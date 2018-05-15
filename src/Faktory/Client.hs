@@ -39,7 +39,7 @@ import Faktory.Protocol
 import Faktory.Settings
 import GHC.Generics
 import GHC.Stack
-import Network.Socket (HostName, PortNumber)
+import Network.Socket (HostName)
 import qualified Network.Socket as NS
 import qualified Network.Socket.ByteString as NSB
 import qualified Network.Socket.ByteString.Lazy as NSBL
@@ -92,7 +92,7 @@ data Client = Client
 -- | Open a new @'Client'@ connection with the given @'Settings'@
 newClient :: HasCallStack => Settings -> IO Client
 newClient settings@Settings{..} = do
-  sock <- connect settingsHost settingsPort
+  sock <- connect settingsAddrInfo
 
   let client = Client sock settings
 
@@ -190,13 +190,11 @@ recvClientJSON = ((decode =<<) <$>) . recvClient
 
 -- | Connect to Host/Port
 --
-connect :: HostName -> PortNumber -> IO NS.Socket
-connect hostName port =
+connect :: NS.AddrInfo -> IO NS.Socket
+connect addr =
   bracketOnError open NS.close pure
  where
   open = do
-    let hints = NS.defaultHints { NS.addrSocketType = NS.Stream }
-    addr <- head <$> NS.getAddrInfo (Just hints) (Just hostName) (Just $ show port)
     sock <- NS.socket (NS.addrFamily addr) (NS.addrSocketType addr) (NS.addrProtocol addr)
     NS.connect sock $ NS.addrAddress addr
     pure sock

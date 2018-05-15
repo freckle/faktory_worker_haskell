@@ -4,6 +4,7 @@
 module Faktory.Settings
   ( Settings(..)
   , defaultSettings
+  , defaultAddrInfo
   , Queue
   , queueArg
   , defaultQueue
@@ -15,23 +16,27 @@ import Data.Semigroup ((<>))
 import Data.String
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
-import Network.Socket (HostName, PortNumber)
+import Network.Socket
+  (AddrInfo(addrSocketType), SocketType(Stream), defaultHints, getAddrInfo)
 import System.IO (hPutStrLn, stderr)
 
 data Settings = Settings
-  { settingsHost :: HostName
-  , settingsPort :: PortNumber
+  { settingsAddrInfo :: AddrInfo
   , settingsLogDebug :: String -> IO ()
   , settingsLogError :: String -> IO ()
   }
 
-defaultSettings :: Settings
-defaultSettings = Settings
-  { settingsHost = "localhost"
-  , settingsPort = 7419
+defaultSettings :: AddrInfo -> Settings
+defaultSettings sockAddr = Settings
+  { settingsAddrInfo = sockAddr
   , settingsLogDebug = \_msg -> pure ()
   , settingsLogError = hPutStrLn stderr . ("[ERROR]: " <>)
   }
+
+defaultAddrInfo :: IO AddrInfo
+defaultAddrInfo = do
+  let hints = defaultHints { addrSocketType = Stream }
+  head <$> getAddrInfo (Just hints) (Just "localhost") (Just "7419")
 
 newtype Queue = Queue Text
   deriving (IsString, FromJSON, ToJSON)
