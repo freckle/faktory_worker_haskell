@@ -177,7 +177,7 @@ recvClient Client{..} = do
 
   case eByteString of
     Left err -> do
-      settingsLogError clientSettings $ "Error: " <> err
+      settingsLogError clientSettings err
       pure Nothing
     Right mByteString -> pure $ fromStrict <$> mByteString
  where
