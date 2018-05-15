@@ -26,7 +26,6 @@ module Faktory.Client
 
 import Control.Exception.Safe
 import Control.Monad (unless, void, when)
-import Control.Monad.IO.Class (liftIO)
 import Data.Aeson
 import Data.Aeson.Casing
 import qualified Data.ByteString as BS
@@ -95,7 +94,7 @@ data Client = Client
 -- | Open a new @'Client'@ connection with the given @'Settings'@
 newClient :: HasCallStack => Settings -> IO Client
 newClient settings@Settings{..} = do
-  h <- liftIO $ connect settingsHost settingsPort
+  h <- connect settingsHost settingsPort
 
   let client = Client h settings
 
@@ -120,7 +119,7 @@ newClient settings@Settings{..} = do
 -- @'withClient'@ and never close a @'Client'@ yourself.
 --
 closeClient :: Client -> IO ()
-closeClient client@Client{..} = liftIO $ do
+closeClient client@Client{..} = do
   command client "END" []
   disconnect clientHandle
 
@@ -132,7 +131,7 @@ command :: Client -> ByteString -> [ByteString] -> IO ()
 command Client{..} cmd args =  do
   let bs = BSL8.unwords (cmd:args)
   settingsLogDebug clientSettings $ "> " <> show bs
-  liftIO $ BSL8.hPutStrLn clientHandle bs
+  BSL8.hPutStrLn clientHandle bs
 
 assertOK :: HasCallStack => Client -> IO ()
 assertOK client = do
