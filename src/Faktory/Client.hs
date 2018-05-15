@@ -91,24 +91,23 @@ data Client = Client
 
 -- | Open a new @'Client'@ connection with the given @'Settings'@
 newClient :: HasCallStack => Settings -> IO Client
-newClient settings@Settings{..} = do
-  sock <- connect settingsAddrInfo
+newClient settings@Settings{..} =
+  bracket (connect settingsAddrInfo) NS.close $ \sock -> do
+    let client = Client sock settings
 
-  let client = Client sock settings
+    helloPayload <- HelloPayload
+      <$> randomWorkerId
+      <*> (show <$> NS.getSocketName sock)
+      <*> (toInteger <$> getProcessID)
+      <*> pure ["haskell"]
+      <*> pure 2
 
-  helloPayload <- HelloPayload
-    <$> randomWorkerId
-    <*> (show <$> NS.getSocketName sock)
-    <*> (toInteger <$> getProcessID)
-    <*> pure ["haskell"]
-    <*> pure 2
+    -- TODO: HI { "v": 2 }
+    void $ recvClient client
+    command client "HELLO" [encode helloPayload]
+    assertOK client
 
-  -- TODO: HI { "v": 2 }
-  void $ recvClient client
-  command client "HELLO" [encode helloPayload]
-  assertOK client
-
-  pure client
+    pure client
 
 -- | Close a @'Client'@
 --
