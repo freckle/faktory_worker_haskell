@@ -15,12 +15,12 @@ import Data.Semigroup ((<>))
 import Data.String
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
-import Network
+import Network.Socket (HostName, PortNumber)
 import System.IO (hPutStrLn, stderr)
 
 data Settings = Settings
   { settingsHost :: HostName
-  , settingsPort :: PortID
+  , settingsPort :: PortNumber
   , settingsLogDebug :: String -> IO ()
   , settingsLogError :: String -> IO ()
   }
@@ -28,7 +28,7 @@ data Settings = Settings
 defaultSettings :: Settings
 defaultSettings = Settings
   { settingsHost = "localhost"
-  , settingsPort = PortNumber 7419
+  , settingsPort = 7419
   , settingsLogDebug = \_msg -> pure ()
   , settingsLogError = hPutStrLn stderr . ("[ERROR]: " <>)
   }

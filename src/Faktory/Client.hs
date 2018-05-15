@@ -25,10 +25,9 @@ module Faktory.Client
   ) where
 
 import Control.Exception.Safe
-import Control.Monad (unless, void, when)
+import Control.Monad (unless, void)
 import Data.Aeson
 import Data.Aeson.Casing
-import qualified Data.ByteString as BS
 import Data.ByteString.Lazy (ByteString, fromStrict)
 import qualified Data.ByteString.Lazy.Char8 as BSL8
 import Data.Foldable (for_)
@@ -40,11 +39,10 @@ import Faktory.Protocol
 import Faktory.Settings
 import GHC.Generics
 import GHC.Stack
-import Network
-import qualified Network.BSD as BSD
-import Network.HostName (getHostName)
+import Network.Socket (HostName, PortNumber)
 import qualified Network.Socket as NS
-import System.IO
+import qualified Network.Socket.ByteString as NSB
+import qualified Network.Socket.ByteString.Lazy as NSBL
 import System.Posix.Process (getProcessID)
 import System.Random
 
@@ -87,20 +85,20 @@ instance ToJSON FailPayload where
    toEncoding = genericToEncoding $ aesonPrefix snakeCase
 
 data Client = Client
-  { clientHandle :: Handle
+  { clientSocket :: NS.Socket
   , clientSettings :: Settings
   }
 
 -- | Open a new @'Client'@ connection with the given @'Settings'@
 newClient :: HasCallStack => Settings -> IO Client
 newClient settings@Settings{..} = do
-  h <- connect settingsHost settingsPort
+  sock <- connect settingsHost settingsPort
 
-  let client = Client h settings
+  let client = Client sock settings
 
   helloPayload <- HelloPayload
     <$> randomWorkerId
-    <*> getHostName
+    <*> (show <$> NS.getSocketName sock)
     <*> (toInteger <$> getProcessID)
     <*> pure ["haskell"]
     <*> pure 2
@@ -121,7 +119,7 @@ newClient settings@Settings{..} = do
 closeClient :: Client -> IO ()
 closeClient client@Client{..} = do
   command client "END" []
-  disconnect clientHandle
+  NS.close clientSocket
 
 -- | Open a new client, yield it, then close it
 withClient :: HasCallStack => Settings -> (Client -> IO ()) -> IO ()
@@ -131,7 +129,7 @@ command :: Client -> ByteString -> [ByteString] -> IO ()
 command Client{..} cmd args =  do
   let bs = BSL8.unwords (cmd:args)
   settingsLogDebug clientSettings $ "> " <> show bs
-  BSL8.hPutStrLn clientHandle bs
+  void $ NSBL.send clientSocket (bs <> "\n")
 
 assertOK :: HasCallStack => Client -> IO ()
 assertOK client = do
@@ -181,9 +179,7 @@ recvClient Client{..} = do
       pure Nothing
     Right mByteString -> pure $ fromStrict <$> mByteString
  where
-  readMore = do
-    hFlush clientHandle
-    BS.hGetSome clientHandle 4096
+  readMore = NSB.recv clientSocket 4096
 
 -- | Receive data and decode it as JSON
 --
@@ -194,29 +190,13 @@ recvClientJSON = ((decode =<<) <$>) . recvClient
 
 -- | Connect to Host/Port
 --
--- Taken from hedis.
---
-connect :: HostName -> PortID -> IO Handle
-connect hostName (PortNumber port) =
-  bracketOnError hConnect hClose $ \connHandle -> do
-    hSetBinaryMode connHandle True
-    pure connHandle
+connect :: HostName -> PortNumber -> IO NS.Socket
+connect hostName port =
+  bracketOnError open NS.close pure
  where
-  hConnect =
-    bracketOnError mkSocket NS.close $ \sock -> do
-      NS.setSocketOption sock NS.KeepAlive 1
-      host <- BSD.getHostByName hostName
-      NS.connect sock $ NS.SockAddrInet port $ BSD.hostAddress host
-      NS.socketToHandle sock ReadWriteMode
-  mkSocket = NS.socket NS.AF_INET NS.Stream 0
-
-connect hostName portId = connectTo hostName portId
-
--- | Disconnect and close the Handle
---
--- Taken from hedis.
---
-disconnect :: Handle -> IO ()
-disconnect connHandle = do
-  open <- hIsOpen connHandle
-  when open (hClose connHandle)
+  open = do
+    let hints = NS.defaultHints { NS.addrSocketType = NS.Stream }
+    addr <- head <$> NS.getAddrInfo (Just hints) (Just hostName) (Just $ show port)
+    sock <- NS.socket (NS.addrFamily addr) (NS.addrSocketType addr) (NS.addrProtocol addr)
+    NS.connect sock $ NS.addrAddress addr
+    pure sock
