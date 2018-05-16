@@ -85,7 +85,7 @@ data Client = Client
 -- | Open a new @'Client'@ connection with the given @'Settings'@
 newClient :: HasCallStack => Settings -> IO Client
 newClient settings@Settings{..} =
-  bracket (connect settingsConnection) NS.close $ \sock -> do
+  bracketOnError (connect settingsConnection) NS.close $ \sock -> do
     let client = Client sock settings
 
     helloPayload <- HelloPayload
@@ -115,7 +115,7 @@ closeClient client@Client{..} = do
 
 -- | Open a new client, yield it, then close it
 withClient :: HasCallStack => Settings -> (Client -> IO ()) -> IO ()
-withClient settings = bracket (newClient settings) closeClient
+withClient settings = bracketOnError (newClient settings) closeClient
 
 command :: Client -> ByteString -> [ByteString] -> IO ()
 command Client{..} cmd args =  do
