@@ -15,36 +15,28 @@ conf_debug:
 conf_forward:
   options_ghc:
     - -XBangPatterns
-    - -XConstraintKinds
-    - -XDataKinds
-    - -XDeriveDataTypeable
+    - -XDeriveAnyClass
+    - -XDeriveFoldable
+    - -XDeriveFunctor
     - -XDeriveGeneric
-    - -XDoAndIfThenElse
-    - -XEmptyDataDecls
+    - -XDeriveLift
+    - -XDeriveTraversable
+    - -XDerivingStrategies
     - -XFlexibleContexts
     - -XFlexibleInstances
-    - -XFunctionalDependencies
     - -XGADTs
-    - -XKindSignatures
+    - -XGeneralizedNewtypeDeriving
     - -XLambdaCase
     - -XMultiParamTypeClasses
-    - -XMultiWayIf
-    - -XNamedFieldPuns
     - -XNoImplicitPrelude
     - -XNoMonomorphismRestriction
     - -XOverloadedStrings
-    - -XPolyKinds
-    - -XQuasiQuotes
-    - -XRank2Types
+    - -XRankNTypes
     - -XRecordWildCards
     - -XScopedTypeVariables
     - -XStandaloneDeriving
-    - -XTemplateHaskell
-    - -XTupleSections
     - -XTypeApplications
     - -XTypeFamilies
-    - -XTypeOperators
-    - -XViewPatterns
 conf_errorHandling:
   econf_ExactPrintFallback: ExactPrintFallbackModeInline
   econf_Werror: false

@@ -1,6 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE OverloadedStrings #-}
-
 -- | Modified version of @"Database.Redis.Protocol"@
 --
 -- <https://github.com/informatikr/hedis/blob/master/src/Database/Redis/Protocol.hs>

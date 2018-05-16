@@ -1,6 +1,6 @@
-{-# LANGUAGE DeriveGeneric #-}
-
 module Main (main) where
+
+import Prelude
 
 import Control.Exception.Safe
 import Control.Monad

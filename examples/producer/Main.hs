@@ -1,5 +1,6 @@
-{-# LANGUAGE DeriveGeneric #-}
 module Main (main) where
+
+import Prelude
 
 import Data.Aeson
 import Data.Semigroup ((<>))

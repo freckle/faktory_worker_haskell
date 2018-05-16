@@ -1,6 +1,3 @@
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE RecordWildCards #-}
-
 module Faktory.Job
   ( Job
   , JobId
@@ -8,6 +5,8 @@ module Faktory.Job
   , jobJid
   , jobArg
   ) where
+
+import Faktory.Prelude
 
 import Data.Aeson
 import Data.Aeson.Casing

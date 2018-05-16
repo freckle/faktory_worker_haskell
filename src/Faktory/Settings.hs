@@ -1,6 +1,3 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE OverloadedStrings #-}
-
 module Faktory.Settings
   ( Settings(..)
   , defaultSettings
@@ -10,11 +7,11 @@ module Faktory.Settings
   , defaultQueue
   ) where
 
+import Faktory.Prelude
+
 import Data.Aeson
 import Data.ByteString.Lazy (ByteString, fromStrict)
-import Data.Semigroup ((<>))
 import Data.String
-import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
 import Network.Socket
   (AddrInfo(addrSocketType), SocketType(Stream), defaultHints, getAddrInfo)
@@ -39,7 +36,7 @@ defaultAddrInfo = do
   head <$> getAddrInfo (Just hints) (Just "localhost") (Just "7419")
 
 newtype Queue = Queue Text
-  deriving (IsString, FromJSON, ToJSON)
+  deriving newtype (IsString, FromJSON, ToJSON)
 
 queueArg :: Queue -> ByteString
 queueArg (Queue q) = fromStrict $ encodeUtf8 q

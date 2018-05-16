@@ -1,7 +1,3 @@
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
-
 module Faktory.Client
   (
   -- * Client operations
@@ -24,15 +20,12 @@ module Faktory.Client
   , assertOK
   ) where
 
-import Control.Exception.Safe
-import Control.Monad (unless, void)
+import Faktory.Prelude
+
 import Data.Aeson
 import Data.Aeson.Casing
 import Data.ByteString.Lazy (ByteString, fromStrict)
 import qualified Data.ByteString.Lazy.Char8 as BSL8
-import Data.Foldable (for_)
-import Data.Semigroup ((<>))
-import Data.Text (Text)
 import qualified Data.Text as T
 import Faktory.Job
 import Faktory.Protocol

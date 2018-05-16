@@ -22,33 +22,25 @@ columns: 80
 newline: native
 language_extensions:
   - BangPatterns
-  - ConstraintKinds
-  - DataKinds
-  - DeriveDataTypeable
+  - DeriveAnyClass
+  - DeriveFoldable
+  - DeriveFunctor
   - DeriveGeneric
-  - DoAndIfThenElse
-  - EmptyDataDecls
+  - DeriveLift
+  - DeriveTraversable
+  - DerivingStrategies
   - FlexibleContexts
   - FlexibleInstances
-  - FunctionalDependencies
   - GADTs
-  - KindSignatures
+  - GeneralizedNewtypeDeriving
   - LambdaCase
   - MultiParamTypeClasses
-  - MultiWayIf
-  - NamedFieldPuns
   - NoImplicitPrelude
   - NoMonomorphismRestriction
   - OverloadedStrings
-  - PolyKinds
-  - QuasiQuotes
-  - Rank2Types
+  - RankNTypes
   - RecordWildCards
   - ScopedTypeVariables
   - StandaloneDeriving
-  - TemplateHaskell
-  - TupleSections
   - TypeApplications
   - TypeFamilies
-  - TypeOperators
-  - ViewPatterns
