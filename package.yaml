@@ -48,7 +48,6 @@ library:
     - aeson
     - aeson-casing
     - bytestring
-    - hostname
     - network
     - random
     - safe-exceptions
@@ -64,6 +63,7 @@ executables:
     dependencies:
       - aeson
       - faktory
+      - safe-exceptions
 
   faktory-example-consumer:
     main: Main.hs
@@ -72,3 +72,12 @@ executables:
       - aeson
       - faktory
       - safe-exceptions
+
+tests:
+  hspec:
+    main: Spec.hs
+    source-dirs: tests
+    ghc-options: -rtsopts -O0
+    dependencies:
+      - faktory
+      - hspec

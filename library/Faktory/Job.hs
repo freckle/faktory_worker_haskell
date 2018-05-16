@@ -11,7 +11,7 @@ import Faktory.Prelude
 import Data.Aeson
 import Data.Aeson.Casing
 import Data.List.NonEmpty (NonEmpty)
-import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.List.NonEmpty as NE
 import Data.Time
 import Faktory.Settings (Queue)
 import GHC.Generics
@@ -44,7 +44,7 @@ newJob queue arg = do
     }
 
 jobArg :: Job arg -> arg
-jobArg Job{..} = NonEmpty.head jobArgs
+jobArg Job{..} = NE.head jobArgs
 
 instance ToJSON args => ToJSON (Job args) where
    toJSON = genericToJSON $ aesonPrefix snakeCase

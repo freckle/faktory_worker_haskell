@@ -15,8 +15,8 @@ import Prelude hiding (error)
 
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as BS8
-import qualified Data.Text.Encoding as Text
-import qualified Data.Text.Read as Text
+import qualified Data.Text.Encoding as T
+import qualified Data.Text.Read as T
 import Scanner (Scanner)
 import qualified Scanner
 
@@ -67,7 +67,7 @@ bulk = Bulk <$> do
 integral :: Integral i => Scanner i
 integral = do
   str <- line
-  case Text.signed Text.decimal (Text.decodeUtf8 str) of
+  case T.signed T.decimal (T.decodeUtf8 str) of
     Left err -> fail (show err)
     Right (l, _) -> return l
 

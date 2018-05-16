@@ -2,6 +2,7 @@ module Main (main) where
 
 import Prelude
 
+import Control.Exception.Safe
 import Data.Aeson
 import Data.Semigroup ((<>))
 import Faktory.Client
@@ -15,13 +16,11 @@ newtype Job = Job { jobMessage :: String }
 instance ToJSON Job
 
 main :: IO ()
-main = withClient defaultSettings $ \client -> do
-  args <- getArgs
-  jobId <- pushJob
-    client
-    defaultQueue
-    Job
+main =
+  bracket (newClient defaultSettings Nothing) closeClient $ \client -> do
+    args <- getArgs
+    jobId <- pushJob client defaultQueue Job
       { jobMessage = unwords args
       }
 
-  putStrLn $ "Pushed job: " <> show jobId
+    putStrLn $ "Pushed job: " <> show jobId

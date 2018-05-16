@@ -5,6 +5,8 @@ module Faktory.Settings
   , Queue
   , queueArg
   , defaultQueue
+  , WorkerId
+  , randomWorkerId
   ) where
 
 import Faktory.Prelude
@@ -15,6 +17,7 @@ import Data.String
 import Data.Text.Encoding (encodeUtf8)
 import Network.Socket (HostName, PortNumber)
 import System.IO (hPutStrLn, stderr)
+import System.Random
 
 data Connection = Connection
   { connectionHostName :: HostName
@@ -45,3 +48,9 @@ queueArg (Queue q) = fromStrict $ encodeUtf8 q
 
 defaultQueue :: Queue
 defaultQueue = "default"
+
+newtype WorkerId = WorkerId String
+  deriving newtype (FromJSON, ToJSON)
+
+randomWorkerId :: IO WorkerId
+randomWorkerId = WorkerId . take 8 . randomRs ('a', 'z') <$> newStdGen
