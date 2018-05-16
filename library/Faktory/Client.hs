@@ -115,7 +115,7 @@ closeClient client@Client{..} = do
 
 -- | Open a new client, yield it, then close it
 withClient :: HasCallStack => Settings -> (Client -> IO ()) -> IO ()
-withClient settings = bracketOnError (newClient settings) closeClient
+withClient settings = bracket (newClient settings) closeClient
 
 command :: Client -> ByteString -> [ByteString] -> IO ()
 command Client{..} cmd args =  do
