@@ -15,12 +15,13 @@ newtype Job = Job { jobMessage :: String }
 instance ToJSON Job
 
 main :: IO ()
-main = do
-  settings <- defaultSettings <$> defaultAddrInfo
-  withClient settings $ \client -> do
-    args <- getArgs
-    jobId <- pushJob client defaultQueue Job
+main = withClient defaultSettings $ \client -> do
+  args <- getArgs
+  jobId <- pushJob
+    client
+    defaultQueue
+    Job
       { jobMessage = unwords args
       }
 
-    putStrLn $ "Pushed job: " <> show jobId
+  putStrLn $ "Pushed job: " <> show jobId

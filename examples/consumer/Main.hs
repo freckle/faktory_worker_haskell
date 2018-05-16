@@ -15,13 +15,11 @@ newtype Job = Job { jobMessage :: String }
 instance FromJSON Job
 
 main :: IO ()
-main = do
-  settings <- defaultSettings <$> defaultAddrInfo
-  withClient settings $ \client -> do
-    putStrLn "Starting consumer loop"
-    forever $ withJob client defaultQueue $ \job -> do
-      let message = jobMessage job
+main = withClient defaultSettings $ \client -> do
+  putStrLn "Starting consumer loop"
+  forever $ withJob client defaultQueue $ \job -> do
+    let message = jobMessage job
 
-      if message == "BOOM"
-        then throwString "Producer exception: BOOM"
-        else putStrLn message
+    if message == "BOOM"
+      then throwString "Producer exception: BOOM"
+      else putStrLn message

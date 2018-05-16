@@ -85,7 +85,7 @@ data Client = Client
 -- | Open a new @'Client'@ connection with the given @'Settings'@
 newClient :: HasCallStack => Settings -> IO Client
 newClient settings@Settings{..} =
-  bracket (connect settingsAddrInfo) NS.close $ \sock -> do
+  bracket (connect settingsConnection) NS.close $ \sock -> do
     let client = Client sock settings
 
     helloPayload <- HelloPayload
@@ -182,11 +182,17 @@ recvClientJSON = ((decode =<<) <$>) . recvClient
 
 -- | Connect to Host/Port
 --
-connect :: NS.AddrInfo -> IO NS.Socket
-connect addr =
+connect :: Connection -> IO NS.Socket
+connect connection =
   bracketOnError open NS.close pure
  where
   open = do
+    addr <- fetchSocketAddressInfo connection
     sock <- NS.socket (NS.addrFamily addr) (NS.addrSocketType addr) (NS.addrProtocol addr)
     NS.connect sock $ NS.addrAddress addr
     pure sock
+
+fetchSocketAddressInfo :: Connection -> IO NS.AddrInfo
+fetchSocketAddressInfo Connection{..} = do
+  let hints = NS.defaultHints { NS.addrSocketType = NS.Stream }
+  head <$> NS.getAddrInfo (Just hints) (Just connectionHostName) (Just $ show connectionPort)
