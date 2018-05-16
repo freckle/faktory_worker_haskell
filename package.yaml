@@ -43,7 +43,7 @@ default-extensions:
   - TypeFamilies
 
 library:
-  source-dirs: src
+  source-dirs: library
   dependencies:
     - aeson
     - aeson-casing
