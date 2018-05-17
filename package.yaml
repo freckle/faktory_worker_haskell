@@ -1,0 +1,74 @@
+---
+name: faktory
+version: 0.1.0.0
+category: Network
+author: Pat Brisbin
+maintainer: pbrisbin@freckle.com
+copyright: 2018 Freckle Education
+license: MIT
+github: frontrowed/faktory_worker_haskell
+
+extra-source-files:
+  - CHANGELOG.md
+  - README.md
+
+ghc-options: -Wall
+
+dependencies:
+  - base
+
+default-extensions:
+  - BangPatterns
+  - DeriveAnyClass
+  - DeriveFoldable
+  - DeriveFunctor
+  - DeriveGeneric
+  - DeriveLift
+  - DeriveTraversable
+  - DerivingStrategies
+  - FlexibleContexts
+  - FlexibleInstances
+  - GADTs
+  - GeneralizedNewtypeDeriving
+  - LambdaCase
+  - MultiParamTypeClasses
+  - NoImplicitPrelude
+  - NoMonomorphismRestriction
+  - OverloadedStrings
+  - RankNTypes
+  - RecordWildCards
+  - ScopedTypeVariables
+  - StandaloneDeriving
+  - TypeApplications
+  - TypeFamilies
+
+library:
+  source-dirs: library
+  dependencies:
+    - aeson
+    - aeson-casing
+    - bytestring
+    - hostname
+    - network
+    - random
+    - safe-exceptions
+    - scanner
+    - text
+    - time
+    - unix
+
+executables:
+  faktory-example-producer:
+    main: Main.hs
+    source-dirs: examples/producer
+    dependencies:
+      - aeson
+      - faktory
+
+  faktory-example-consumer:
+    main: Main.hs
+    source-dirs: examples/consumer
+    dependencies:
+      - aeson
+      - faktory
+      - safe-exceptions
