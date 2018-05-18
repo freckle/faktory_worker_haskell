@@ -7,6 +7,7 @@ module Faktory.Client
 
   -- * High-level Job operations
   , pushJob
+  , flush
 
   -- * High-level Client API
   , command_
@@ -83,6 +84,13 @@ pushJob client queue arg = do
   job <- newJob queue arg
   commandOK client "PUSH" [encode job]
   pure $ jobJid job
+
+-- | Clear all job data in the Faktory server
+--
+-- Use with caution!
+--
+flush :: HasCallStack => Client -> IO ()
+flush client = commandOK client "FLUSH" []
 
 -- | Send a command, read and discard the response
 command_ :: Client -> ByteString -> [ByteString] -> IO ()

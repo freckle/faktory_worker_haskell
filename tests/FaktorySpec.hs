@@ -17,6 +17,7 @@ spec = describe "Faktory" $ do
   it "can push and process jobs" $ do
     settings <- getTestSettings
     bracket (newClient settings Nothing) closeClient $ \client -> do
+      void $ flush client
       void $ pushJob @Text client defaultQueue "a"
       void $ pushJob @Text client defaultQueue "b"
       void $ pushJob @Text client defaultQueue "HALT"
