@@ -37,15 +37,6 @@ See the [examples](./examples).
    hello world
    ```
 
-## Roadmap
-
-This was a relatively quick spike. The following features were skipped and
-should be added before a proper release:
-
-- [ ] Password support
-- [ ] Support for `at` in Jobs
-- [ ] TLS support
-
 ## Development & Tests
 
 ```console
