@@ -15,14 +15,9 @@ import Data.Aeson
 import Data.ByteString.Lazy (ByteString, fromStrict)
 import Data.String
 import Data.Text.Encoding (encodeUtf8)
-import Network.Socket (HostName, PortNumber)
+import Faktory.Connection
 import System.IO (hPutStrLn, stderr)
 import System.Random
-
-data Connection = Connection
-  { connectionHostName :: HostName
-  , connectionPort :: PortNumber
-  }
 
 data Settings = Settings
   { settingsConnection :: Connection
@@ -32,10 +27,7 @@ data Settings = Settings
 
 defaultSettings :: Settings
 defaultSettings = Settings
-  { settingsConnection = Connection
-    { connectionHostName = "localhost"
-    , connectionPort = 7419
-    }
+  { settingsConnection = defaultConnection
   , settingsLogDebug = \_msg -> pure ()
   , settingsLogError = hPutStrLn stderr . ("[ERROR]: " <>)
   }
