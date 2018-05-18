@@ -1,4 +1,98 @@
-# Faktory Worker Library for Haskell
+# faktory\_worker\_haskell
+
+Haskell client and worker process for the Faktory background job server.
+
+Architecture overview from [Ruby client README](https://github.com/contribsys/faktory_worker_ruby#readme):
+
+```
+                       +--------------------+
+                       |                    |
+                       |     Faktory        |
+                       |     Server         |
+        +---------->>>>|                    +>>>>--------+
+        |              |                    |            |
+        |              |                    |            |
+        |              +--------------------+            |
++-----------------+                            +-------------------+
+|                 |                            |                   |
+|    Client       |                            |     Worker        |
+|    pushes       |                            |     pulls         |
+|     jobs        |                            |      jobs         |
+|                 |                            |                   |
+|                 |                            |                   |
++-----------------+                            +-------------------+
+```
+
+- Client - an API any process can use to push jobs to the Faktory server.
+- Worker - a process that pulls jobs from Faktory and executes them.
+- Server - the Faktory daemon which stores background jobs in queues to be
+  processed by Workers.
+
+This package contains only the client and worker parts. The server part is
+[here](https://github.com/contribsys/faktory/)
+
+## Installation
+
+TODO.
+
+## Documentation
+
+See the [wiki](//github.com/contribsys/faktory_worker_ruby/wiki) for more
+details.
+
+## Usage
+
+### Job
+
+Any value can be a "Job" that is pushed and pulled to and from Faktory via its
+`ToJSON` and `FromJSON` instances:
+
+```hs
+newtype Job = Job
+  { jobMessage :: String
+  }
+
+instance ToJSON job
+instance FromJSON Job
+```
+
+### Worker
+
+```hs
+main = do
+  settings <- envSettings
+
+  runWorker envSettings defaultQueue $ \job ->
+    -- Process your Job here
+    putStrLn $ jobMessage job
+
+    -- If any exception is thrown, the job will be marked as Failed in Faktory
+    -- and retried. Note: you will not otherwise hear about any such exceptions,
+    -- unless you catch-and-rethrow them yourself.
+```
+
+### Client
+
+```hs
+main = do
+  settings <- envSettings
+  client <- newClient settings Nothing -- N.B. A WorkerId is not necessary if
+                                       -- only pushing Jobs.
+
+  pushJob client defaultQueue $ Job "Hello world"
+
+  closeClient client
+```
+
+### Configuration
+
+When using `envSettings`, the following variables will be used:
+
+- `FAKTORY_PROVIDER`: the name of another environment variable where the
+  connection string can be found. Defaults to `FAKTORY_URL`.
+- `FAKTORY_URL` (or whatever you named in `FAKTORY_PROVIDER`): connection string
+  to the Faktory server. Format is `tcp(+tls)://(:password@)host:port`. Defaults
+  to `tcp://localhost:4719`.
 
 ## Examples
 
