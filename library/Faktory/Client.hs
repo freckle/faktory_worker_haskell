@@ -22,6 +22,7 @@ import Data.Aeson
 import Data.Aeson.Casing
 import Data.ByteString.Lazy (ByteString, fromStrict)
 import qualified Data.ByteString.Lazy.Char8 as BSL8
+import Faktory.Connection
 import Faktory.Job
 import Faktory.Protocol
 import Faktory.Settings
@@ -136,19 +137,3 @@ recvUnsafe Settings{..} sock = do
       settingsLogError err
       pure Nothing
     Right mByteString -> pure $ fromStrict <$> mByteString
-
--- | Connect to Host/Port
-connect :: Connection -> IO NS.Socket
-connect connection =
-  bracketOnError open NS.close pure
- where
-  open = do
-    addr <- fetchSocketAddressInfo connection
-    sock <- NS.socket (NS.addrFamily addr) (NS.addrSocketType addr) (NS.addrProtocol addr)
-    NS.connect sock $ NS.addrAddress addr
-    pure sock
-
-fetchSocketAddressInfo :: Connection -> IO NS.AddrInfo
-fetchSocketAddressInfo Connection{..} = do
-  let hints = NS.defaultHints { NS.addrSocketType = NS.Stream }
-  head <$> NS.getAddrInfo (Just hints) (Just connectionHostName) (Just $ show connectionPort)
