@@ -34,7 +34,11 @@ defaultConnection = Connection
 -- | Parse a @'Connection'@ from environment variables
 --
 -- > FAKTORY_PROVIDER=FAKTORY_URL
--- > FAKTORY_URL=tcp://:password@host:port
+-- > FAKTORY_URL=tcp://:my-password@localhost:7419
+--
+-- Supported format is @tcp(+tls):\/\/(:password@)host:port@.
+--
+-- See <https://github.com/contribsys/faktory/wiki/Worker-Lifecycle#url-configuration>.
 --
 envConnection :: IO Connection
 envConnection = do

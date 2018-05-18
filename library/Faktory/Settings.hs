@@ -2,6 +2,7 @@ module Faktory.Settings
   ( Settings(..)
   , Connection(..)
   , defaultSettings
+  , envSettings
   , Queue
   , queueArg
   , defaultQueue
@@ -31,6 +32,15 @@ defaultSettings = Settings
   , settingsLogDebug = \_msg -> pure ()
   , settingsLogError = hPutStrLn stderr . ("[ERROR]: " <>)
   }
+
+-- | Defaults, but read @'Connection'@ from the environment
+--
+-- See @'envConnection'@
+--
+envSettings :: IO Settings
+envSettings = do
+  connection <- envConnection
+  pure defaultSettings { settingsConnection = connection }
 
 newtype Queue = Queue Text
   deriving newtype (IsString, FromJSON, ToJSON)

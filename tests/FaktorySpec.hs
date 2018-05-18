@@ -5,17 +5,15 @@ module FaktorySpec
 import Faktory.Prelude
 
 import Control.Concurrent.MVar
-import Data.Maybe
 import Faktory.Client
 import Faktory.Settings
 import Faktory.Worker
-import System.Environment
 import Test.Hspec
 
 spec :: Spec
 spec = describe "Faktory" $ do
   it "can push and process jobs" $ do
-    settings <- getTestSettings
+    settings <- envSettings
     bracket (newClient settings Nothing) closeClient $ \client -> do
       void $ flush client
       void $ pushJob @Text client defaultQueue "a"
@@ -29,19 +27,3 @@ spec = describe "Faktory" $ do
 
     jobs <- readMVar processedJobs
     jobs `shouldMatchList` ["a", "b", "HALT"]
-
--- TODO: Add proper, complete FAKTORY_URL support, as per Faktory documentation
-getTestSettings :: IO Settings
-getTestSettings = do
-  mFaktoryHost <- lookupEnv "FAKTORY_HOST"
-
-  let
-    defaultConnection = settingsConnection defaultSettings
-    defaultHostName = connectionHostName defaultConnection
-
-    testHostName = fromMaybe defaultHostName mFaktoryHost
-    testConnection = defaultConnection
-      { connectionHostName = testHostName
-      }
-
-  pure defaultSettings { settingsConnection = testConnection }
