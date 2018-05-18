@@ -32,7 +32,23 @@ spec = do
 
       withEnvironment env $ do
         Connection{..} <- envConnection
+        connectionTls `shouldBe` False
+        connectionPassword `shouldBe` Nothing
         connectionHostName `shouldBe` "foo"
+        connectionPort `shouldBe` 123
+
+    it "parses tls and password" $ do
+      let
+        env =
+          [ ("FAKTORY_PROVIDER", Nothing)
+          , ("FAKTORY_URL", Just "tcp+tls://:foo@bar:123")
+          ]
+
+      withEnvironment env $ do
+        Connection{..} <- envConnection
+        connectionTls `shouldBe` True
+        connectionPassword `shouldBe` Just "foo"
+        connectionHostName `shouldBe` "bar"
         connectionPort `shouldBe` 123
 
     it "follows _PROVIDER to find _URL" $ do
