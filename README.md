@@ -1,10 +1,10 @@
 # Faktory Worker Library for Haskell
 
-## Usage
+## Examples
 
-See the [examples](./examples).
+See the [examples](./examples). To run them:
 
-1. Run a Faktory server
+1. Run a local Faktory server
 
    ```console
    docker run --rm \
@@ -28,6 +28,9 @@ See the [examples](./examples).
    % stack exec faktory-example-producer hello world
    Pushed job: "ljcjlbexbgun"
    ```
+
+   *NOTE*: if you submit "BOOM" as a Job, the processing loop will raise an
+   exception, so you can see how a Failed Job looks in Faktory.
 
 1. See that your Job was processed back in the consumer
 
