@@ -16,14 +16,18 @@ import Text.Megaparsec
 import Text.Megaparsec.Char
 
 data Connection = Connection
-  { connectionHostName :: HostName
+  { connectionTls :: Bool
+  , connectionPassword :: Maybe String
+  , connectionHostName :: HostName
   , connectionPort :: PortNumber
   }
   deriving (Eq, Show)
 
 defaultConnection :: Connection
 defaultConnection = Connection
-  { connectionHostName = "localhost"
+  { connectionTls = False
+  , connectionPassword = Nothing
+  , connectionHostName = "localhost"
   , connectionPort = 7419
   }
 
@@ -73,11 +77,8 @@ parseProvider = some (upperChar <|> char '_')
 parseConnection :: Parser Connection
 parseConnection = go <?> "tcp(+tls)://(:<password>@)<host>:<port>"
  where
-  go = do
-    -- TODO: connectionTls :: Bool, connectionPassword :: Maybe String
-    void $ string "tcp://" <|> string "tcp+tls://"
-    void $ optional $ char ':' *> manyTill anyChar (char '@')
-
-    Connection
-      <$> manyTill anyChar (char ':')
-      <*> (read <$> some digitChar)
+  go = Connection
+    <$> (False <$ string "tcp://" <|> True <$ string "tcp+tls://")
+    <*> optional (char ':' *> manyTill anyChar (char '@'))
+    <*> manyTill anyChar (char ':')
+    <*> (read <$> some digitChar)
