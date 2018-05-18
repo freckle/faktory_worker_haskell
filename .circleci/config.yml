@@ -35,4 +35,4 @@ jobs:
           name: Test
           command: make test
           environment:
-            FAKTORY_HOST: faktory
+            FAKTORY_URL: tcp://faktory:7419
