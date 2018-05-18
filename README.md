@@ -48,6 +48,9 @@ stack build --pedantic --test --no-run-tests
 stack build --pedantic --test
 ```
 
+*NOTE*: `FactorySpec` requires a local Faktory server is running, and it will
+flush all Jobs from this server as part of running the tests.
+
 ---
 
 [CHANGELOG](./CHANGELOG.md) | [LICENSE](./LICENSE)
