@@ -49,7 +49,6 @@ library:
     - aeson-casing
     - bytestring
     - connection
-    - data-default-class
     - megaparsec
     - network
     - random

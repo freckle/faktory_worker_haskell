@@ -7,7 +7,6 @@ module Faktory.Connection
 
 import Faktory.Prelude
 
-import Data.Default.Class (def)
 import Data.Maybe (fromMaybe)
 import Data.Void
 import qualified Network.Connection as Con
@@ -58,7 +57,13 @@ connect Connection{..} =
     Con.connectTo ctx $ Con.ConnectionParams
       { Con.connectionHostname  = connectionHostName
       , Con.connectionPort      = connectionPort
-      , Con.connectionUseSecure = if connectionTls then Just def else Nothing
+      , Con.connectionUseSecure = if connectionTls
+          then Just Con.TLSSettingsSimple
+            { Con.settingDisableCertificateValidation = False
+            , Con.settingDisableSession = False
+            , Con.settingUseServerName = False
+            }
+          else Nothing
       , Con.connectionUseSocks  = Nothing
       }
 
