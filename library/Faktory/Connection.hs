@@ -7,10 +7,11 @@ module Faktory.Connection
 
 import Faktory.Prelude
 
+import Data.Default.Class (def)
 import Data.Maybe (fromMaybe)
 import Data.Void
+import qualified Network.Connection as Con
 import Network.Socket (HostName, PortNumber)
-import qualified Network.Socket as NS
 import System.Environment (lookupEnv)
 import Text.Megaparsec
 import Text.Megaparsec.Char
@@ -48,20 +49,18 @@ envConnection = do
   parseThrow parseConnection provider connectionString
 
 -- | Connect to the given @'Connection'@ as a @'Socket'@
-connect :: Connection -> IO NS.Socket
-connect connection =
-  bracketOnError open NS.close pure
+connect :: Connection -> IO Con.Connection
+connect Connection{..} =
+  bracketOnError open Con.connectionClose pure
  where
   open = do
-    addr <- fetchSocketAddressInfo connection
-    sock <- NS.socket (NS.addrFamily addr) (NS.addrSocketType addr) (NS.addrProtocol addr)
-    NS.connect sock $ NS.addrAddress addr
-    pure sock
-
-fetchSocketAddressInfo :: Connection -> IO NS.AddrInfo
-fetchSocketAddressInfo Connection{..} = do
-  let hints = NS.defaultHints { NS.addrSocketType = NS.Stream }
-  head <$> NS.getAddrInfo (Just hints) (Just connectionHostName) (Just $ show connectionPort)
+    ctx <- Con.initConnectionContext
+    Con.connectTo ctx $ Con.ConnectionParams
+      { Con.connectionHostname  = connectionHostName
+      , Con.connectionPort      = connectionPort
+      , Con.connectionUseSecure = if connectionTls then Just def else Nothing
+      , Con.connectionUseSocks  = Nothing
+      }
 
 type Parser = Parsec Void String
 

@@ -48,6 +48,8 @@ library:
     - aeson
     - aeson-casing
     - bytestring
+    - connection
+    - data-default-class
     - megaparsec
     - network
     - random
