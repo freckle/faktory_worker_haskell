@@ -55,8 +55,8 @@ connect Connection{..} =
   open = do
     ctx <- Con.initConnectionContext
     Con.connectTo ctx $ Con.ConnectionParams
-      { Con.connectionHostname  = connectionHostName
-      , Con.connectionPort      = connectionPort
+      { Con.connectionHostname = connectionHostName
+      , Con.connectionPort = connectionPort
       , Con.connectionUseSecure = if connectionTls
           then Just Con.TLSSettingsSimple
             { Con.settingDisableCertificateValidation = False
@@ -64,7 +64,7 @@ connect Connection{..} =
             , Con.settingUseServerName = False
             }
           else Nothing
-      , Con.connectionUseSocks  = Nothing
+      , Con.connectionUseSocks = Nothing
       }
 
 type Parser = Parsec Void String
