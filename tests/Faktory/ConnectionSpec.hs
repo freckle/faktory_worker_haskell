@@ -11,7 +11,7 @@ import Test.Hspec
 
 spec :: Spec
 spec = do
-  describe "envConnection" $ do
+  describe "envConnectionInfo" $ do
     it "returns default settings in an empty environment" $ do
       let
         env =
@@ -20,8 +20,8 @@ spec = do
           ]
 
       withEnvironment env $ do
-        connection <- envConnection
-        connection `shouldBe` defaultConnection
+        connection <- envConnectionInfo
+        connection `shouldBe` defaultConnectionInfo
 
     it "parses the provided URL" $ do
       let
@@ -31,11 +31,11 @@ spec = do
           ]
 
       withEnvironment env $ do
-        Connection{..} <- envConnection
-        connectionTls `shouldBe` False
-        connectionPassword `shouldBe` Nothing
-        connectionHostName `shouldBe` "foo"
-        connectionPort `shouldBe` 123
+        ConnectionInfo{..} <- envConnectionInfo
+        connectionInfoTls `shouldBe` False
+        connectionInfoPassword `shouldBe` Nothing
+        connectionInfoHostName `shouldBe` "foo"
+        connectionInfoPort `shouldBe` 123
 
     it "parses tls and password" $ do
       let
@@ -45,11 +45,11 @@ spec = do
           ]
 
       withEnvironment env $ do
-        Connection{..} <- envConnection
-        connectionTls `shouldBe` True
-        connectionPassword `shouldBe` Just "foo"
-        connectionHostName `shouldBe` "bar"
-        connectionPort `shouldBe` 123
+        ConnectionInfo{..} <- envConnectionInfo
+        connectionInfoTls `shouldBe` True
+        connectionInfoPassword `shouldBe` Just "foo"
+        connectionInfoHostName `shouldBe` "bar"
+        connectionInfoPort `shouldBe` 123
 
     it "follows _PROVIDER to find _URL" $ do
       let
@@ -59,9 +59,9 @@ spec = do
           ]
 
       withEnvironment env $ do
-        Connection{..} <- envConnection
-        connectionHostName `shouldBe` "foo"
-        connectionPort `shouldBe` 123
+        ConnectionInfo{..} <- envConnectionInfo
+        connectionInfoHostName `shouldBe` "foo"
+        connectionInfoPort `shouldBe` 123
 
     it "throws nice errors for invalid PROVIDER" $ do
       let
@@ -70,7 +70,7 @@ spec = do
           , ("FAKTORY_URL", Nothing)
           ]
 
-      withEnvironment env envConnection
+      withEnvironment env envConnectionInfo
         `shouldThrowMessage` "expecting an environment variable name"
 
     it "throws nice errors for invalid _URL" $ do
@@ -80,7 +80,7 @@ spec = do
           , ("FAKTORY_URL", Just "http://foo:123")
           ]
 
-      withEnvironment env envConnection
+      withEnvironment env envConnectionInfo
         `shouldThrowMessage` "expecting tcp(+tls)://(:<password>@)<host>:<port>"
 
     it "throws nice errors for missing _PROVIDER" $ do
@@ -92,7 +92,7 @@ spec = do
           , ("MISSING_URL", Nothing)
           ]
 
-      withEnvironment env envConnection `shouldThrowMessage` "..."
+      withEnvironment env envConnectionInfo `shouldThrowMessage` "..."
 
 -- | Override ENV with the given values, and restore them after
 --

@@ -1,7 +1,7 @@
 module Faktory.Connection
-  ( Connection(..)
-  , defaultConnection
-  , envConnection
+  ( ConnectionInfo(..)
+  , defaultConnectionInfo
+  , envConnectionInfo
   , connect
   ) where
 
@@ -9,26 +9,26 @@ import Faktory.Prelude
 
 import Data.Maybe (fromMaybe)
 import Data.Void
-import qualified Network.Connection as Con
+import Network.Connection
 import Network.Socket (HostName, PortNumber)
 import System.Environment (lookupEnv)
 import Text.Megaparsec
 import Text.Megaparsec.Char
 
-data Connection = Connection
-  { connectionTls :: Bool
-  , connectionPassword :: Maybe String
-  , connectionHostName :: HostName
-  , connectionPort :: PortNumber
+data ConnectionInfo = ConnectionInfo
+  { connectionInfoTls :: Bool
+  , connectionInfoPassword :: Maybe String
+  , connectionInfoHostName :: HostName
+  , connectionInfoPort :: PortNumber
   }
   deriving (Eq, Show)
 
-defaultConnection :: Connection
-defaultConnection = Connection
-  { connectionTls = False
-  , connectionPassword = Nothing
-  , connectionHostName = "localhost"
-  , connectionPort = 7419
+defaultConnectionInfo :: ConnectionInfo
+defaultConnectionInfo = ConnectionInfo
+  { connectionInfoTls = False
+  , connectionInfoPassword = Nothing
+  , connectionInfoHostName = "localhost"
+  , connectionInfoPort = 7419
   }
 
 -- | Parse a @'Connection'@ from environment variables
@@ -40,31 +40,31 @@ defaultConnection = Connection
 --
 -- See <https://github.com/contribsys/faktory/wiki/Worker-Lifecycle#url-configuration>.
 --
-envConnection :: IO Connection
-envConnection = do
+envConnectionInfo :: IO ConnectionInfo
+envConnectionInfo = do
   providerString <- fromMaybe "FAKTORY_URL" <$> lookupEnv "FAKTORY_PROVIDER"
   provider <- parseThrow parseProvider "FAKTORY_PROVIDER" providerString
   connectionString <- fromMaybe "tcp://localhost:7419" <$> lookupEnv provider
   parseThrow parseConnection provider connectionString
 
 -- | Connect to the given @'Connection'@ as a @'Socket'@
-connect :: Connection -> IO Con.Connection
-connect Connection{..} =
-  bracketOnError open Con.connectionClose pure
+connect :: ConnectionInfo -> IO Connection
+connect ConnectionInfo{..} =
+  bracketOnError open connectionClose pure
  where
   open = do
-    ctx <- Con.initConnectionContext
-    Con.connectTo ctx $ Con.ConnectionParams
-      { Con.connectionHostname = connectionHostName
-      , Con.connectionPort = connectionPort
-      , Con.connectionUseSecure = if connectionTls
-          then Just Con.TLSSettingsSimple
-            { Con.settingDisableCertificateValidation = False
-            , Con.settingDisableSession = False
-            , Con.settingUseServerName = False
+    ctx <- initConnectionContext
+    connectTo ctx $ ConnectionParams
+      { connectionHostname = connectionInfoHostName
+      , connectionPort = connectionInfoPort
+      , connectionUseSecure = if connectionInfoTls
+          then Just TLSSettingsSimple
+            { settingDisableCertificateValidation = False
+            , settingDisableSession = False
+            , settingUseServerName = False
             }
           else Nothing
-      , Con.connectionUseSocks = Nothing
+      , connectionUseSocks = Nothing
       }
 
 type Parser = Parsec Void String
@@ -82,10 +82,10 @@ parseProvider :: Parser String
 parseProvider = some (upperChar <|> char '_')
   <?> "an environment variable name"
 
-parseConnection :: Parser Connection
+parseConnection :: Parser ConnectionInfo
 parseConnection = go <?> "tcp(+tls)://(:<password>@)<host>:<port>"
  where
-  go = Connection
+  go = ConnectionInfo
     <$> (False <$ string "tcp://" <|> True <$ string "tcp+tls://")
     <*> optional (char ':' *> manyTill anyChar (char '@'))
     <*> manyTill anyChar (char ':')

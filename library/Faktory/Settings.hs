@@ -1,6 +1,6 @@
 module Faktory.Settings
   ( Settings(..)
-  , Connection(..)
+  , ConnectionInfo(..)
   , defaultSettings
   , envSettings
   , Queue
@@ -21,14 +21,14 @@ import System.IO (hPutStrLn, stderr)
 import System.Random
 
 data Settings = Settings
-  { settingsConnection :: Connection
+  { settingsConnection :: ConnectionInfo
   , settingsLogDebug :: String -> IO ()
   , settingsLogError :: String -> IO ()
   }
 
 defaultSettings :: Settings
 defaultSettings = Settings
-  { settingsConnection = defaultConnection
+  { settingsConnection = defaultConnectionInfo
   , settingsLogDebug = \_msg -> pure ()
   , settingsLogError = hPutStrLn stderr . ("[ERROR]: " <>)
   }
@@ -39,7 +39,7 @@ defaultSettings = Settings
 --
 envSettings :: IO Settings
 envSettings = do
-  connection <- envConnection
+  connection <- envConnectionInfo
   pure defaultSettings { settingsConnection = connection }
 
 newtype Queue = Queue Text

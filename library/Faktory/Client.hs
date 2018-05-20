@@ -28,7 +28,7 @@ import Faktory.Protocol
 import Faktory.Settings
 import GHC.Generics
 import GHC.Stack
-import qualified Network.Connection as Con
+import Network.Connection
 import Network.Socket (HostName)
 import System.Posix.Process (getProcessID)
 
@@ -47,14 +47,14 @@ instance ToJSON HelloPayload where
    toEncoding = genericToEncoding $ aesonPrefix snakeCase
 
 data Client = Client
-  { clientConnection :: MVar Con.Connection
+  { clientConnection :: MVar Connection
   , clientSettings :: Settings
   }
 
 -- | Open a new @'Client'@ connection with the given @'Settings'@
 newClient :: HasCallStack => Settings -> Maybe WorkerId -> IO Client
 newClient settings@Settings{..} mWorkerId =
-  bracketOnError (connect settingsConnection) Con.connectionClose $ \conn -> do
+  bracketOnError (connect settingsConnection) connectionClose $ \conn -> do
     -- TODO: HI { "v": 2 }
     void $ recvUnsafe settings conn
 
@@ -62,7 +62,7 @@ newClient settings@Settings{..} mWorkerId =
       <$> newMVar conn
       <*> pure settings
 
-    helloPayload <- HelloPayload mWorkerId (show . fst $ Con.connectionID conn)
+    helloPayload <- HelloPayload mWorkerId (show . fst $ connectionID conn)
       <$> (toInteger <$> getProcessID)
       <*> pure ["haskell"]
       <*> pure 2
@@ -74,7 +74,7 @@ newClient settings@Settings{..} mWorkerId =
 closeClient :: Client -> IO ()
 closeClient Client{..} = withMVar clientConnection $ \conn -> do
   sendUnsafe clientSettings conn "END" []
-  Con.connectionClose conn
+  connectionClose conn
 
 -- | Push a Job to the Server
 pushJob :: (HasCallStack, ToJSON arg) => Client -> Queue -> arg -> IO JobId
@@ -114,19 +114,19 @@ commandJSON Client{..} cmd args = withMVar clientConnection $ \conn -> do
 --
 -- Do not use outside of @'withMVar'@, this is not threadsafe.
 --
-sendUnsafe :: Settings -> Con.Connection -> ByteString -> [ByteString] -> IO ()
+sendUnsafe :: Settings -> Connection -> ByteString -> [ByteString] -> IO ()
 sendUnsafe Settings{..} conn cmd args =  do
   let bs = BSL8.unwords (cmd:args)
   settingsLogDebug $ "> " <> show bs
-  void . Con.connectionPut conn . BSL8.toStrict $ bs <> "\n"
+  void . connectionPut conn . BSL8.toStrict $ bs <> "\n"
 
 -- | Receive data from the Server socket
 --
 -- Do not use outside of @'withMVar'@, this is not threadsafe.
 --
-recvUnsafe :: Settings -> Con.Connection -> IO (Maybe ByteString)
+recvUnsafe :: Settings -> Connection -> IO (Maybe ByteString)
 recvUnsafe Settings{..} conn = do
-  eByteString <- readReply $ Con.connectionGet conn 4096
+  eByteString <- readReply $ connectionGet conn 4096
   settingsLogDebug $ "< " <> show eByteString
 
   case eByteString of
