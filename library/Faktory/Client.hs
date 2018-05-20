@@ -28,7 +28,7 @@ import Faktory.Protocol
 import Faktory.Settings
 import GHC.Generics
 import GHC.Stack
-import Network.Connection as Con
+import qualified Network.Connection as Con
 import Network.Socket (HostName)
 import System.Posix.Process (getProcessID)
 
