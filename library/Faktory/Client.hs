@@ -22,16 +22,14 @@ import Data.Aeson
 import Data.Aeson.Casing
 import Data.ByteString.Lazy (ByteString, fromStrict)
 import qualified Data.ByteString.Lazy.Char8 as BSL8
-import Faktory.Connection
+import Faktory.Connection (connect)
 import Faktory.Job
 import Faktory.Protocol
 import Faktory.Settings
 import GHC.Generics
 import GHC.Stack
+import Network.Connection
 import Network.Socket (HostName)
-import qualified Network.Socket as NS
-import qualified Network.Socket.ByteString as NSB
-import qualified Network.Socket.ByteString.Lazy as NSBL
 import System.Posix.Process (getProcessID)
 
 -- | <https://github.com/contribsys/faktory/wiki/Worker-Lifecycle#initial-handshake>
@@ -49,24 +47,23 @@ instance ToJSON HelloPayload where
    toEncoding = genericToEncoding $ aesonPrefix snakeCase
 
 data Client = Client
-  { clientSocket :: MVar NS.Socket
+  { clientConnection :: MVar Connection
   , clientSettings :: Settings
   }
 
 -- | Open a new @'Client'@ connection with the given @'Settings'@
 newClient :: HasCallStack => Settings -> Maybe WorkerId -> IO Client
 newClient settings@Settings{..} mWorkerId =
-  bracketOnError (connect settingsConnection) NS.close $ \sock -> do
+  bracketOnError (connect settingsConnection) connectionClose $ \conn -> do
     -- TODO: HI { "v": 2 }
-    void $ recvUnsafe settings sock
+    void $ recvUnsafe settings conn
 
     client <- Client
-      <$> newMVar sock
+      <$> newMVar conn
       <*> pure settings
 
-    helloPayload <- HelloPayload mWorkerId
-      <$> (show <$> NS.getSocketName sock)
-      <*> (toInteger <$> getProcessID)
+    helloPayload <- HelloPayload mWorkerId (show . fst $ connectionID conn)
+      <$> (toInteger <$> getProcessID)
       <*> pure ["haskell"]
       <*> pure 2
 
@@ -75,9 +72,9 @@ newClient settings@Settings{..} mWorkerId =
 
 -- | Close a @'Client'@
 closeClient :: Client -> IO ()
-closeClient Client{..} = withMVar clientSocket $ \sock -> do
-  sendUnsafe clientSettings sock "END" []
-  NS.close sock
+closeClient Client{..} = withMVar clientConnection $ \conn -> do
+  sendUnsafe clientSettings conn "END" []
+  connectionClose conn
 
 -- | Push a Job to the Server
 pushJob :: (HasCallStack, ToJSON arg) => Client -> Queue -> arg -> IO JobId
@@ -95,41 +92,41 @@ flush client = commandOK client "FLUSH" []
 
 -- | Send a command, read and discard the response
 command_ :: Client -> ByteString -> [ByteString] -> IO ()
-command_ Client{..} cmd args = withMVar clientSocket $ \sock -> do
-  sendUnsafe clientSettings sock cmd args
-  void $ recvUnsafe clientSettings sock
+command_ Client{..} cmd args = withMVar clientConnection $ \conn -> do
+  sendUnsafe clientSettings conn cmd args
+  void $ recvUnsafe clientSettings conn
 
 -- | Send a command, assert the response is @OK@
 commandOK :: HasCallStack => Client -> ByteString -> [ByteString] -> IO ()
-commandOK Client{..} cmd args = withMVar clientSocket $ \sock -> do
-  sendUnsafe clientSettings sock cmd args
-  response <- recvUnsafe clientSettings sock
+commandOK Client{..} cmd args = withMVar clientConnection $ \conn -> do
+  sendUnsafe clientSettings conn cmd args
+  response <- recvUnsafe clientSettings conn
   unless (response == Just "OK") $ throwString "Server not OK"
 
 -- | Send a command, parse the response as JSON
 commandJSON :: FromJSON a => Client -> ByteString -> [ByteString] -> IO (Maybe a)
-commandJSON Client{..} cmd args = withMVar clientSocket $ \sock -> do
-  sendUnsafe clientSettings sock cmd args
-  mByteString <- recvUnsafe clientSettings sock
+commandJSON Client{..} cmd args = withMVar clientConnection $ \conn -> do
+  sendUnsafe clientSettings conn cmd args
+  mByteString <- recvUnsafe clientSettings conn
   pure $ decode =<< mByteString
 
 -- | Send a command to the Server socket
 --
 -- Do not use outside of @'withMVar'@, this is not threadsafe.
 --
-sendUnsafe :: Settings -> NS.Socket -> ByteString -> [ByteString] -> IO ()
-sendUnsafe Settings{..} sock cmd args =  do
+sendUnsafe :: Settings -> Connection -> ByteString -> [ByteString] -> IO ()
+sendUnsafe Settings{..} conn cmd args =  do
   let bs = BSL8.unwords (cmd:args)
   settingsLogDebug $ "> " <> show bs
-  void $ NSBL.send sock $ bs <> "\n"
+  void . connectionPut conn . BSL8.toStrict $ bs <> "\n"
 
 -- | Receive data from the Server socket
 --
 -- Do not use outside of @'withMVar'@, this is not threadsafe.
 --
-recvUnsafe :: Settings -> NS.Socket -> IO (Maybe ByteString)
-recvUnsafe Settings{..} sock = do
-  eByteString <- readReply $ NSB.recv sock 4096
+recvUnsafe :: Settings -> Connection -> IO (Maybe ByteString)
+recvUnsafe Settings{..} conn = do
+  eByteString <- readReply $ connectionGet conn 4096
   settingsLogDebug $ "< " <> show eByteString
 
   case eByteString of
