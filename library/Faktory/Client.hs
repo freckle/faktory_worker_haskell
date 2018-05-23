@@ -79,12 +79,12 @@ newClient settings@Settings{..} mWorkerId =
     stripped <- fromJustThrows ("Missing HI prefix: " <> show greeting) $ BSL8.stripPrefix "HI" greeting
     HiPayload{..} <- fromJustThrows ("Failed to parse HI payload: " <> show stripped) $ decode stripped
 
-    when (_hipV > expectedServerVersion)
+    when (_hipV > expectedProtocolVersion)
       $ settingsLogError $ concat
-        [ "Actual server version "
+        [ "Server's protocol version "
         , show _hipV
-        , " higher than expected server version "
-        , show expectedServerVersion
+        , " higher than client's expected protocol version "
+        , show expectedProtocolVersion
         ]
 
     let
@@ -94,7 +94,7 @@ newClient settings@Settings{..} mWorkerId =
     helloPayload <- HelloPayload mWorkerId (show . fst $ connectionID conn)
       <$> (toInteger <$> getProcessID)
       <*> pure ["haskell"]
-      <*> pure 2
+      <*> pure expectedProtocolVersion
       <*> pure mHashedPassword
 
     commandOK client "HELLO" [encode helloPayload]
@@ -193,6 +193,6 @@ hashPassword nonce n password =
   hash :: (ByteArrayAccess b) => b -> Digest SHA256
   hash = hashWith SHA256
 
--- | Server version client expects to connect to
-expectedServerVersion :: Int
-expectedServerVersion = 2
+-- | Protocol version the client expects
+expectedProtocolVersion :: Int
+expectedProtocolVersion = 2
