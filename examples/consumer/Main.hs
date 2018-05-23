@@ -16,7 +16,8 @@ instance FromJSON Job
 main :: IO ()
 main = do
   putStrLn "Starting consumer loop"
-  runWorker defaultSettings defaultQueue $ \job -> do
+  settings <- envSettings
+  runWorker settings defaultQueue $ \job -> do
     let message = jobMessage job
 
     if message == "BOOM"

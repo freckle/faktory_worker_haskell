@@ -18,10 +18,15 @@ module Faktory.Client
 import Faktory.Prelude
 
 import Control.Concurrent.MVar
+import Crypto.Hash (Digest, SHA256(..), hashWith)
 import Data.Aeson
 import Data.Aeson.Casing
+import Data.ByteArray (ByteArrayAccess)
 import Data.ByteString.Lazy (ByteString, fromStrict)
 import qualified Data.ByteString.Lazy.Char8 as BSL8
+import Data.Text (Text)
+import qualified Data.Text as T
+import qualified Data.Text.Encoding as T
 import Faktory.Connection (connect)
 import Faktory.Job
 import Faktory.Protocol
@@ -32,13 +37,29 @@ import Network.Connection
 import Network.Socket (HostName)
 import System.Posix.Process (getProcessID)
 
+data Client = Client
+  { clientConnection :: MVar Connection
+  , clientSettings :: Settings
+  }
+
 -- | <https://github.com/contribsys/faktory/wiki/Worker-Lifecycle#initial-handshake>
+data HiPayload = HiPayload
+  { _hipV :: Int
+  , _hipS :: Maybe Text
+  , _hipI :: Maybe Int
+  }
+  deriving Generic
+
+instance FromJSON HiPayload where
+   parseJSON = genericParseJSON $ aesonPrefix snakeCase
+
 data HelloPayload = HelloPayload
   { _hpWid :: Maybe WorkerId
   , _hpHostname :: HostName
   , _hpPid :: Integer -- TODO: Orphan ToJSON ProcessID
-  , _hpLabels :: [String]
+  , _hpLabels :: [Text]
   , _hpV :: Int
+  , _hpPwdhash :: Maybe Text
   }
   deriving Generic
 
@@ -46,29 +67,40 @@ instance ToJSON HelloPayload where
    toJSON = genericToJSON $ aesonPrefix snakeCase
    toEncoding = genericToEncoding $ aesonPrefix snakeCase
 
-data Client = Client
-  { clientConnection :: MVar Connection
-  , clientSettings :: Settings
-  }
-
 -- | Open a new @'Client'@ connection with the given @'Settings'@
 newClient :: HasCallStack => Settings -> Maybe WorkerId -> IO Client
 newClient settings@Settings{..} mWorkerId =
   bracketOnError (connect settingsConnection) connectionClose $ \conn -> do
-    -- TODO: HI { "v": 2 }
-    void $ recvUnsafe settings conn
-
     client <- Client
       <$> newMVar conn
       <*> pure settings
 
+    greeting <- fromJustThrows "Unexpected end of HI message" =<< recvUnsafe settings conn
+    stripped <- fromJustThrows ("Missing HI prefix: " <> show greeting) $ BSL8.stripPrefix "HI" greeting
+    HiPayload{..} <- fromJustThrows ("Failed to parse HI payload: " <> show stripped) $ decode stripped
+
+    when (_hipV > expectedProtocolVersion)
+      $ settingsLogError $ concat
+        [ "Server's protocol version "
+        , show _hipV
+        , " higher than client's expected protocol version "
+        , show expectedProtocolVersion
+        ]
+
+    let
+      mPassword = connectionInfoPassword settingsConnection
+      mHashedPassword = hashPassword <$> _hipS <*> _hipI <*> mPassword
+
     helloPayload <- HelloPayload mWorkerId (show . fst $ connectionID conn)
       <$> (toInteger <$> getProcessID)
       <*> pure ["haskell"]
-      <*> pure 2
+      <*> pure expectedProtocolVersion
+      <*> pure mHashedPassword
 
     commandOK client "HELLO" [encode helloPayload]
     pure client
+ where
+  fromJustThrows message = maybe (throwString message) pure
 
 -- | Close a @'Client'@
 closeClient :: Client -> IO ()
@@ -134,3 +166,33 @@ recvUnsafe Settings{..} conn = do
       settingsLogError err
       pure Nothing
     Right mByteString -> pure $ fromStrict <$> mByteString
+
+-- | Iteratively apply a function @n@ times
+--
+-- This is like @iterate f s !! n@ but strict in @s@
+--
+times :: Int -> (s -> s) -> s -> s
+times n f !s
+  | n <= 0 = s
+  | otherwise = times (n - 1) f (f s)
+
+-- | Hash password using provided @nonce@ for @n@ iterations
+hashPassword :: Text -> Int -> String -> Text
+hashPassword nonce n password =
+  T.pack
+  . show
+  . times (n - 1) hash
+  . hash
+  . T.encodeUtf8
+  $ T.pack password <> nonce
+ where
+  -- Note that we use hash at two different types above.
+  --
+  -- 1. hash :: ByteString    -> Digest SHA256
+  -- 2. hash :: Digest SHA256 -> Digest SHA256
+  hash :: (ByteArrayAccess b) => b -> Digest SHA256
+  hash = hashWith SHA256
+
+-- | Protocol version the client expects
+expectedProtocolVersion :: Int
+expectedProtocolVersion = 2
