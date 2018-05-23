@@ -16,8 +16,9 @@ newtype Job = Job { jobMessage :: String }
 instance ToJSON Job
 
 main :: IO ()
-main =
-  bracket (newClient defaultSettings Nothing) closeClient $ \client -> do
+main = do
+  settings <- envSettings
+  bracket (newClient settings Nothing) closeClient $ \client -> do
     args <- getArgs
     jobId <- pushJob client defaultQueue Job
       { jobMessage = unwords args

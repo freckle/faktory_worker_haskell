@@ -49,7 +49,9 @@ library:
     - aeson-casing
     - bytestring
     - connection
+    - cryptonite
     - megaparsec
+    - memory
     - network
     - random
     - safe-exceptions
