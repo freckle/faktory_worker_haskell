@@ -37,7 +37,22 @@ import Network.Connection
 import Network.Socket (HostName)
 import System.Posix.Process (getProcessID)
 
+data Client = Client
+  { clientConnection :: MVar Connection
+  , clientSettings :: Settings
+  }
+
 -- | <https://github.com/contribsys/faktory/wiki/Worker-Lifecycle#initial-handshake>
+data HiPayload = HiPayload
+  { _hipV :: Int
+  , _hipS :: Maybe Text
+  , _hipI :: Maybe Int
+  }
+  deriving Generic
+
+instance FromJSON HiPayload where
+   parseJSON = genericParseJSON $ aesonPrefix snakeCase
+
 data HelloPayload = HelloPayload
   { _hpWid :: Maybe WorkerId
   , _hpHostname :: HostName
@@ -52,46 +67,6 @@ instance ToJSON HelloPayload where
    toJSON = genericToJSON $ aesonPrefix snakeCase
    toEncoding = genericToEncoding $ aesonPrefix snakeCase
 
-data Client = Client
-  { clientConnection :: MVar Connection
-  , clientSettings :: Settings
-  }
-
-data HiPayload = HiPayload
-  { _hipV :: Int
-  , _hipS :: Maybe Text
-  , _hipI :: Maybe Int
-  }
-  deriving Generic
-
-instance FromJSON HiPayload where
-   parseJSON = genericParseJSON $ aesonPrefix snakeCase
-
--- | Iteratively apply a function @n@ times
---
--- This is like @iterate f s !! n@ but strict in @s@
-times :: Int -> (s -> s) -> s -> s
-times n f !s
-  | n <= 0 = s
-  | otherwise = times (n - 1) f (f s)
-
--- | Hash password using provided @nonce@ for @n@ iterations
-hashPassword :: Text -> Int -> String -> Text
-hashPassword nonce n password =
-  T.pack
-  . show
-  . times (n - 1) hash
-  . hash
-  . T.encodeUtf8
-  $ T.pack password <> nonce
- where
-  -- Note that we use hash at two different types above.
-  --
-  -- 1. hash :: ByteString    -> Digest SHA256
-  -- 2. hash :: Digest SHA256 -> Digest SHA256
-  hash :: (ByteArrayAccess b) => b -> Digest SHA256
-  hash = hashWith SHA256
-
 -- | Open a new @'Client'@ connection with the given @'Settings'@
 newClient :: HasCallStack => Settings -> Maybe WorkerId -> IO Client
 newClient settings@Settings{..} mWorkerId =
@@ -100,7 +75,18 @@ newClient settings@Settings{..} mWorkerId =
       <$> newMVar conn
       <*> pure settings
 
-    HiPayload{..} <- expectPrefixedJSON client "HI"
+    greeting <- fromJustThrows "Unexpected end of HI message" =<< recvUnsafe settings conn
+    stripped <- fromJustThrows ("Missing HI prefix: " <> show greeting) $ BSL8.stripPrefix "HI" greeting
+    HiPayload{..} <- fromJustThrows ("Failed to parse HI payload: " <> show stripped) $ decode stripped
+
+    when (_hipV > expectedServerVersion)
+      $ settingsLogError $ concat
+        [ "Actual server version "
+        , show _hipV
+        , " higher than expected server version "
+        , show expectedServerVersion
+        ]
+
     let
       mPassword = connectionInfoPassword settingsConnection
       mHashedPassword = hashPassword <$> _hipS <*> _hipI <*> mPassword
@@ -113,6 +99,8 @@ newClient settings@Settings{..} mWorkerId =
 
     commandOK client "HELLO" [encode helloPayload]
     pure client
+ where
+  fromJustThrows message = maybe (throwString message) pure
 
 -- | Close a @'Client'@
 closeClient :: Client -> IO ()
@@ -154,18 +142,6 @@ commandJSON Client{..} cmd args = withMVar clientConnection $ \conn -> do
   mByteString <- recvUnsafe clientSettings conn
   pure $ decode =<< mByteString
 
--- | Wait for a prefixed JSON payload
---
--- Throws on no payload, no prefix, or failure to parse JSON. This is currently
--- only used to parse the HI payload from the server
-expectPrefixedJSON :: (HasCallStack, FromJSON a) => Client -> ByteString -> IO a
-expectPrefixedJSON Client{..} prefix = withMVar clientConnection $ \conn -> do
-  bytes <- fromJustThrows "Unexpected end of input" =<< recvUnsafe clientSettings conn
-  unprefixed <- fromJustThrows ("Missing prefix: " <> show bytes) $ BSL8.stripPrefix prefix bytes
-  fromJustThrows ("Failed to parse payload: " <> show unprefixed) $ decode unprefixed
- where
-  fromJustThrows message = maybe (throwString message) pure
-
 -- | Send a command to the Server socket
 --
 -- Do not use outside of @'withMVar'@, this is not threadsafe.
@@ -190,3 +166,33 @@ recvUnsafe Settings{..} conn = do
       settingsLogError err
       pure Nothing
     Right mByteString -> pure $ fromStrict <$> mByteString
+
+-- | Iteratively apply a function @n@ times
+--
+-- This is like @iterate f s !! n@ but strict in @s@
+--
+times :: Int -> (s -> s) -> s -> s
+times n f !s
+  | n <= 0 = s
+  | otherwise = times (n - 1) f (f s)
+
+-- | Hash password using provided @nonce@ for @n@ iterations
+hashPassword :: Text -> Int -> String -> Text
+hashPassword nonce n password =
+  T.pack
+  . show
+  . times (n - 1) hash
+  . hash
+  . T.encodeUtf8
+  $ T.pack password <> nonce
+ where
+  -- Note that we use hash at two different types above.
+  --
+  -- 1. hash :: ByteString    -> Digest SHA256
+  -- 2. hash :: Digest SHA256 -> Digest SHA256
+  hash :: (ByteArrayAccess b) => b -> Digest SHA256
+  hash = hashWith SHA256
+
+-- | Server version client expects to connect to
+expectedServerVersion :: Int
+expectedServerVersion = 2
