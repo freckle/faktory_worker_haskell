@@ -20,7 +20,6 @@ import Faktory.Prelude
 import Control.Concurrent.MVar
 import Crypto.Hash (Digest, SHA256(..), hashWith)
 import Data.Aeson
-import Data.Aeson.Casing
 import Data.ByteArray (ByteArrayAccess)
 import Data.ByteString.Lazy (ByteString, fromStrict)
 import qualified Data.ByteString.Lazy.Char8 as BSL8
@@ -31,7 +30,6 @@ import Faktory.Connection (connect)
 import Faktory.Job
 import Faktory.Protocol
 import Faktory.Settings
-import GHC.Generics
 import GHC.Stack
 import Network.Connection
 import Network.Socket (HostName)
@@ -44,28 +42,46 @@ data Client = Client
 
 -- | <https://github.com/contribsys/faktory/wiki/Worker-Lifecycle#initial-handshake>
 data HiPayload = HiPayload
-  { _hipV :: Int
-  , _hipS :: Maybe Text
-  , _hipI :: Maybe Int
+  { hiVersion :: Int
+  , hiNonce :: Maybe Text
+  , hiIterations :: Maybe Int
   }
-  deriving Generic
 
 instance FromJSON HiPayload where
-   parseJSON = genericParseJSON $ aesonPrefix snakeCase
+  parseJSON = withObject "HiPayload" $ \o ->
+    HiPayload
+      <$> o .: "v"
+      <*> o .:? "s"
+      <*> o .:? "i"
 
 data HelloPayload = HelloPayload
-  { _hpWid :: Maybe WorkerId
-  , _hpHostname :: HostName
-  , _hpPid :: Integer -- TODO: Orphan ToJSON ProcessID
-  , _hpLabels :: [Text]
-  , _hpV :: Int
-  , _hpPwdhash :: Maybe Text
+  { helloWorkerId :: Maybe WorkerId
+  , helloHostname :: HostName
+  , helloProcessId :: Integer -- TODO: Orphan ToJSON ProcessID
+  , helloLabels :: [Text]
+  , helloVersion :: Int
+  , helloPasswordHash :: Maybe Text
   }
-  deriving Generic
 
 instance ToJSON HelloPayload where
-   toJSON = genericToJSON $ aesonPrefix snakeCase
-   toEncoding = genericToEncoding $ aesonPrefix snakeCase
+  toJSON HelloPayload{..} =
+    object
+      [ "wid" .= helloWorkerId
+      , "hostname" .= helloHostname
+      , "pid" .= helloProcessId
+      , "labels" .= helloLabels
+      , "v" .= helloVersion
+      , "pwdhash" .= helloPasswordHash
+      ]
+  toEncoding HelloPayload{..} =
+    pairs $ mconcat
+      [ "wid" .= helloWorkerId
+      , "hostname" .= helloHostname
+      , "pid" .= helloProcessId
+      , "labels" .= helloLabels
+      , "v" .= helloVersion
+      , "pwdhash" .= helloPasswordHash
+      ]
 
 -- | Open a new @'Client'@ connection with the given @'Settings'@
 newClient :: HasCallStack => Settings -> Maybe WorkerId -> IO Client
@@ -79,17 +95,17 @@ newClient settings@Settings{..} mWorkerId =
     stripped <- fromJustThrows ("Missing HI prefix: " <> show greeting) $ BSL8.stripPrefix "HI" greeting
     HiPayload{..} <- fromJustThrows ("Failed to parse HI payload: " <> show stripped) $ decode stripped
 
-    when (_hipV > expectedProtocolVersion)
+    when (hiVersion > expectedProtocolVersion)
       $ settingsLogError $ concat
         [ "Server's protocol version "
-        , show _hipV
+        , show hiVersion
         , " higher than client's expected protocol version "
         , show expectedProtocolVersion
         ]
 
     let
       mPassword = connectionInfoPassword settingsConnection
-      mHashedPassword = hashPassword <$> _hipS <*> _hipI <*> mPassword
+      mHashedPassword = hashPassword <$> hiNonce <*> hiIterations <*> mPassword
 
     helloPayload <- HelloPayload mWorkerId (show . fst $ connectionID conn)
       <$> (toInteger <$> getProcessID)
