@@ -52,7 +52,7 @@ newtype Job = Job
   { jobMessage :: String
   }
 
-instance ToJSON job
+instance ToJSON Job
 instance FromJSON Job
 ```
 
@@ -62,7 +62,7 @@ instance FromJSON Job
 main = do
   settings <- envSettings
 
-  runWorker envSettings defaultQueue $ \job ->
+  runWorker settings defaultQueue $ \job ->
     -- Process your Job here
     putStrLn $ jobMessage job
 
