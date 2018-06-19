@@ -3,7 +3,7 @@ module Faktory.Settings
   , ConnectionInfo(..)
   , defaultSettings
   , envSettings
-  , Queue
+  , Queue(..)
   , queueArg
   , defaultQueue
   , WorkerId
