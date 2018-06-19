@@ -2,6 +2,8 @@ module Faktory.Job
   ( Job
   , JobId
   , perform
+  , performAt
+  , performIn
   , newJob
   , jobJid
   , jobArg
@@ -37,6 +39,23 @@ perform client queue arg = do
   job <- newJob queue arg
   jobJid job <$ pushJob client job
 
+performAt
+  :: (HasCallStack, ToJSON arg) => Client -> Queue -> arg -> UTCTime -> IO JobId
+performAt client queue arg time = do
+  job <- newJob queue arg
+  jobJid job <$ pushJob client job { jobAt = Just time }
+
+performIn
+  :: (HasCallStack, ToJSON arg)
+  => Client
+  -> Queue
+  -> arg
+  -> NominalDiffTime
+  -> IO JobId
+performIn client queue arg diff = do
+  time <- addUTCTime diff <$> getCurrentTime
+  performAt client queue arg time
+
 newJob :: ToJSON arg => Queue -> arg -> IO (Job arg)
 newJob queue arg = do
   -- Ruby uses 12 random hex
@@ -47,7 +66,7 @@ newJob queue arg = do
     , jobRetry = 25
     , jobQueue = queue
     , jobJobtype = "Example" -- TODO
-    , jobAt = Nothing -- TODO
+    , jobAt = Nothing
     , jobArgs = pure arg
     }
 
