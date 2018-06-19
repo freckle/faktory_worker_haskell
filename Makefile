@@ -17,7 +17,7 @@ test:
 .PHONY: lint
 lint:
 	hlint library/.
-	hlint test/.
+	hlint tests/.
 	weeder .
 
 .PHONY: clean
