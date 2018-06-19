@@ -85,3 +85,13 @@ tests:
     dependencies:
       - faktory
       - hspec
+
+  readme:
+    main: README.lhs
+    source-dirs: .
+    ghc-options: -Wall -pgmL markdown-unlit
+    dependencies:
+      - aeson
+      - base
+      - faktory
+      - markdown-unlit
