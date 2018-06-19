@@ -6,6 +6,7 @@ import Faktory.Prelude
 
 import Control.Concurrent.MVar
 import Faktory.Client
+import Faktory.Job
 import Faktory.Settings
 import Faktory.Worker
 import Test.Hspec
@@ -16,9 +17,9 @@ spec = describe "Faktory" $ do
     settings <- envSettings
     bracket (newClient settings Nothing) closeClient $ \client -> do
       void $ flush client
-      void $ pushJob @Text client defaultQueue "a"
-      void $ pushJob @Text client defaultQueue "b"
-      void $ pushJob @Text client defaultQueue "HALT"
+      void $ perform @Text client defaultQueue "a"
+      void $ perform @Text client defaultQueue "b"
+      void $ perform @Text client defaultQueue "HALT"
 
     processedJobs <- newMVar ([] :: [Text])
     runWorker settings defaultQueue $ \job -> do

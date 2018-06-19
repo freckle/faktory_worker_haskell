@@ -47,8 +47,9 @@ details.
 import Data.Aeson
 import Prelude
 import Faktory.Client
-import Faktory.Worker
+import Faktory.Job
 import Faktory.Settings
+import Faktory.Worker
 import GHC.Generics
 
 {- Don't actually run anything -}
@@ -97,7 +98,7 @@ clientMain = do
   client <- newClient settings Nothing -- N.B. A WorkerId is not necessary if
                                        -- only pushing Jobs.
 
-  jobId <- pushJob client defaultQueue $ MyJob "Hello world"
+  jobId <- perform client defaultQueue $ MyJob "Hello world"
 
   print jobId
 

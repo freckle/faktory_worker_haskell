@@ -1,6 +1,7 @@
 module Faktory.Job
   ( Job
   , JobId
+  , perform
   , newJob
   , jobJid
   , jobArg
@@ -13,8 +14,10 @@ import Data.Aeson.Casing
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NE
 import Data.Time
+import Faktory.Client (Client, pushJob)
 import Faktory.Settings (Queue)
 import GHC.Generics
+import GHC.Stack
 import System.Random
 
 data Job arg = Job
@@ -28,6 +31,11 @@ data Job arg = Job
   -- interface so that's what we expose. See @'jobArg'@.
   }
   deriving Generic
+
+perform :: (HasCallStack, ToJSON arg) => Client -> Queue -> arg -> IO JobId
+perform client queue arg = do
+  job <- newJob queue arg
+  jobJid job <$ pushJob client job
 
 newJob :: ToJSON arg => Queue -> arg -> IO (Job arg)
 newJob queue arg = do

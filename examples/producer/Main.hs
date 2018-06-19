@@ -6,6 +6,7 @@ import Control.Exception.Safe
 import Data.Aeson
 import Data.Semigroup ((<>))
 import Faktory.Client
+import Faktory.Job (perform)
 import Faktory.Settings
 import GHC.Generics
 import System.Environment (getArgs)
@@ -20,7 +21,7 @@ main = do
   settings <- envSettings
   bracket (newClient settings Nothing) closeClient $ \client -> do
     args <- getArgs
-    jobId <- pushJob client defaultQueue Job
+    jobId <- perform client defaultQueue Job
       { jobMessage = unwords args
       }
 
