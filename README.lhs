@@ -54,6 +54,8 @@ import GHC.Generics
 {- Don't actually run anything -}
 main :: IO ()
 main = if True then pure () else (workerMain >> clientMain)
+workerMain :: IO ()
+clientMain :: IO ()
 ```
 -->
 
@@ -75,7 +77,6 @@ instance FromJSON MyJob
 ### Worker
 
 ```haskell
-workerMain :: IO ()
 workerMain = do
   settings <- envSettings
 
@@ -91,7 +92,6 @@ workerMain = do
 ### Client
 
 ```haskell
-clientMain :: IO ()
 clientMain = do
   settings <- envSettings
   client <- newClient settings Nothing -- N.B. A WorkerId is not necessary if
