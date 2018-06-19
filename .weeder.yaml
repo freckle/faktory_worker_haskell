@@ -1,0 +1,8 @@
+- package:
+  - name: faktory
+  - section:
+    - name: test:readme
+    - message:
+      - name: Redundant build-depends entry
+      - depends: markdown-unlit
+
