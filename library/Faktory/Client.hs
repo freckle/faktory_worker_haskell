@@ -27,7 +27,6 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import Faktory.Connection (connect)
---import Faktory.Job
 import Faktory.Protocol
 import Faktory.Settings
 import GHC.Stack
