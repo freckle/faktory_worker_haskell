@@ -1,6 +1,9 @@
 module Faktory.Job
   ( Job
   , JobId
+  , perform
+  , performAt
+  , performIn
   , newJob
   , jobJid
   , jobArg
@@ -13,8 +16,10 @@ import Data.Aeson.Casing
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NE
 import Data.Time
+import Faktory.Client (Client, pushJob)
 import Faktory.Settings (Queue)
 import GHC.Generics
+import GHC.Stack
 import System.Random
 
 data Job arg = Job
@@ -29,6 +34,28 @@ data Job arg = Job
   }
   deriving Generic
 
+perform :: (HasCallStack, ToJSON arg) => Client -> Queue -> arg -> IO JobId
+perform client queue arg = do
+  job <- newJob queue arg
+  jobJid job <$ pushJob client job
+
+performAt
+  :: (HasCallStack, ToJSON arg) => Client -> Queue -> UTCTime -> arg -> IO JobId
+performAt client queue time arg = do
+  job <- newJob queue arg
+  jobJid job <$ pushJob client job { jobAt = Just time }
+
+performIn
+  :: (HasCallStack, ToJSON arg)
+  => Client
+  -> Queue
+  -> NominalDiffTime
+  -> arg
+  -> IO JobId
+performIn client queue diff arg = do
+  time <- addUTCTime diff <$> getCurrentTime
+  performAt client queue time arg
+
 newJob :: ToJSON arg => Queue -> arg -> IO (Job arg)
 newJob queue arg = do
   -- Ruby uses 12 random hex
@@ -39,7 +66,7 @@ newJob queue arg = do
     , jobRetry = 25
     , jobQueue = queue
     , jobJobtype = "Example" -- TODO
-    , jobAt = Nothing -- TODO
+    , jobAt = Nothing
     , jobArgs = pure arg
     }
 

@@ -27,7 +27,6 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import Faktory.Connection (connect)
-import Faktory.Job
 import Faktory.Protocol
 import Faktory.Settings
 import GHC.Stack
@@ -125,11 +124,8 @@ closeClient Client{..} = withMVar clientConnection $ \conn -> do
   connectionClose conn
 
 -- | Push a Job to the Server
-pushJob :: (HasCallStack, ToJSON arg) => Client -> Queue -> arg -> IO JobId
-pushJob client queue arg = do
-  job <- newJob queue arg
-  commandOK client "PUSH" [encode job]
-  pure $ jobJid job
+pushJob :: (HasCallStack, ToJSON a) => Client -> a -> IO ()
+pushJob client job = commandOK client "PUSH" [encode job]
 
 -- | Clear all job data in the Faktory server
 --
