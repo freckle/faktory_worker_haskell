@@ -40,8 +40,8 @@ perform client queue arg = do
   jobJid job <$ pushJob client job
 
 performAt
-  :: (HasCallStack, ToJSON arg) => Client -> Queue -> arg -> UTCTime -> IO JobId
-performAt client queue arg time = do
+  :: (HasCallStack, ToJSON arg) => Client -> Queue -> UTCTime -> arg -> IO JobId
+performAt client queue time arg = do
   job <- newJob queue arg
   jobJid job <$ pushJob client job { jobAt = Just time }
 
@@ -49,12 +49,12 @@ performIn
   :: (HasCallStack, ToJSON arg)
   => Client
   -> Queue
-  -> arg
   -> NominalDiffTime
+  -> arg
   -> IO JobId
-performIn client queue arg diff = do
+performIn client queue diff arg = do
   time <- addUTCTime diff <$> getCurrentTime
-  performAt client queue arg time
+  performAt client queue time arg
 
 newJob :: ToJSON arg => Queue -> arg -> IO (Job arg)
 newJob queue arg = do
