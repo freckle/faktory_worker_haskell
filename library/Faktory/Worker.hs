@@ -79,12 +79,12 @@ processorLoop client queue f = do
         [ Handler $ \(ex :: WorkerHalt) -> throw ex
         , Handler $ \(ex :: SomeException) -> failJob client job $ T.pack $ show ex
         ]
-    Nothing -> threadDelay $ 1 * 1000000
+    Nothing -> threadDelaySeconds 1
 
 -- | <https://github.com/contribsys/faktory/wiki/Worker-Lifecycle#heartbeat>
 heartBeat :: Client -> WorkerId -> IO ()
 heartBeat client workerId = do
-  threadDelay $ 25 * 1000000
+  threadDelaySeconds 25
   command_ client "BEAT" [encode $ BeatPayload workerId]
 
 fetchJob :: FromJSON args => Client -> Queue -> IO (Maybe (Job args))
