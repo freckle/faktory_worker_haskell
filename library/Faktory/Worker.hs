@@ -73,11 +73,13 @@ processorLoop client queue f = do
 
   mJob <- fetchJob client queue
 
-  for_ mJob $ \job ->
-    processAndAck job `catches`
-      [ Handler $ \(ex :: WorkerHalt) -> throw ex
-      , Handler $ \(ex :: SomeException) -> failJob client job $ T.pack $ show ex
-      ]
+  case mJob of
+    Just job ->
+      processAndAck job `catches`
+        [ Handler $ \(ex :: WorkerHalt) -> throw ex
+        , Handler $ \(ex :: SomeException) -> failJob client job $ T.pack $ show ex
+        ]
+    Nothing -> threadDelay $ 1 * 1000000
 
 -- | <https://github.com/contribsys/faktory/wiki/Worker-Lifecycle#heartbeat>
 heartBeat :: Client -> WorkerId -> IO ()
