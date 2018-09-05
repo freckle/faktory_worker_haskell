@@ -20,4 +20,4 @@ threadDelaySeconds n = threadDelay $ n * 1000000
 forkIOWithThrowToParent :: IO () -> IO ThreadId
 forkIOWithThrowToParent action = do
   parent <- myThreadId
-  forkIO $ action `catch` \(err :: SomeException) -> throwTo parent err
+  forkIO $ action `X.catchAny` \err -> throwTo parent err

@@ -6,7 +6,8 @@
 module Faktory.Worker
   ( WorkerHalt(..)
   , runWorker
-  ) where
+  )
+where
 
 import Faktory.Prelude
 
@@ -88,11 +89,7 @@ heartBeat client workerId = do
   command_ client "BEAT" [encode $ BeatPayload workerId]
 
 fetchJob :: FromJSON args => Client -> Queue -> IO (Maybe (Job args))
-fetchJob client queue =
-  -- Treat an exception here like no Job. The Client will have already logged
-  -- the protocol error to stderr, and we should just keep chugging.
-  handleAny (const $ pure Nothing)
-    $ commandJSON client "FETCH" [queueArg queue]
+fetchJob client queue = commandJSON client "FETCH" [queueArg queue]
 
 ackJob :: HasCallStack => Client -> Job args -> IO ()
 ackJob client job =
