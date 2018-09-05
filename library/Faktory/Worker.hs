@@ -10,7 +10,7 @@ module Faktory.Worker
 
 import Faktory.Prelude
 
-import Control.Concurrent
+import Control.Concurrent (killThread)
 import Data.Aeson
 import Data.Aeson.Casing
 import qualified Data.Text as T
@@ -58,7 +58,7 @@ runWorker :: FromJSON args => Settings -> Queue -> (args -> IO ()) -> IO ()
 runWorker settings queue f = do
   workerId <- randomWorkerId
   client <- newClient settings $ Just workerId
-  beatThreadId <- forkIO $ forever $ heartBeat client workerId
+  beatThreadId <- forkIOWithThrowToParent $ forever $ heartBeat client workerId
 
   forever (processorLoop client queue f)
     `catch` (\(_ex :: WorkerHalt) -> pure ())
