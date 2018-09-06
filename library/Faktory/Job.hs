@@ -4,6 +4,7 @@ module Faktory.Job
   , perform
   , performAt
   , performIn
+  , performOnce
   , newJob
   , jobJid
   , jobArg
@@ -35,26 +36,50 @@ data Job arg = Job
   deriving Generic
 
 perform :: (HasCallStack, ToJSON arg) => Client -> Queue -> arg -> IO JobId
-perform client queue arg = do
-  job <- newJob queue arg
-  jobJid job <$ pushJob client job
+perform = performWith id
 
+-- | Perform the Job at the given time
 performAt
-  :: (HasCallStack, ToJSON arg) => Client -> Queue -> UTCTime -> arg -> IO JobId
-performAt client queue time arg = do
-  job <- newJob queue arg
-  jobJid job <$ pushJob client job { jobAt = Just time }
+  :: (HasCallStack, ToJSON arg) => UTCTime -> Client -> Queue -> arg -> IO JobId
+performAt time = performWith $ \job -> job { jobAt = Just time }
 
+-- | Perform the Job in some time, given as a @'NominalDiffTime'@
 performIn
   :: (HasCallStack, ToJSON arg)
-  => Client
+  => NominalDiffTime
+  -> Client
   -> Queue
-  -> NominalDiffTime
   -> arg
   -> IO JobId
-performIn client queue diff arg = do
+performIn diff = performWithM $ \job -> do
   time <- addUTCTime diff <$> getCurrentTime
-  performAt client queue time arg
+  pure job { jobAt = Just time }
+
+-- | Perform the Job with 0 retries
+performOnce :: (HasCallStack, ToJSON arg) => Client -> Queue -> arg -> IO JobId
+performOnce = performWith $ \job -> job { jobRetry = 0 }
+
+performWith
+  :: (HasCallStack, ToJSON arg)
+  => (Job arg -> Job arg)
+  -> Client
+  -> Queue
+  -> arg
+  -> IO JobId
+performWith f client queue arg = do
+  job <- f <$> newJob queue arg
+  jobJid job <$ pushJob client job
+
+performWithM
+  :: (HasCallStack, ToJSON arg)
+  => (Job arg -> IO (Job arg))
+  -> Client
+  -> Queue
+  -> arg
+  -> IO JobId
+performWithM f client queue arg = do
+  job <- f =<< newJob queue arg
+  jobJid job <$ pushJob client job
 
 newJob :: ToJSON arg => Queue -> arg -> IO (Job arg)
 newJob queue arg = do
