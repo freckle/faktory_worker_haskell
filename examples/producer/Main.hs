@@ -21,7 +21,7 @@ main = do
   settings <- envSettings
   bracket (newClient settings Nothing) closeClient $ \client -> do
     args <- getArgs
-    jobId <- perform client defaultQueue Job
+    jobId <- perform mempty client Job
       { jobMessage = unwords args
       }
 

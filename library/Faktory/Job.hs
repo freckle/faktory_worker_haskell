@@ -2,8 +2,12 @@ module Faktory.Job
   ( Job
   , JobId
   , perform
-  , performAt
-  , performIn
+  , retry
+  , once
+  , queue
+  , jobtype
+  , at
+  , in_
   , newJob
   , jobJid
   , jobArg
@@ -17,7 +21,7 @@ import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NE
 import Data.Time
 import Faktory.Client (Client, pushJob)
-import Faktory.Settings (Queue)
+import Faktory.Settings (Queue, defaultQueue)
 import GHC.Generics
 import GHC.Stack
 import System.Random
@@ -34,44 +38,85 @@ data Job arg = Job
   }
   deriving Generic
 
-perform :: (HasCallStack, ToJSON arg) => Client -> Queue -> arg -> IO JobId
-perform client queue arg = do
-  job <- newJob queue arg
-  jobJid job <$ pushJob client job
+-- | Individual changes to a @'Job'@ to be 'perform'ed
+data JobUpdate
+  = SetRetry Int
+  | SetQueue Queue
+  | SetJobtype String
+  | SetAt UTCTime
+  | SetIn NominalDiffTime
 
-performAt
-  :: (HasCallStack, ToJSON arg) => Client -> Queue -> UTCTime -> arg -> IO JobId
-performAt client queue time arg = do
-  job <- newJob queue arg
-  jobJid job <$ pushJob client job { jobAt = Just time }
+newtype JobOptions = JobOptions [JobUpdate]
+  deriving newtype (Semigroup, Monoid)
 
-performIn
+-- | Perform a Job with the given options
+--
+-- @
+-- 'perform' 'mempty' SomeJob
+-- 'perform' ('queue' "SomeQueue") SomeJob
+-- 'perform' 'once' SomeJob
+-- 'perform' ('at' someTime <> 'once') SomeJob
+-- 'perform' ('in_' 10 <> 'once') SomeJob
+-- 'perform' ('in_' 10 <> 'retry' 3) SomeJob
+-- @
+--
+perform
   :: (HasCallStack, ToJSON arg)
-  => Client
-  -> Queue
-  -> NominalDiffTime
+  => JobOptions
+  -> Client
   -> arg
   -> IO JobId
-performIn client queue diff arg = do
-  time <- addUTCTime diff <$> getCurrentTime
-  performAt client queue time arg
+perform options client arg = do
+  job <- applyOptions options =<< newJob arg
+  jobJid job <$ pushJob client job
 
-newJob :: ToJSON arg => Queue -> arg -> IO (Job arg)
-newJob queue arg = do
+applyOptions :: JobOptions -> Job arg -> IO (Job arg)
+applyOptions (JobOptions patches) = go patches
+ where
+  go [] job = pure job
+  go (set : sets) job = case set of
+    SetRetry n -> go sets $ job { jobRetry = n }
+    SetQueue q -> go sets $ job { jobQueue = q }
+    SetJobtype jt -> go sets $ job { jobJobtype = jt }
+    SetAt time -> go sets $ job { jobAt = Just time }
+    SetIn diff -> do
+      now <- getCurrentTime
+      go sets $ job { jobAt = Just $ addUTCTime diff now }
+
+retry :: Int -> JobOptions
+retry n = JobOptions [SetRetry n]
+
+once :: JobOptions
+once = retry 0
+
+queue :: Queue -> JobOptions
+queue q = JobOptions [SetQueue q]
+
+jobtype :: String -> JobOptions
+jobtype jt = JobOptions [SetJobtype jt]
+
+at :: UTCTime -> JobOptions
+at t = JobOptions [SetAt t]
+
+in_ :: NominalDiffTime -> JobOptions
+in_ i = JobOptions [SetIn i]
+
+newJob :: ToJSON arg => arg -> IO (Job arg)
+newJob arg = do
   -- Ruby uses 12 random hex
   jobId <- take 12 . randomRs ('a', 'z') <$> newStdGen
 
   pure Job
     { jobJid = jobId
     , jobRetry = 25
-    , jobQueue = queue
-    , jobJobtype = "Example" -- TODO
+    , jobQueue = defaultQueue
+    , jobJobtype = "Default"
     , jobAt = Nothing
     , jobArgs = pure arg
     }
 
 jobArg :: Job arg -> arg
-jobArg Job{..} = NE.head jobArgs
+jobArg Job {..} = NE.head jobArgs
 
 instance ToJSON args => ToJSON (Job args) where
    toJSON = genericToJSON $ aesonPrefix snakeCase
