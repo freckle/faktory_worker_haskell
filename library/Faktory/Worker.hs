@@ -16,7 +16,7 @@ import Data.Aeson
 import Data.Aeson.Casing
 import qualified Data.Text as T
 import Faktory.Client
-import Faktory.Job
+import Faktory.Job (Job, JobId, jobArg, jobJid)
 import Faktory.Settings
 import GHC.Generics
 import GHC.Stack
