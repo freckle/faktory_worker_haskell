@@ -52,11 +52,12 @@ newtype JobOptions = JobOptions [JobUpdate]
 -- | Perform a Job with the given options
 --
 -- @
--- 'perform' 'mempty' "queue" SomeJob
--- 'perform' 'once' "queue" SomeJob
--- 'perform' ('retry' 3 <> 'in_' 10) "queue" SomeJob
--- 'perform' ('once' <> 'at' someTime) "queue" SomeJob
--- 'perform' ('once' <> 'in_' 10) "queue" SomeJob
+-- 'perform' 'mempty' SomeJob
+-- 'perform' ('queue' "SomeQueue") SomeJob
+-- 'perform' 'once' SomeJob
+-- 'perform' ('at' someTime <> 'once') SomeJob
+-- 'perform' ('in_' 10 <> 'once') SomeJob
+-- 'perform' ('in_' 10 <> 'retry' 3) SomeJob
 -- @
 --
 perform
