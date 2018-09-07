@@ -55,13 +55,13 @@ instance ToJSON FailPayload where
    toJSON = genericToJSON $ aesonPrefix snakeCase
    toEncoding = genericToEncoding $ aesonPrefix snakeCase
 
-runWorker :: FromJSON args => Settings -> Queue -> (args -> IO ()) -> IO ()
-runWorker settings queue f = do
+runWorker :: FromJSON args => Settings -> (args -> IO ()) -> IO ()
+runWorker settings f = do
   workerId <- randomWorkerId
   client <- newClient settings $ Just workerId
   beatThreadId <- forkIOWithThrowToParent $ forever $ heartBeat client workerId
 
-  forever (processorLoop client queue f)
+  forever (processorLoop client (settingsQueue settings) f)
     `catch` (\(_ex :: WorkerHalt) -> pure ())
     `finally` (killThread beatThreadId >> closeClient client)
 

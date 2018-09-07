@@ -81,7 +81,7 @@ instance FromJSON MyJob
 workerMain = do
   settings <- envSettings
 
-  runWorker settings defaultQueue $ \job ->
+  runWorker settings $ \job ->
     -- Process your Job here
     putStrLn $ myJobMessage job
 
@@ -109,6 +109,8 @@ clientMain = do
 
 When using `envSettings`, the following variables will be used:
 
+- `FAKTORY_QUEUE`: the name of the queue to consume from. This is Worker-only,
+  for `perform`, a non-default Queue should be given by the `queue` option
 - `FAKTORY_PROVIDER`: the name of another environment variable where the
   connection string can be found. Defaults to `FAKTORY_URL`.
 - `FAKTORY_URL` (or whatever you named in `FAKTORY_PROVIDER`): connection string
