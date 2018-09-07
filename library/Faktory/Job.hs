@@ -30,7 +30,7 @@ data Job arg = Job
   , jobJobtype :: String
   , jobAt :: Maybe UTCTime
   , jobArgs :: NonEmpty arg
-  -- ^ Faktory needs to serialized args as a list, but we like a single-argument
+  -- ^ Faktory needs to serialize args as a list, but we like a single-argument
   -- interface so that's what we expose. See @'jobArg'@.
   }
   deriving Generic
