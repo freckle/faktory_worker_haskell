@@ -23,7 +23,7 @@ spec = describe "Faktory" $ do
 
     processedJobs <- newMVar ([] :: [Text])
     runWorker settings $ \job -> do
-      modifyMVar_ processedJobs $ pure . (job:)
+      modifyMVar_ processedJobs $ pure . (job :)
       when (job == "HALT") $ throw WorkerHalt
 
     jobs <- readMVar processedJobs

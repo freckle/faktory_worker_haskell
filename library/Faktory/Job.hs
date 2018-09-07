@@ -60,12 +60,7 @@ newtype JobOptions = JobOptions [JobUpdate]
 -- 'perform' ('in_' 10 <> 'retry' 3) SomeJob
 -- @
 --
-perform
-  :: (HasCallStack, ToJSON arg)
-  => JobOptions
-  -> Client
-  -> arg
-  -> IO JobId
+perform :: (HasCallStack, ToJSON arg) => JobOptions -> Client -> arg -> IO JobId
 perform options client arg = do
   job <- applyOptions options =<< newJob arg
   jobJid job <$ pushJob client job

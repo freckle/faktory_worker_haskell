@@ -21,8 +21,6 @@ main = do
   settings <- envSettings
   bracket (newClient settings Nothing) closeClient $ \client -> do
     args <- getArgs
-    jobId <- perform mempty client Job
-      { jobMessage = unwords args
-      }
+    jobId <- perform mempty client Job {jobMessage = unwords args}
 
     putStrLn $ "Pushed job: " <> show jobId

@@ -49,8 +49,7 @@ envConnectionInfo = do
 
 -- | Connect to the given @'Connection'@ as a @'Socket'@
 connect :: ConnectionInfo -> IO Connection
-connect ConnectionInfo{..} =
-  bracketOnError open connectionClose pure
+connect ConnectionInfo {..} = bracketOnError open connectionClose pure
  where
   open = do
     ctx <- initConnectionContext
@@ -58,12 +57,12 @@ connect ConnectionInfo{..} =
       { connectionHostname = connectionInfoHostName
       , connectionPort = connectionInfoPort
       , connectionUseSecure = if connectionInfoTls
-          then Just TLSSettingsSimple
-            { settingDisableCertificateValidation = False
-            , settingDisableSession = False
-            , settingUseServerName = False
-            }
-          else Nothing
+        then Just TLSSettingsSimple
+          { settingDisableCertificateValidation = False
+          , settingDisableSession = False
+          , settingUseServerName = False
+          }
+        else Nothing
       , connectionUseSocks = Nothing
       }
 
@@ -79,14 +78,15 @@ parseThrow parser name value = either err pure $ parse parser name value
     ]
 
 parseProvider :: Parser String
-parseProvider = some (upperChar <|> char '_')
-  <?> "an environment variable name"
+parseProvider =
+  some (upperChar <|> char '_') <?> "an environment variable name"
 
 parseConnection :: Parser ConnectionInfo
 parseConnection = go <?> "tcp(+tls)://(:<password>@)<host>:<port>"
  where
-  go = ConnectionInfo
-    <$> (False <$ string "tcp://" <|> True <$ string "tcp+tls://")
-    <*> optional (char ':' *> manyTill anyChar (char '@'))
-    <*> manyTill anyChar (char ':')
-    <*> (read <$> some digitChar)
+  go =
+    ConnectionInfo
+      <$> (False <$ string "tcp://" <|> True <$ string "tcp+tls://")
+      <*> optional (char ':' *> manyTill anyChar (char '@'))
+      <*> manyTill anyChar (char ':')
+      <*> (read <$> some digitChar)

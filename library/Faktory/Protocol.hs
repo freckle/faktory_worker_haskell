@@ -26,9 +26,7 @@ data Reply
   | Bulk (Maybe ByteString)
 
 readReply :: IO ByteString -> IO (Either String (Maybe ByteString))
-readReply getMore =
-  fromScanResult <$> Scanner.scanWith getMore reply BS8.empty
-
+readReply getMore = fromScanResult <$> Scanner.scanWith getMore reply BS8.empty
  where
   fromScanResult = \case
     Scanner.Fail _ msg -> Left msg
@@ -59,9 +57,7 @@ error = Error <$> line
 bulk :: Scanner Reply
 bulk = Bulk <$> do
   len <- integral
-  if len < 0
-    then return Nothing
-    else Just <$> Scanner.take len <* eol
+  if len < 0 then return Nothing else Just <$> Scanner.take len <* eol
 
 {-# INLINE integral #-}
 integral :: Integral i => Scanner i

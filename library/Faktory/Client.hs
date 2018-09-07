@@ -84,29 +84,32 @@ instance ToJSON HelloPayload where
 
 -- | Open a new @'Client'@ connection with the given @'Settings'@
 newClient :: HasCallStack => Settings -> Maybe WorkerId -> IO Client
-newClient settings@Settings{..} mWorkerId =
+newClient settings@Settings {..} mWorkerId =
   bracketOnError (connect settingsConnection) connectionClose $ \conn -> do
-    client <- Client
-      <$> newMVar conn
-      <*> pure settings
+    client <- Client <$> newMVar conn <*> pure settings
 
-    greeting <- fromJustThrows "Unexpected end of HI message" =<< recvUnsafe settings conn
-    stripped <- fromJustThrows ("Missing HI prefix: " <> show greeting) $ BSL8.stripPrefix "HI" greeting
-    HiPayload{..} <- fromJustThrows ("Failed to parse HI payload: " <> show stripped) $ decode stripped
+    greeting <-
+      fromJustThrows "Unexpected end of HI message" =<< recvUnsafe settings conn
+    stripped <-
+      fromJustThrows ("Missing HI prefix: " <> show greeting)
+        $ BSL8.stripPrefix "HI" greeting
+    HiPayload {..} <-
+      fromJustThrows ("Failed to parse HI payload: " <> show stripped)
+        $ decode stripped
 
-    when (hiVersion > expectedProtocolVersion)
-      $ settingsLogError $ concat
-        [ "Server's protocol version "
-        , show hiVersion
-        , " higher than client's expected protocol version "
-        , show expectedProtocolVersion
-        ]
+    when (hiVersion > expectedProtocolVersion) $ settingsLogError $ concat
+      [ "Server's protocol version "
+      , show hiVersion
+      , " higher than client's expected protocol version "
+      , show expectedProtocolVersion
+      ]
 
     let
       mPassword = connectionInfoPassword settingsConnection
       mHashedPassword = hashPassword <$> hiNonce <*> hiIterations <*> mPassword
 
-    helloPayload <- HelloPayload mWorkerId (show . fst $ connectionID conn)
+    helloPayload <-
+      HelloPayload mWorkerId (show . fst $ connectionID conn)
       <$> (toInteger <$> getProcessID)
       <*> pure ["haskell"]
       <*> pure expectedProtocolVersion
@@ -114,12 +117,11 @@ newClient settings@Settings{..} mWorkerId =
 
     commandOK client "HELLO" [encode helloPayload]
     pure client
- where
-  fromJustThrows message = maybe (throwString message) pure
+  where fromJustThrows message = maybe (throwString message) pure
 
 -- | Close a @'Client'@
 closeClient :: Client -> IO ()
-closeClient Client{..} = withMVar clientConnection $ \conn -> do
+closeClient Client {..} = withMVar clientConnection $ \conn -> do
   sendUnsafe clientSettings conn "END" []
   connectionClose conn
 
@@ -136,20 +138,21 @@ flush client = commandOK client "FLUSH" []
 
 -- | Send a command, read and discard the response
 command_ :: Client -> ByteString -> [ByteString] -> IO ()
-command_ Client{..} cmd args = withMVar clientConnection $ \conn -> do
+command_ Client {..} cmd args = withMVar clientConnection $ \conn -> do
   sendUnsafe clientSettings conn cmd args
   void $ recvUnsafe clientSettings conn
 
 -- | Send a command, assert the response is @OK@
 commandOK :: HasCallStack => Client -> ByteString -> [ByteString] -> IO ()
-commandOK Client{..} cmd args = withMVar clientConnection $ \conn -> do
+commandOK Client {..} cmd args = withMVar clientConnection $ \conn -> do
   sendUnsafe clientSettings conn cmd args
   response <- recvUnsafe clientSettings conn
   unless (response == Just "OK") $ throwString "Server not OK"
 
 -- | Send a command, parse the response as JSON
-commandJSON :: FromJSON a => Client -> ByteString -> [ByteString] -> IO (Maybe a)
-commandJSON Client{..} cmd args = withMVar clientConnection $ \conn -> do
+commandJSON
+  :: FromJSON a => Client -> ByteString -> [ByteString] -> IO (Maybe a)
+commandJSON Client {..} cmd args = withMVar clientConnection $ \conn -> do
   sendUnsafe clientSettings conn cmd args
   mByteString <- recvUnsafe clientSettings conn
   pure $ decode =<< mByteString
@@ -159,8 +162,8 @@ commandJSON Client{..} cmd args = withMVar clientConnection $ \conn -> do
 -- Do not use outside of @'withMVar'@, this is not threadsafe.
 --
 sendUnsafe :: Settings -> Connection -> ByteString -> [ByteString] -> IO ()
-sendUnsafe Settings{..} conn cmd args =  do
-  let bs = BSL8.unwords (cmd:args)
+sendUnsafe Settings {..} conn cmd args = do
+  let bs = BSL8.unwords (cmd : args)
   settingsLogDebug $ "> " <> show bs
   void . connectionPut conn . BSL8.toStrict $ bs <> "\n"
 
@@ -169,7 +172,7 @@ sendUnsafe Settings{..} conn cmd args =  do
 -- Do not use outside of @'withMVar'@, this is not threadsafe.
 --
 recvUnsafe :: Settings -> Connection -> IO (Maybe ByteString)
-recvUnsafe Settings{..} conn = do
+recvUnsafe Settings {..} conn = do
   eByteString <- readReply $ connectionGet conn 4096
   settingsLogDebug $ "< " <> show eByteString
 
@@ -192,11 +195,12 @@ times n f !s
 hashPassword :: Text -> Int -> String -> Text
 hashPassword nonce n password =
   T.pack
-  . show
-  . times (n - 1) hash
-  . hash
-  . T.encodeUtf8
-  $ T.pack password <> nonce
+    . show
+    . times (n - 1) hash
+    . hash
+    . T.encodeUtf8
+    $ T.pack password
+    <> nonce
  where
   -- Note that we use hash at two different types above.
   --
