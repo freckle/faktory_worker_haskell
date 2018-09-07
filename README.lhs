@@ -98,7 +98,7 @@ clientMain = do
   client <- newClient settings Nothing -- N.B. A WorkerId is not necessary if
                                        -- only pushing Jobs.
 
-  jobId <- perform mempty client defaultQueue $ MyJob "Hello world"
+  jobId <- perform mempty client $ MyJob "Hello world"
 
   print jobId
 

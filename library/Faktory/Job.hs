@@ -4,6 +4,8 @@ module Faktory.Job
   , perform
   , retry
   , once
+  , queue
+  , jobtype
   , at
   , in_
   , newJob
@@ -19,7 +21,7 @@ import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NE
 import Data.Time
 import Faktory.Client (Client, pushJob)
-import Faktory.Settings (Queue)
+import Faktory.Settings (Queue, defaultQueue)
 import GHC.Generics
 import GHC.Stack
 import System.Random
@@ -39,6 +41,8 @@ data Job arg = Job
 -- | Individual changes to a @'Job'@ to be 'perform'ed
 data JobUpdate
   = SetRetry Int
+  | SetQueue Queue
+  | SetJobtype String
   | SetAt UTCTime
   | SetIn NominalDiffTime
 
@@ -59,11 +63,10 @@ perform
   :: (HasCallStack, ToJSON arg)
   => JobOptions
   -> Client
-  -> Queue
   -> arg
   -> IO JobId
-perform options client queue arg = do
-  job <- applyOptions options =<< newJob queue arg
+perform options client arg = do
+  job <- applyOptions options =<< newJob arg
   jobJid job <$ pushJob client job
 
 applyOptions :: JobOptions -> Job arg -> IO (Job arg)
@@ -72,6 +75,8 @@ applyOptions (JobOptions patches) = go patches
   go [] job = pure job
   go (set : sets) job = case set of
     SetRetry n -> go sets $ job { jobRetry = n }
+    SetQueue q -> go sets $ job { jobQueue = q }
+    SetJobtype jt -> go sets $ job { jobJobtype = jt }
     SetAt time -> go sets $ job { jobAt = Just time }
     SetIn diff -> do
       now <- getCurrentTime
@@ -83,22 +88,28 @@ retry n = JobOptions [SetRetry n]
 once :: JobOptions
 once = retry 0
 
+queue :: Queue -> JobOptions
+queue q = JobOptions [SetQueue q]
+
+jobtype :: String -> JobOptions
+jobtype jt = JobOptions [SetJobtype jt]
+
 at :: UTCTime -> JobOptions
 at t = JobOptions [SetAt t]
 
 in_ :: NominalDiffTime -> JobOptions
 in_ i = JobOptions [SetIn i]
 
-newJob :: ToJSON arg => Queue -> arg -> IO (Job arg)
-newJob queue arg = do
+newJob :: ToJSON arg => arg -> IO (Job arg)
+newJob arg = do
   -- Ruby uses 12 random hex
   jobId <- take 12 . randomRs ('a', 'z') <$> newStdGen
 
   pure Job
     { jobJid = jobId
     , jobRetry = 25
-    , jobQueue = queue
-    , jobJobtype = "Example" -- TODO
+    , jobQueue = defaultQueue
+    , jobJobtype = "Default"
     , jobAt = Nothing
     , jobArgs = pure arg
     }
