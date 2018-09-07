@@ -22,7 +22,7 @@ spec = describe "Faktory" $ do
       void $ perform @Text mempty client "HALT"
 
     processedJobs <- newMVar ([] :: [Text])
-    runWorker settings defaultQueue $ \job -> do
+    runWorker settings $ \job -> do
       modifyMVar_ processedJobs $ pure . (job:)
       when (job == "HALT") $ throw WorkerHalt
 
