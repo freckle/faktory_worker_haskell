@@ -17,9 +17,9 @@ import Data.ByteString.Lazy (ByteString, fromStrict)
 import Data.String
 import Data.Text.Encoding (encodeUtf8)
 import Faktory.Connection
+import System.Environment (lookupEnv)
 import System.IO (hPutStrLn, stderr)
 import System.Random
-import System.Environment (lookupEnv)
 
 data Settings = Settings
   { settingsQueue :: Queue
