@@ -19,16 +19,19 @@ import Data.Text.Encoding (encodeUtf8)
 import Faktory.Connection
 import System.IO (hPutStrLn, stderr)
 import System.Random
+import System.Environment (lookupEnv)
 
 data Settings = Settings
-  { settingsConnection :: ConnectionInfo
+  { settingsQueue :: Queue
+  , settingsConnection :: ConnectionInfo
   , settingsLogDebug :: String -> IO ()
   , settingsLogError :: String -> IO ()
   }
 
 defaultSettings :: Settings
 defaultSettings = Settings
-  { settingsConnection = defaultConnectionInfo
+  { settingsQueue = defaultQueue
+  , settingsConnection = defaultConnectionInfo
   , settingsLogDebug = \_msg -> pure ()
   , settingsLogError = hPutStrLn stderr . ("[ERROR]: " <>)
   }
@@ -39,8 +42,12 @@ defaultSettings = Settings
 --
 envSettings :: IO Settings
 envSettings = do
+  mQueue <- lookupEnv "FAKTORY_QUEUE"
   connection <- envConnectionInfo
-  pure defaultSettings { settingsConnection = connection }
+  pure defaultSettings
+    { settingsQueue = maybe defaultQueue (Queue . pack) mQueue
+    , settingsConnection = connection
+    }
 
 newtype Queue = Queue Text
   deriving newtype (IsString, FromJSON, ToJSON)

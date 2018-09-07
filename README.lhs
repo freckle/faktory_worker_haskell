@@ -81,7 +81,7 @@ instance FromJSON MyJob
 workerMain = do
   settings <- envSettings
 
-  runWorker settings defaultQueue $ \job ->
+  runWorker settings $ \job ->
     -- Process your Job here
     putStrLn $ myJobMessage job
 
