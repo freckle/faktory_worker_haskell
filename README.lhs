@@ -1,6 +1,6 @@
 # faktory\_worker\_haskell
 
-[![CircleCI](https://circleci.com/gh/frontrowed/faktory_worker_haskell.svg?style=svg)](https://circleci.com/gh/frontrowed/faktory_worker_haskell) [![Maintainability](https://api.codeclimate.com/v1/badges/929bacf899fdb41cdfa7/maintainability)](https://codeclimate.com/repos/5b92d4a391eb4d0298000180/maintainability)
+[![CircleCI](https://circleci.com/gh/frontrowed/faktory_worker_haskell.svg?style=svg)](https://circleci.com/gh/frontrowed/faktory_worker_haskell)
 
 Haskell client and worker process for the Faktory background job server.
 
