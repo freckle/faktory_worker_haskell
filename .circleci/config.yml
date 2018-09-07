@@ -3,7 +3,8 @@ version: 2
 jobs:
   build:
     docker:
-      - image: fpco/stack-build:lts-11.9
+      # https://github.com/haskell-works/stack-build/blob/master/minimal/Dockerfile
+      - image: quay.io/haskell_works/stack-build-minimal
       - image: contribsys/faktory
         name: faktory
     steps:
@@ -17,6 +18,9 @@ jobs:
             - v2-{{ .Branch }}-{{ checksum "digest" }}
             - v2-{{ .Branch }}-
             - v2-master-
+      - run:
+          name: Upgrade Stack
+          command: stack upgrade
       - run:
           name: Dependencies
           command: make setup
