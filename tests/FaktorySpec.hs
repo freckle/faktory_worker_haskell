@@ -17,9 +17,9 @@ spec = describe "Faktory" $ do
     settings <- envSettings
     bracket (newClient settings Nothing) closeClient $ \client -> do
       void $ flush client
-      void $ perform @Text client defaultQueue "a"
-      void $ perform @Text client defaultQueue "b"
-      void $ perform @Text client defaultQueue "HALT"
+      void $ perform @Text mempty client defaultQueue "a"
+      void $ perform @Text mempty client defaultQueue "b"
+      void $ perform @Text mempty client defaultQueue "HALT"
 
     processedJobs <- newMVar ([] :: [Text])
     runWorker settings defaultQueue $ \job -> do

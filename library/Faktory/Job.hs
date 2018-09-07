@@ -2,9 +2,10 @@ module Faktory.Job
   ( Job
   , JobId
   , perform
-  , performAt
-  , performIn
-  , performOnce
+  , retry
+  , once
+  , at
+  , in_
   , newJob
   , jobJid
   , jobArg
@@ -35,51 +36,58 @@ data Job arg = Job
   }
   deriving Generic
 
-perform :: (HasCallStack, ToJSON arg) => Client -> Queue -> arg -> IO JobId
-perform = performWith id
+-- | Individual changes to a @'Job'@ to be 'perform'ed
+data JobUpdate
+  = SetRetry Int
+  | SetAt UTCTime
+  | SetIn NominalDiffTime
 
--- | Perform the Job at the given time
-performAt
-  :: (HasCallStack, ToJSON arg) => UTCTime -> Client -> Queue -> arg -> IO JobId
-performAt time = performWith $ \job -> job { jobAt = Just time }
+newtype JobOptions = JobOptions [JobUpdate]
+  deriving newtype (Semigroup, Monoid)
 
--- | Perform the Job in some time, given as a @'NominalDiffTime'@
-performIn
+-- | Perform a Job with the given options
+--
+-- @
+-- 'perform' 'mempty' "queue" SomeJob
+-- 'perform' 'once' "queue" SomeJob
+-- 'perform' ('retry' 3 <> 'in_' 10) "queue" SomeJob
+-- 'perform' ('once' <> 'at' someTime) "queue" SomeJob
+-- 'perform' ('once' <> 'in_' 10) "queue" SomeJob
+-- @
+--
+perform
   :: (HasCallStack, ToJSON arg)
-  => NominalDiffTime
+  => JobOptions
   -> Client
   -> Queue
   -> arg
   -> IO JobId
-performIn diff = performWithM $ \job -> do
-  time <- addUTCTime diff <$> getCurrentTime
-  pure job { jobAt = Just time }
-
--- | Perform the Job with 0 retries
-performOnce :: (HasCallStack, ToJSON arg) => Client -> Queue -> arg -> IO JobId
-performOnce = performWith $ \job -> job { jobRetry = 0 }
-
-performWith
-  :: (HasCallStack, ToJSON arg)
-  => (Job arg -> Job arg)
-  -> Client
-  -> Queue
-  -> arg
-  -> IO JobId
-performWith f client queue arg = do
-  job <- f <$> newJob queue arg
+perform options client queue arg = do
+  job <- applyOptions options =<< newJob queue arg
   jobJid job <$ pushJob client job
 
-performWithM
-  :: (HasCallStack, ToJSON arg)
-  => (Job arg -> IO (Job arg))
-  -> Client
-  -> Queue
-  -> arg
-  -> IO JobId
-performWithM f client queue arg = do
-  job <- f =<< newJob queue arg
-  jobJid job <$ pushJob client job
+applyOptions :: JobOptions -> Job arg -> IO (Job arg)
+applyOptions (JobOptions patches) = go patches
+ where
+  go [] job = pure job
+  go (set : sets) job = case set of
+    SetRetry n -> go sets $ job { jobRetry = n }
+    SetAt time -> go sets $ job { jobAt = Just time }
+    SetIn diff -> do
+      now <- getCurrentTime
+      go sets $ job { jobAt = Just $ addUTCTime diff now }
+
+retry :: Int -> JobOptions
+retry n = JobOptions [SetRetry n]
+
+once :: JobOptions
+once = retry 0
+
+at :: UTCTime -> JobOptions
+at t = JobOptions [SetAt t]
+
+in_ :: NominalDiffTime -> JobOptions
+in_ i = JobOptions [SetIn i]
 
 newJob :: ToJSON arg => Queue -> arg -> IO (Job arg)
 newJob queue arg = do
@@ -96,7 +104,7 @@ newJob queue arg = do
     }
 
 jobArg :: Job arg -> arg
-jobArg Job{..} = NE.head jobArgs
+jobArg Job {..} = NE.head jobArgs
 
 instance ToJSON args => ToJSON (Job args) where
    toJSON = genericToJSON $ aesonPrefix snakeCase
