@@ -45,12 +45,18 @@ conf_errorHandling:
 conf_preprocessor:
   ppconf_CPPMode: CPPModeAbort
   ppconf_hackAroundIncludes: false
+conf_obfuscate: false
+conf_roundtrip_exactprint_only: false
 conf_version: 1
 conf_layout:
+  lconfig_reformatModulePreamble: false
   lconfig_altChooser:
     tag: AltChooserBoundedSearch
     contents: 3
+  lconfig_allowSingleLineExportList: false
   lconfig_importColumn: 60
+  lconfig_hangingTypeSignature: false
+  lconfig_importAsColumn: 50
   lconfig_alignmentLimit: 1
   lconfig_indentListSpecial: true
   lconfig_indentAmount: 2
