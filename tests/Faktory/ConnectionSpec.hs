@@ -13,11 +13,7 @@ spec :: Spec
 spec = do
   describe "envConnectionInfo" $ do
     it "returns default settings in an empty environment" $ do
-      let
-        env =
-          [ ("FAKTORY_PROVIDER", Nothing)
-          , ("FAKTORY_URL", Nothing)
-          ]
+      let env = [("FAKTORY_PROVIDER", Nothing), ("FAKTORY_URL", Nothing)]
 
       withEnvironment env $ do
         connection <- envConnectionInfo
@@ -26,12 +22,10 @@ spec = do
     it "parses the provided URL" $ do
       let
         env =
-          [ ("FAKTORY_PROVIDER", Nothing)
-          , ("FAKTORY_URL", Just "tcp://foo:123")
-          ]
+          [("FAKTORY_PROVIDER", Nothing), ("FAKTORY_URL", Just "tcp://foo:123")]
 
       withEnvironment env $ do
-        ConnectionInfo{..} <- envConnectionInfo
+        ConnectionInfo {..} <- envConnectionInfo
         connectionInfoTls `shouldBe` False
         connectionInfoPassword `shouldBe` Nothing
         connectionInfoHostName `shouldBe` "foo"
@@ -45,7 +39,7 @@ spec = do
           ]
 
       withEnvironment env $ do
-        ConnectionInfo{..} <- envConnectionInfo
+        ConnectionInfo {..} <- envConnectionInfo
         connectionInfoTls `shouldBe` True
         connectionInfoPassword `shouldBe` Just "foo"
         connectionInfoHostName `shouldBe` "bar"
@@ -59,7 +53,7 @@ spec = do
           ]
 
       withEnvironment env $ do
-        ConnectionInfo{..} <- envConnectionInfo
+        ConnectionInfo {..} <- envConnectionInfo
         connectionInfoHostName `shouldBe` "foo"
         connectionInfoPort `shouldBe` 123
 
@@ -88,9 +82,7 @@ spec = do
 
       let
         env =
-          [ ("FAKTORY_PROVIDER", Just "MISSING_URL")
-          , ("MISSING_URL", Nothing)
-          ]
+          [("FAKTORY_PROVIDER", Just "MISSING_URL"), ("MISSING_URL", Nothing)]
 
       withEnvironment env envConnectionInfo `shouldThrowMessage` "..."
 
@@ -112,5 +104,5 @@ withEnvironment env act = bracket
     pure (variable, mOriginalValue)
 
 shouldThrowMessage :: IO a -> String -> Expectation
-shouldThrowMessage act msg = act `shouldThrow` \ex ->
-  msg `isInfixOf` show @SomeException ex
+shouldThrowMessage act msg =
+  act `shouldThrow` \ex -> msg `isInfixOf` show @SomeException ex

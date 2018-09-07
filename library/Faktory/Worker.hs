@@ -76,10 +76,11 @@ processorLoop client queue f = do
 
   case mJob of
     Just job ->
-      processAndAck job `catches`
-        [ Handler $ \(ex :: WorkerHalt) -> throw ex
-        , Handler $ \(ex :: SomeException) -> failJob client job $ T.pack $ show ex
-        ]
+      processAndAck job
+        `catches` [ Handler $ \(ex :: WorkerHalt) -> throw ex
+                  , Handler $ \(ex :: SomeException) ->
+                    failJob client job $ T.pack $ show ex
+                  ]
     Nothing -> threadDelaySeconds 1
 
 -- | <https://github.com/contribsys/faktory/wiki/Worker-Lifecycle#heartbeat>
@@ -92,8 +93,7 @@ fetchJob :: FromJSON args => Client -> Queue -> IO (Maybe (Job args))
 fetchJob client queue = commandJSON client "FETCH" [queueArg queue]
 
 ackJob :: HasCallStack => Client -> Job args -> IO ()
-ackJob client job =
-  commandOK client "ACK" [encode $ AckPayload $ jobJid job]
+ackJob client job = commandOK client "ACK" [encode $ AckPayload $ jobJid job]
 
 failJob :: HasCallStack => Client -> Job args -> Text -> IO ()
 failJob client job message =
