@@ -61,27 +61,28 @@ runWorker settings f = do
   client <- newClient settings $ Just workerId
   beatThreadId <- forkIOWithThrowToParent $ forever $ heartBeat client workerId
 
-  forever (processorLoop client (settingsQueue settings) f)
+  forever (processorLoop client settings f)
     `catch` (\(_ex :: WorkerHalt) -> pure ())
     `finally` (killThread beatThreadId >> closeClient client)
 
-processorLoop :: FromJSON arg => Client -> Queue -> (arg -> IO ()) -> IO ()
-processorLoop client queue f = do
+processorLoop :: FromJSON arg => Client -> Settings -> (arg -> IO ()) -> IO ()
+processorLoop client settings f = do
   let
     processAndAck job = do
       f $ jobArg job
       ackJob client job
 
-  mJob <- fetchJob client queue
+  emJob <- fetchJob client $ settingsQueue settings
 
-  case mJob of
-    Just job ->
+  case emJob of
+    Left err -> settingsLogError settings $ "Invalid Job: " <> err
+    Right Nothing -> threadDelaySeconds 1
+    Right (Just job) ->
       processAndAck job
         `catches` [ Handler $ \(ex :: WorkerHalt) -> throw ex
                   , Handler $ \(ex :: SomeException) ->
                     failJob client job $ T.pack $ show ex
                   ]
-    Nothing -> threadDelaySeconds 1
 
 -- | <https://github.com/contribsys/faktory/wiki/Worker-Lifecycle#heartbeat>
 heartBeat :: Client -> WorkerId -> IO ()
@@ -89,7 +90,8 @@ heartBeat client workerId = do
   threadDelaySeconds 25
   command_ client "BEAT" [encode $ BeatPayload workerId]
 
-fetchJob :: FromJSON args => Client -> Queue -> IO (Maybe (Job args))
+fetchJob
+  :: FromJSON args => Client -> Queue -> IO (Either String (Maybe (Job args)))
 fetchJob client queue = commandJSON client "FETCH" [queueArg queue]
 
 ackJob :: HasCallStack => Client -> Job args -> IO ()
