@@ -34,6 +34,7 @@ spec = describe "Faktory" $ do
     bracket (newClient settings Nothing) closeClient $ \client -> do
       void $ flush client
       void $ perform @Text once client "a"
+      void $ perform @Text (retry 0) client "b"
       void $ perform @Text mempty client "HALT"
 
     processedJobs <- newMVar ([] :: [Text])
@@ -42,4 +43,4 @@ spec = describe "Faktory" $ do
       when (job == "HALT") $ throw WorkerHalt
 
     jobs <- readMVar processedJobs
-    jobs `shouldMatchList` ["a", "HALT"]
+    jobs `shouldMatchList` ["a", "b", "HALT"]
