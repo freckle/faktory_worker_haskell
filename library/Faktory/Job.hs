@@ -21,20 +21,20 @@ import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NE
 import Data.Time
 import Faktory.Client (Client, pushJob)
-import Faktory.Settings (Queue, defaultQueue)
+import Faktory.Settings (Queue)
 import GHC.Generics
 import GHC.Stack
 import System.Random
 
 data Job arg = Job
   { jobJid :: JobId
-  , jobRetry :: Int
-  , jobQueue :: Queue
   , jobJobtype :: String
-  , jobAt :: Maybe UTCTime
   , jobArgs :: NonEmpty arg
   -- ^ Faktory needs to serialize args as a list, but we like a single-argument
   -- interface so that's what we expose. See @'jobArg'@.
+  , jobRetry :: Maybe Int
+  , jobQueue :: Maybe Queue
+  , jobAt :: Maybe UTCTime
   }
   deriving Generic
 
@@ -70,8 +70,8 @@ applyOptions (JobOptions patches) = go patches
  where
   go [] job = pure job
   go (set : sets) job = case set of
-    SetRetry n -> go sets $ job { jobRetry = n }
-    SetQueue q -> go sets $ job { jobQueue = q }
+    SetRetry n -> go sets $ job { jobRetry = Just n }
+    SetQueue q -> go sets $ job { jobQueue = Just q }
     SetJobtype jt -> go sets $ job { jobJobtype = jt }
     SetAt time -> go sets $ job { jobAt = Just time }
     SetIn diff -> do
@@ -103,11 +103,11 @@ newJob arg = do
 
   pure Job
     { jobJid = jobId
-    , jobRetry = 25
-    , jobQueue = defaultQueue
     , jobJobtype = "Default"
-    , jobAt = Nothing
     , jobArgs = pure arg
+    , jobRetry = Nothing
+    , jobQueue = Nothing
+    , jobAt = Nothing
     }
 
 jobArg :: Job arg -> arg
