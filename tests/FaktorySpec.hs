@@ -28,3 +28,18 @@ spec = describe "Faktory" $ do
 
     jobs <- readMVar processedJobs
     jobs `shouldMatchList` ["a", "b", "HALT"]
+
+  it "can push jobs with optional attributes" $ do
+    settings <- envSettings
+    bracket (newClient settings Nothing) closeClient $ \client -> do
+      void $ flush client
+      void $ perform @Text once client "a"
+      void $ perform @Text mempty client "HALT"
+
+    processedJobs <- newMVar ([] :: [Text])
+    runWorker settings $ \job -> do
+      modifyMVar_ processedJobs $ pure . (job :)
+      when (job == "HALT") $ throw WorkerHalt
+
+    jobs <- readMVar processedJobs
+    jobs `shouldMatchList` ["a", "HALT"]
