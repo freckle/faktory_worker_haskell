@@ -81,8 +81,9 @@ applyOptions (JobOptions patches) = go patches
 retry :: Int -> JobOptions
 retry n = JobOptions [SetRetry n]
 
+-- | Eqivalent to @'retry' (-1)@: no retries, and move to Dead on failure
 once :: JobOptions
-once = retry 0
+once = retry (-1)
 
 queue :: Queue -> JobOptions
 queue q = JobOptions [SetQueue q]
