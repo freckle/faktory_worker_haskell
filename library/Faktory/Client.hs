@@ -151,11 +151,15 @@ commandOK Client {..} cmd args = withMVar clientConnection $ \conn -> do
 
 -- | Send a command, parse the response as JSON
 commandJSON
-  :: FromJSON a => Client -> ByteString -> [ByteString] -> IO (Maybe a)
+  :: FromJSON a
+  => Client
+  -> ByteString
+  -> [ByteString]
+  -> IO (Either String (Maybe a))
 commandJSON Client {..} cmd args = withMVar clientConnection $ \conn -> do
   sendUnsafe clientSettings conn cmd args
   mByteString <- recvUnsafe clientSettings conn
-  pure $ decode =<< mByteString
+  pure $ traverse eitherDecode mByteString
 
 -- | Send a command to the Server socket
 --
