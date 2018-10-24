@@ -76,7 +76,7 @@ processorLoop client settings f = do
 
   case emJob of
     Left err -> settingsLogError settings $ "Invalid Job: " <> err
-    Right Nothing -> threadDelaySeconds 1
+    Right Nothing -> threadDelaySeconds $ settingsWorkerIdleDelay settings
     Right (Just job) ->
       processAndAck job
         `catches` [ Handler $ \(ex :: WorkerHalt) -> throw ex

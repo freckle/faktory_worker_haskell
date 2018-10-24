@@ -26,6 +26,7 @@ data Settings = Settings
   , settingsConnection :: ConnectionInfo
   , settingsLogDebug :: String -> IO ()
   , settingsLogError :: String -> IO ()
+  , settingsWorkerIdleDelay :: Int
   }
 
 defaultSettings :: Settings
@@ -34,6 +35,7 @@ defaultSettings = Settings
   , settingsConnection = defaultConnectionInfo
   , settingsLogDebug = \_msg -> pure ()
   , settingsLogError = hPutStrLn stderr . ("[ERROR]: " <>)
+  , settingsWorkerIdleDelay = 1
   }
 
 -- | Defaults, but read @'Connection'@ from the environment
