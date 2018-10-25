@@ -113,7 +113,7 @@ tests:
   hspec:
     main: Spec.hs
     source-dirs: tests
-    ghc-options: -rtsopts -O0
+    ghc-options: -rtsopts --disable-optimizations
     dependencies:
       - faktory
       - hspec
