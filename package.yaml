@@ -38,7 +38,7 @@ description: |
 
   This package contains only the `Client` and `Worker`.
 
-extra-source-files:
+extra-doc-files:
   - CHANGELOG.md
   - README.md
 
