@@ -42,7 +42,7 @@ extra-doc-files:
   - CHANGELOG.md
   - README.md
 
-tested-with: GHC==8.4.3, GHC==8.2.2, GHC==8.0.2
+tested-with: GHC==8.4.3
 
 ghc-options: -Wall
 
