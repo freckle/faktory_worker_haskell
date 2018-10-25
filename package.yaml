@@ -44,7 +44,16 @@ extra-doc-files:
 
 tested-with: GHC==8.4.3
 
-ghc-options: -Wall
+ghc-options:
+  -Weverything
+  -Wno-missing-exported-signatures
+  -Wno-missed-specialisations
+  -Wno-all-missed-specialisations
+  -Wno-unsafe
+  -Wno-safe
+  -Wno-missing-local-signatures
+  -Wno-monomorphism-restriction
+  -Wno-missing-import-lists
 
 dependencies:
   - base >= 4.11 && < 5
@@ -121,7 +130,7 @@ tests:
   readme:
     main: README.lhs
     source-dirs: .
-    ghc-options: -Wall -pgmL markdown-unlit
+    ghc-options: -pgmL markdown-unlit
     dependencies:
       - aeson
       - base

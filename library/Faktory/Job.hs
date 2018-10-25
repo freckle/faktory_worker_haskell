@@ -97,7 +97,7 @@ at t = JobOptions [SetAt t]
 in_ :: NominalDiffTime -> JobOptions
 in_ i = JobOptions [SetIn i]
 
-newJob :: ToJSON arg => arg -> IO (Job arg)
+newJob :: arg -> IO (Job arg)
 newJob arg = do
   -- Ruby uses 12 random hex
   jobId <- take 12 . randomRs ('a', 'z') <$> newStdGen
