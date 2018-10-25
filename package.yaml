@@ -7,6 +7,36 @@ maintainer: pbrisbin@freckle.com
 copyright: 2018 Freckle Education
 license: MIT
 github: frontrowed/faktory_worker_haskell
+synoposis: Faktory Worker for Haskell
+description: |
+  Haskell client and worker process for the Faktory background job server.
+
+  == Architecture overview
+
+  @
+  |                        +--------------------+
+  |                        |                    |
+  |                        |     Faktory        |
+  |                        |     Server         |
+  |         +---------->>>>|                    +>>>>--------+
+  |         |              |                    |            |
+  |         |              |                    |            |
+  |         |              +--------------------+            |
+  | +-----------------+                            +-------------------+
+  | |                 |                            |                   |
+  | |    Client       |                            |     Worker        |
+  | |    pushes       |                            |     pulls         |
+  | |     jobs        |                            |      jobs         |
+  | |                 |                            |                   |
+  | |                 |                            |                   |
+  | +-----------------+                            +-------------------+
+  @
+
+  * `Client` - an API any process can use to push jobs to the Faktory server.
+  * `Worker` - a process that pulls jobs from Faktory and executes them.
+  * `Server` - the Faktory daemon which stores background jobs in queues to be processed by Workers.
+
+  This package contains only the `Client` and `Worker`.
 
 extra-source-files:
   - CHANGELOG.md
