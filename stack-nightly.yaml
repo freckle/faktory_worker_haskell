@@ -1,0 +1,4 @@
+# Indicates last update, must be overridden by --resolver
+resolver: nightly-2018-12-05
+extra-deps:
+  - megaparsec-6.5.0@sha256:a1dfed92863607ea9f7609a0578d486761a052a4d01aaff95b90f25da2564346
