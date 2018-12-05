@@ -22,3 +22,7 @@ lint:
 .PHONY: clean
 clean:
 	stack clean
+
+.PHONY: check-nightly
+check-nightly: STACK_ARGUMENTS=--stack-yaml stack-nightly.yaml --resolver nightly
+check-nightly: setup build test
