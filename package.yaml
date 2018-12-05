@@ -2,8 +2,8 @@
 name: faktory
 version: 0.1.0.0
 category: Network
-author: Pat Brisbin
-maintainer: pbrisbin@freckle.com
+author: Freckle Engineering
+maintainer: engineering@freckle.com
 copyright: 2018 Freckle Education
 license: MIT
 github: frontrowed/faktory_worker_haskell
