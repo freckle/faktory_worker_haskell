@@ -40,7 +40,7 @@ description: |
 
 extra-doc-files:
   - CHANGELOG.md
-  - README.md
+  - README.lhs
 
 tested-with: GHC==8.4.3
 
