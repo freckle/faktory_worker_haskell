@@ -42,9 +42,10 @@ extra-doc-files:
   - CHANGELOG.md
   - README.lhs
 
-tested-with:
-  - GHC==8.4.4
-  - GHC==8.6.3
+# TODO: figuer out syntax here
+# tested-with:
+#   - GHC==8.4.4
+#   - GHC==8.6.3
 
 ghc-options:
   -Weverything
