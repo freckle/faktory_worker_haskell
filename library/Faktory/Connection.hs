@@ -7,13 +7,23 @@ module Faktory.Connection
 
 import Faktory.Prelude
 
+import Control.Applicative ((<|>))
 import Data.Maybe (fromMaybe)
 import Data.Void
 import Network.Connection
 import Network.Socket (HostName, PortNumber)
 import System.Environment (lookupEnv)
 import Text.Megaparsec
-import Text.Megaparsec.Char
+  ( Parsec
+  , anySingle
+  , errorBundlePretty
+  , manyTill
+  , optional
+  , parse
+  , some
+  , (<?>)
+  )
+import Text.Megaparsec.Char (char, digitChar, string, upperChar)
 
 data ConnectionInfo = ConnectionInfo
   { connectionInfoTls :: Bool
@@ -74,7 +84,7 @@ parseThrow parser name value = either err pure $ parse parser name value
   err ex = throwIO . userError $ unlines
     [ ""
     , "\"" <> value <> "\" is an invalid value for " <> name <> ":"
-    , parseErrorPretty ex
+    , errorBundlePretty ex
     ]
 
 parseProvider :: Parser String
@@ -87,6 +97,6 @@ parseConnection = go <?> "tcp(+tls)://(:<password>@)<host>:<port>"
   go =
     ConnectionInfo
       <$> (False <$ string "tcp://" <|> True <$ string "tcp+tls://")
-      <*> optional (char ':' *> manyTill anyChar (char '@'))
-      <*> manyTill anyChar (char ':')
+      <*> optional (char ':' *> manyTill anySingle (char '@'))
+      <*> manyTill anySingle (char ':')
       <*> (read <$> some digitChar)
