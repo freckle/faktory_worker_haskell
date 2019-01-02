@@ -1,25 +1,28 @@
 ---
 version: 2
-jobs:
-  build:
+
+references:
+  stack_build: &stack_build
     docker:
       # https://github.com/haskell-works/stack-build/blob/master/minimal/Dockerfile
       - image: quay.io/haskell_works/stack-build-minimal
       - image: contribsys/faktory:0.9.0
         name: faktory
-    environment:
-      STACK_ARGUMENTS: --no-terminal
     steps:
       - checkout
       - run:
           name: Digest
           command: |
+            {
+              stack --version
+              echo -- "$STACK_YAML/$STACK_ARGUMENTS"
+            } > rdigest
             git ls-files | xargs md5sum > digest
       - restore_cache:
           keys:
-            - v2-{{ .Branch }}-{{ checksum "digest" }}
-            - v2-{{ .Branch }}-
-            - v2-master-
+            - v3-{{ .Branch }}-{{ checksum "rdigest" }}-{{ checksum "digest" }}
+            - v3-{{ .Branch }}-
+            - v3-master-
       - run:
           name: Upgrade Stack
           command: stack upgrade
@@ -30,7 +33,8 @@ jobs:
           name: Build
           command: make build
       - save_cache:
-          key: v2-{{ .Branch }}-{{ checksum "digest" }}
+          # yamllint disable-line rule:line-length
+          key: v3-{{ .Branch }}-{{ checksum "rdigest" }}-{{ checksum "digest" }}
           paths:
             - ~/.stack
             - ./.stack-work
@@ -42,3 +46,25 @@ jobs:
           command: make test
           environment:
             FAKTORY_URL: tcp://faktory:7419
+
+jobs:
+  build:
+    <<: *stack_build
+  build_8.4.4:
+    <<: *stack_build
+    environment:
+      STACK_ARGUMENTS: --no-terminal
+      STACK_YAML: stack-lts-12.21.yaml
+  build_8.6.3:
+    <<: *stack_build
+    environment:
+      STACK_ARGUMENTS: --no-terminal
+      STACK_YAML: stack-lts-13.1.yaml
+
+workflows:
+  version: 2
+  commit:
+    jobs:
+      - build
+      - build_8.4.4
+      - build_8.6.3
