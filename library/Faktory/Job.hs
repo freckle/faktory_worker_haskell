@@ -1,6 +1,7 @@
 module Faktory.Job
   ( Job
   , JobId
+  , JobOptions
   , perform
   , retry
   , once
@@ -46,6 +47,10 @@ data JobUpdate
   | SetAt UTCTime
   | SetIn NominalDiffTime
 
+-- | Options for the execution of a job
+--
+-- See @'perform'@ for more details.
+--
 newtype JobOptions = JobOptions [JobUpdate]
   deriving newtype (Semigroup, Monoid)
 

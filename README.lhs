@@ -35,7 +35,8 @@ This package contains only the client and worker parts. The server part is
 
 ## Installation
 
-TODO.
+- Hackage: http://hackage.haskell.org/package/faktory
+- Stackage: *Coming soon*
 
 ## Documentation
 
