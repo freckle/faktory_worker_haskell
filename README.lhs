@@ -38,9 +38,9 @@ This package contains only the client and worker parts. The server part is
 - Hackage: http://hackage.haskell.org/package/faktory
 - Stackage: *Coming soon*
 
-## Documentation
+## Faktory Documentation
 
-See the [wiki](//github.com/contribsys/faktory_worker_ruby/wiki) for more
+See the [wiki](//github.com/contribsys/faktory/wiki) for more
 details.
 
 ## Usage
