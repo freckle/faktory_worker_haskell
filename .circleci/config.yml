@@ -20,9 +20,9 @@ references:
             git ls-files | xargs md5sum > digest
       - restore_cache:
           keys:
-            - v3-{{ .Branch }}-{{ checksum "rdigest" }}-{{ checksum "digest" }}
-            - v3-{{ .Branch }}-
-            - v3-master-
+            - v4-{{ .Branch }}-{{ checksum "rdigest" }}-{{ checksum "digest" }}
+            - v4-{{ .Branch }}-
+            - v4-master-
       - run:
           name: Upgrade Stack
           command: stack upgrade
@@ -34,7 +34,7 @@ references:
           command: make build
       - save_cache:
           # yamllint disable-line rule:line-length
-          key: v3-{{ .Branch }}-{{ checksum "rdigest" }}-{{ checksum "digest" }}
+          key: v4-{{ .Branch }}-{{ checksum "rdigest" }}-{{ checksum "digest" }}
           paths:
             - ~/.stack
             - ./.stack-work
