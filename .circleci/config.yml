@@ -21,7 +21,9 @@ references:
       - restore_cache:
           keys:
             - v4-{{ .Branch }}-{{ checksum "rdigest" }}-{{ checksum "digest" }}
+            - v4-{{ .Branch }}-{{ checksum "rdigest" }}-
             - v4-{{ .Branch }}-
+            - v4-master-{{ checksum "rdigest" }}-
             - v4-master-
       - run:
           name: Upgrade Stack
