@@ -37,7 +37,7 @@ data Job arg = Job
   , jobQueue :: Maybe Queue
   , jobAt :: Maybe UTCTime
   }
-  deriving Generic
+  deriving stock Generic
 
 -- | Individual changes to a @'Job'@ to be 'perform'ed
 data JobUpdate
@@ -120,10 +120,10 @@ jobArg :: Job arg -> arg
 jobArg Job {..} = NE.head jobArgs
 
 instance ToJSON args => ToJSON (Job args) where
-   toJSON = genericToJSON $ aesonPrefix snakeCase
-   toEncoding = genericToEncoding $ aesonPrefix snakeCase
+  toJSON = genericToJSON $ aesonPrefix snakeCase
+  toEncoding = genericToEncoding $ aesonPrefix snakeCase
 
 instance FromJSON args => FromJSON (Job args) where
-   parseJSON = genericParseJSON $ aesonPrefix snakeCase
+  parseJSON = genericParseJSON $ aesonPrefix snakeCase
 
 type JobId = String

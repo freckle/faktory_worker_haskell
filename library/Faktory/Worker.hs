@@ -23,25 +23,26 @@ import GHC.Stack
 
 -- | If processing functions @'throw'@ this, @'runWorker'@ will exit
 data WorkerHalt = WorkerHalt
-  deriving (Eq, Show, Exception)
+  deriving stock (Eq, Show)
+  deriving anyclass Exception
 
 newtype BeatPayload = BeatPayload
   { _bpWid :: WorkerId
   }
-  deriving Generic
+  deriving stock Generic
 
 instance ToJSON BeatPayload where
-   toJSON = genericToJSON $ aesonPrefix snakeCase
-   toEncoding = genericToEncoding $ aesonPrefix snakeCase
+  toJSON = genericToJSON $ aesonPrefix snakeCase
+  toEncoding = genericToEncoding $ aesonPrefix snakeCase
 
 newtype AckPayload = AckPayload
   { _apJid :: JobId
   }
-  deriving Generic
+  deriving stock Generic
 
 instance ToJSON AckPayload where
-   toJSON = genericToJSON $ aesonPrefix snakeCase
-   toEncoding = genericToEncoding $ aesonPrefix snakeCase
+  toJSON = genericToJSON $ aesonPrefix snakeCase
+  toEncoding = genericToEncoding $ aesonPrefix snakeCase
 
 data FailPayload = FailPayload
   { _fpMessage :: Text
@@ -49,11 +50,11 @@ data FailPayload = FailPayload
   , _fpJid :: JobId
   , _fpBacktrace :: [String]
   }
-  deriving Generic
+  deriving stock Generic
 
 instance ToJSON FailPayload where
-   toJSON = genericToJSON $ aesonPrefix snakeCase
-   toEncoding = genericToEncoding $ aesonPrefix snakeCase
+  toJSON = genericToJSON $ aesonPrefix snakeCase
+  toEncoding = genericToEncoding $ aesonPrefix snakeCase
 
 runWorker :: FromJSON args => Settings -> (args -> IO ()) -> IO ()
 runWorker settings f = do

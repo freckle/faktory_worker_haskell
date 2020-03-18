@@ -94,9 +94,9 @@ library:
     - bytestring >= 0.1 && < 1
     - connection >= 0.2 && < 1
     - cryptonite >= 0.2 && < 1
-    - megaparsec >= 7 && < 8
+    - megaparsec >= 7 && < 8.1
     - memory >= 0.1 && < 1
-    - network >= 2.6 && < 3
+    - network >= 2.6 && < 3.2
     - random >= 1.1 && < 2
     - safe-exceptions >= 0.1 && < 1
     - scanner >= 0.2 && < 1

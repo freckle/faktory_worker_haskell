@@ -60,6 +60,11 @@ jobs:
     environment:
       STACK_ARGUMENTS: --no-terminal
       STACK_YAML: stack-lts-13.1.yaml
+  build_8.8.2:
+    <<: *stack_build
+    environment:
+      STACK_ARGUMENTS: --no-terminal
+      STACK_YAML: stack-lts-15.3.yaml
 
 workflows:
   version: 2
@@ -68,3 +73,4 @@ workflows:
       - build
       - build_8.4.4
       - build_8.6.3
+      - build_8.8.2

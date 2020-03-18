@@ -10,8 +10,8 @@ import GHC.Generics
 
 -- | Must match examples/producer
 newtype Job = Job { jobMessage :: String }
-  deriving Generic
-instance FromJSON Job
+  deriving stock Generic
+  deriving anyclass FromJSON
 
 main :: IO ()
 main = do

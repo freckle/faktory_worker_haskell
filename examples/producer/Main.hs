@@ -4,7 +4,6 @@ import Prelude
 
 import Control.Exception.Safe
 import Data.Aeson
-import Data.Semigroup ((<>))
 import Faktory.Client
 import Faktory.Job (perform)
 import Faktory.Settings
@@ -13,14 +12,14 @@ import System.Environment (getArgs)
 
 -- | Must match examples/consumer
 newtype Job = Job { jobMessage :: String }
-  deriving Generic
-instance ToJSON Job
+  deriving stock Generic
+  deriving anyclass ToJSON
 
 main :: IO ()
 main = do
   settings <- envSettings
   bracket (newClient settings Nothing) closeClient $ \client -> do
     args <- getArgs
-    jobId <- perform mempty client Job {jobMessage = unwords args}
+    jobId <- perform mempty client Job { jobMessage = unwords args }
 
     putStrLn $ "Pushed job: " <> show jobId
