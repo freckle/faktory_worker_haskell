@@ -48,8 +48,6 @@ extra-doc-files:
 #   - GHC==8.6.3
 
 ghc-options:
-  -ddump-to-file
-  -ddump-hi
   -Weverything
   -Wno-missing-exported-signatures
   -Wno-missed-specialisations
