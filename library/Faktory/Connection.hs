@@ -31,7 +31,7 @@ data ConnectionInfo = ConnectionInfo
   , connectionInfoHostName :: HostName
   , connectionInfoPort :: PortNumber
   }
-  deriving (Eq, Show)
+  deriving stock (Eq, Show)
 
 defaultConnectionInfo :: ConnectionInfo
 defaultConnectionInfo = ConnectionInfo

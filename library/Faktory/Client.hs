@@ -23,7 +23,6 @@ import Data.Aeson
 import Data.ByteArray (ByteArrayAccess)
 import Data.ByteString.Lazy (ByteString, fromStrict)
 import qualified Data.ByteString.Lazy.Char8 as BSL8
-import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import Faktory.Connection (connect)

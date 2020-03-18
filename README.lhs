@@ -72,10 +72,8 @@ Any value can be a "Job" that is pushed and pulled to and from Faktory via its
 newtype MyJob = MyJob
   { myJobMessage :: String
   }
-  deriving (Generic)
-
-instance ToJSON MyJob
-instance FromJSON MyJob
+  deriving stock Generic
+  deriving anyclass (ToJSON, FromJSON)
 ```
 
 ### Worker
