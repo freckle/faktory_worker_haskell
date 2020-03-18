@@ -147,7 +147,10 @@ commandOK :: HasCallStack => Client -> ByteString -> [ByteString] -> IO ()
 commandOK Client {..} cmd args = withMVar clientConnection $ \conn -> do
   sendUnsafe clientSettings conn cmd args
   response <- recvUnsafe clientSettings conn
-  unless (response == Just "OK") $ throwString "Server not OK"
+  unless (response == Just "OK")
+    $ throwString
+    $ "Server not OK. Reply was: "
+    <> show response
 
 -- | Send a command, parse the response as JSON
 commandJSON
