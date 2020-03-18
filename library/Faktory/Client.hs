@@ -47,11 +47,8 @@ data HiPayload = HiPayload
   }
 
 instance FromJSON HiPayload where
-  parseJSON = withObject "HiPayload" $ \o ->
-    HiPayload
-      <$> o .: "v"
-      <*> o .:? "s"
-      <*> o .:? "i"
+  parseJSON = withObject "HiPayload"
+    $ \o -> HiPayload <$> o .: "v" <*> o .:? "s" <*> o .:? "i"
 
 data HelloPayload = HelloPayload
   { helloWorkerId :: Maybe WorkerId
@@ -63,24 +60,22 @@ data HelloPayload = HelloPayload
   }
 
 instance ToJSON HelloPayload where
-  toJSON HelloPayload{..} =
-    object
-      [ "wid" .= helloWorkerId
-      , "hostname" .= helloHostname
-      , "pid" .= helloProcessId
-      , "labels" .= helloLabels
-      , "v" .= helloVersion
-      , "pwdhash" .= helloPasswordHash
-      ]
-  toEncoding HelloPayload{..} =
-    pairs $ mconcat
-      [ "wid" .= helloWorkerId
-      , "hostname" .= helloHostname
-      , "pid" .= helloProcessId
-      , "labels" .= helloLabels
-      , "v" .= helloVersion
-      , "pwdhash" .= helloPasswordHash
-      ]
+  toJSON HelloPayload {..} = object
+    [ "wid" .= helloWorkerId
+    , "hostname" .= helloHostname
+    , "pid" .= helloProcessId
+    , "labels" .= helloLabels
+    , "v" .= helloVersion
+    , "pwdhash" .= helloPasswordHash
+    ]
+  toEncoding HelloPayload {..} = pairs $ mconcat
+    [ "wid" .= helloWorkerId
+    , "hostname" .= helloHostname
+    , "pid" .= helloProcessId
+    , "labels" .= helloLabels
+    , "v" .= helloVersion
+    , "pwdhash" .= helloPasswordHash
+    ]
 
 -- | Open a new @'Client'@ connection with the given @'Settings'@
 newClient :: HasCallStack => Settings -> Maybe WorkerId -> IO Client
