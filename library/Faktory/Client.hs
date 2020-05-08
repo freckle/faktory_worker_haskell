@@ -20,6 +20,7 @@ import Faktory.Prelude
 import Control.Concurrent.MVar
 import Crypto.Hash (Digest, SHA256(..), hashWith)
 import Data.Aeson
+import Data.Bitraversable (bimapM)
 import Data.ByteArray (ByteArrayAccess)
 import Data.ByteString.Lazy (ByteString, fromStrict)
 import qualified Data.ByteString.Lazy.Char8 as BSL8
@@ -180,7 +181,7 @@ recvUnsafe :: Settings -> Connection -> IO (Either String (Maybe ByteString))
 recvUnsafe Settings {..} conn = do
   emByteString <- readReply $ connectionGet conn 4096
   settingsLogDebug $ "< " <> show emByteString
-  either (pure . Left) (pure . Right . fmap fromStrict) emByteString
+  bimapM pure (pure . fmap fromStrict) emByteString
 
 -- | Iteratively apply a function @n@ times
 --
