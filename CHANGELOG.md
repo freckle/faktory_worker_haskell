@@ -1,6 +1,11 @@
-## [*Unreleased*](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.1.0...master)
+## [*Unreleased*](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.1.1...master)
 
 None
+
+## [v1.0.1.1](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.1.0...v1.0.1.1)
+
+- Include non-OK reply in `commandOK` error
+- Build with GHC-8.8
 
 ## [v1.0.1.0](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.0.0...v1.0.1.0)
 
