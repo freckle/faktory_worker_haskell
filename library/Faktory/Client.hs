@@ -20,6 +20,7 @@ import Faktory.Prelude
 import Control.Concurrent.MVar
 import Crypto.Hash (Digest, SHA256(..), hashWith)
 import Data.Aeson
+import Data.Bitraversable (bimapM)
 import Data.ByteArray (ByteArrayAccess)
 import Data.ByteString.Lazy (ByteString, fromStrict)
 import qualified Data.ByteString.Lazy.Char8 as BSL8
@@ -83,7 +84,9 @@ newClient settings@Settings {..} mWorkerId =
     client <- Client <$> newMVar conn <*> pure settings
 
     greeting <-
-      fromJustThrows "Unexpected end of HI message" =<< recvUnsafe settings conn
+      fromJustThrows "Unexpected end of HI message"
+      =<< fromRightThrows
+      =<< recvUnsafe settings conn
     stripped <-
       fromJustThrows ("Missing HI prefix: " <> show greeting)
         $ BSL8.stripPrefix "HI" greeting
@@ -134,14 +137,14 @@ flush client = commandOK client "FLUSH" []
 command_ :: Client -> ByteString -> [ByteString] -> IO ()
 command_ Client {..} cmd args = withMVar clientConnection $ \conn -> do
   sendUnsafe clientSettings conn cmd args
-  void $ recvUnsafe clientSettings conn
+  void $ fromRightThrows =<< recvUnsafe clientSettings conn
 
 -- | Send a command, assert the response is @OK@
 commandOK :: HasCallStack => Client -> ByteString -> [ByteString] -> IO ()
 commandOK Client {..} cmd args = withMVar clientConnection $ \conn -> do
   sendUnsafe clientSettings conn cmd args
   response <- recvUnsafe clientSettings conn
-  unless (response == Just "OK")
+  unless (response == Right (Just "OK"))
     $ throwString
     $ "Server not OK. Reply was: "
     <> show response
@@ -155,8 +158,8 @@ commandJSON
   -> IO (Either String (Maybe a))
 commandJSON Client {..} cmd args = withMVar clientConnection $ \conn -> do
   sendUnsafe clientSettings conn cmd args
-  mByteString <- recvUnsafe clientSettings conn
-  pure $ traverse eitherDecode mByteString
+  emByteString <- recvUnsafe clientSettings conn
+  either (pure . Left) (pure . traverse eitherDecode) emByteString
 
 -- | Send a command to the Server socket
 --
@@ -172,16 +175,11 @@ sendUnsafe Settings {..} conn cmd args = do
 --
 -- Do not use outside of @'withMVar'@, this is not threadsafe.
 --
-recvUnsafe :: Settings -> Connection -> IO (Maybe ByteString)
+recvUnsafe :: Settings -> Connection -> IO (Either String (Maybe ByteString))
 recvUnsafe Settings {..} conn = do
-  eByteString <- readReply $ connectionGet conn 4096
-  settingsLogDebug $ "< " <> show eByteString
-
-  case eByteString of
-    Left err -> do
-      settingsLogError err
-      pure Nothing
-    Right mByteString -> pure $ fromStrict <$> mByteString
+  emByteString <- readReply $ connectionGet conn 4096
+  settingsLogDebug $ "< " <> show emByteString
+  bimapM pure (pure . fmap fromStrict) emByteString
 
 -- | Iteratively apply a function @n@ times
 --
