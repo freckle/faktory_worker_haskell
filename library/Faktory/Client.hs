@@ -160,10 +160,7 @@ commandJSON
 commandJSON Client {..} cmd args = withMVar clientConnection $ \conn -> do
   sendUnsafe clientSettings conn cmd args
   emByteString <- recvUnsafe clientSettings conn
-
-  case emByteString of
-    Left err -> pure $ Left err
-    Right mByteString -> pure $ traverse eitherDecode mByteString
+  either (pure . Left) (pure . traverse eitherDecode) emByteString
 
 -- | Send a command to the Server socket
 --
@@ -181,12 +178,9 @@ sendUnsafe Settings {..} conn cmd args = do
 --
 recvUnsafe :: Settings -> Connection -> IO (Either String (Maybe ByteString))
 recvUnsafe Settings {..} conn = do
-  eByteString <- readReply $ connectionGet conn 4096
-  settingsLogDebug $ "< " <> show eByteString
-
-  case eByteString of
-    Left err -> pure $ Left err
-    Right mByteString -> pure . Right $ fromStrict <$> mByteString
+  emByteString <- readReply $ connectionGet conn 4096
+  settingsLogDebug $ "< " <> show emByteString
+  either (pure . Left) (pure . Right . fmap fromStrict) emByteString
 
 -- | Iteratively apply a function @n@ times
 --
