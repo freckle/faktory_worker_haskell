@@ -114,9 +114,7 @@ newClient settings@Settings {..} mWorkerId =
 
     commandOK client "HELLO" [encode helloPayload]
     pure client
- where
-  fromJustThrows message = maybe (throwString message) pure
-  fromRightThrows = either throwString pure
+  where fromJustThrows message = maybe (throwString message) pure
 
 -- | Close a @'Client'@
 closeClient :: Client -> IO ()
@@ -139,7 +137,7 @@ flush client = commandOK client "FLUSH" []
 command_ :: Client -> ByteString -> [ByteString] -> IO ()
 command_ Client {..} cmd args = withMVar clientConnection $ \conn -> do
   sendUnsafe clientSettings conn cmd args
-  void $ recvUnsafe clientSettings conn
+  void $ fromRightThrows =<< recvUnsafe clientSettings conn
 
 -- | Send a command, assert the response is @OK@
 commandOK :: HasCallStack => Client -> ByteString -> [ByteString] -> IO ()

@@ -20,3 +20,6 @@ forkIOWithThrowToParent :: IO () -> IO ThreadId
 forkIOWithThrowToParent action = do
   parent <- myThreadId
   forkIO $ action `X.catchAny` \err -> throwTo parent err
+
+fromRightThrows :: MonadThrow m => Either String a -> m a
+fromRightThrows = either throwString pure
