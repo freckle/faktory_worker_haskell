@@ -2,6 +2,10 @@
 
 None
 
+## [v1.0.1.2](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.1.1...v1.0.1.2)
+
+- Fix internal handling of invalid Server Replies
+
 ## [v1.0.1.1](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.1.0...v1.0.1.1)
 
 - Include non-OK reply in `commandOK` error
