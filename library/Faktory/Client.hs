@@ -83,7 +83,9 @@ newClient settings@Settings {..} mWorkerId =
     client <- Client <$> newMVar conn <*> pure settings
 
     greeting <-
-      fromJustThrows "Unexpected end of HI message" =<< recvUnsafe settings conn
+      fromJustThrows "Unexpected end of HI message"
+      =<< fromRightThrows
+      =<< recvUnsafe settings conn
     stripped <-
       fromJustThrows ("Missing HI prefix: " <> show greeting)
         $ BSL8.stripPrefix "HI" greeting
@@ -111,7 +113,9 @@ newClient settings@Settings {..} mWorkerId =
 
     commandOK client "HELLO" [encode helloPayload]
     pure client
-  where fromJustThrows message = maybe (throwString message) pure
+ where
+  fromJustThrows message = maybe (throwString message) pure
+  fromRightThrows = either throwString pure
 
 -- | Close a @'Client'@
 closeClient :: Client -> IO ()
@@ -141,7 +145,7 @@ commandOK :: HasCallStack => Client -> ByteString -> [ByteString] -> IO ()
 commandOK Client {..} cmd args = withMVar clientConnection $ \conn -> do
   sendUnsafe clientSettings conn cmd args
   response <- recvUnsafe clientSettings conn
-  unless (response == Just "OK")
+  unless (response == Right (Just "OK"))
     $ throwString
     $ "Server not OK. Reply was: "
     <> show response
@@ -155,8 +159,11 @@ commandJSON
   -> IO (Either String (Maybe a))
 commandJSON Client {..} cmd args = withMVar clientConnection $ \conn -> do
   sendUnsafe clientSettings conn cmd args
-  mByteString <- recvUnsafe clientSettings conn
-  pure $ traverse eitherDecode mByteString
+  emByteString <- recvUnsafe clientSettings conn
+
+  case emByteString of
+    Left err -> pure $ Left err
+    Right mByteString -> pure $ traverse eitherDecode mByteString
 
 -- | Send a command to the Server socket
 --
@@ -172,16 +179,14 @@ sendUnsafe Settings {..} conn cmd args = do
 --
 -- Do not use outside of @'withMVar'@, this is not threadsafe.
 --
-recvUnsafe :: Settings -> Connection -> IO (Maybe ByteString)
+recvUnsafe :: Settings -> Connection -> IO (Either String (Maybe ByteString))
 recvUnsafe Settings {..} conn = do
   eByteString <- readReply $ connectionGet conn 4096
   settingsLogDebug $ "< " <> show eByteString
 
   case eByteString of
-    Left err -> do
-      settingsLogError err
-      pure Nothing
-    Right mByteString -> pure $ fromStrict <$> mByteString
+    Left err -> pure $ Left err
+    Right mByteString -> pure . Right $ fromStrict <$> mByteString
 
 -- | Iteratively apply a function @n@ times
 --
