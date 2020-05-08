@@ -46,16 +46,25 @@ spec = describe "Faktory" $ do
     jobs <- readMVar processedJobs
     jobs `shouldMatchList` ["a", "b", "HALT"]
 
-  it "doesn't crash on a consumer timeout" $ do
+  it "correctly handles fetch timeouts" $ do
     settings' <- envSettings
     let settings = settings' { settingsWorkerIdleDelay = 0 }
 
+    -- start a background thread that waits for longer than the fetch timeout,
+    -- then stops the worker.
+    --
+    -- https://github.com/contribsys/faktory/wiki/Worker-Lifecycle#fetching-jobs
+    --
+    -- This ensures that the worker loop experiences recieving a Nothing from
+    -- the Server and handles it correctly. Setting our own idle delay to 0
+    -- ensures that we'll pick up the following HALT message immediately.
+    --
     void
       $ forkIO
       $ bracket (newClient settings Nothing) closeClient
       $ \client -> do
           void $ flush client
-          threadDelay 500000 -- 0.5s
+          threadDelay $ 2 * 1000000 + 250000
           void $ perform @Text mempty client "HALT"
 
     processedJobs <- newMVar ([] :: [Text])
