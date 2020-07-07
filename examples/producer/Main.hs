@@ -4,9 +4,8 @@ import Prelude
 
 import Control.Exception.Safe
 import Data.Aeson
-import Faktory.Client
 import Faktory.Job (perform)
-import Faktory.Settings
+import Faktory.Producer
 import GHC.Generics
 import System.Environment (getArgs)
 
@@ -16,10 +15,8 @@ newtype Job = Job { jobMessage :: String }
   deriving anyclass ToJSON
 
 main :: IO ()
-main = do
-  settings <- envSettings
-  bracket (newClient settings Nothing) closeClient $ \client -> do
-    args <- getArgs
-    jobId <- perform mempty client Job { jobMessage = unwords args }
+main = bracket newProducerEnv closeProducer $ \producer -> do
+  args <- getArgs
+  jobId <- perform mempty producer Job { jobMessage = unwords args }
 
-    putStrLn $ "Pushed job: " <> show jobId
+  putStrLn $ "Pushed job: " <> show jobId

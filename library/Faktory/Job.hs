@@ -21,7 +21,7 @@ import Data.Aeson.Casing
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NE
 import Data.Time
-import Faktory.Client (Client, pushJob)
+import Faktory.Producer (Producer, pushJob)
 import Faktory.Settings (Queue)
 import GHC.Generics
 import GHC.Stack
@@ -65,10 +65,11 @@ newtype JobOptions = JobOptions [JobUpdate]
 -- 'perform' ('in_' 10 <> 'retry' 3) SomeJob
 -- @
 --
-perform :: (HasCallStack, ToJSON arg) => JobOptions -> Client -> arg -> IO JobId
-perform options client arg = do
+perform
+  :: (HasCallStack, ToJSON arg) => JobOptions -> Producer -> arg -> IO JobId
+perform options producer arg = do
   job <- applyOptions options =<< newJob arg
-  jobJid job <$ pushJob client job
+  jobJid job <$ pushJob producer job
 
 applyOptions :: JobOptions -> Job arg -> IO (Job arg)
 applyOptions (JobOptions patches) = go patches
