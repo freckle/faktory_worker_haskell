@@ -5,10 +5,6 @@ module Faktory.Client
   , newClient
   , closeClient
 
-  -- * High-level Job operations
-  , pushJob
-  , flush
-
   -- * High-level Client API
   , command_
   , commandOK
@@ -121,17 +117,6 @@ closeClient :: Client -> IO ()
 closeClient Client {..} = withMVar clientConnection $ \conn -> do
   sendUnsafe clientSettings conn "END" []
   connectionClose conn
-
--- | Push a Job to the Server
-pushJob :: (HasCallStack, ToJSON a) => Client -> a -> IO ()
-pushJob client job = commandOK client "PUSH" [encode job]
-
--- | Clear all job data in the Faktory server
---
--- Use with caution!
---
-flush :: HasCallStack => Client -> IO ()
-flush client = commandOK client "FLUSH" []
 
 -- | Send a command, read and discard the response
 command_ :: Client -> ByteString -> [ByteString] -> IO ()

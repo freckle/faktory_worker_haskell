@@ -49,7 +49,7 @@ details.
 ```haskell
 import Data.Aeson
 import Prelude
-import Faktory.Client
+import Faktory.Producer
 import Faktory.Job
 import Faktory.Settings
 import Faktory.Worker
@@ -57,9 +57,9 @@ import GHC.Generics
 
 {- Don't actually run anything -}
 main :: IO ()
-main = if True then pure () else (workerMain >> clientMain)
+main = if True then pure () else (workerMain >> producerMain)
 workerMain :: IO ()
-clientMain :: IO ()
+producerMain :: IO ()
 ```
 -->
 
@@ -91,19 +91,19 @@ workerMain = do
     -- unless you catch-and-rethrow them yourself.
 ```
 
-### Client
+### Producer
+
+`Producer` wraps `Client` for push-only usage.
 
 ```haskell
-clientMain = do
-  settings <- envSettings
-  client <- newClient settings Nothing -- N.B. A WorkerId is not necessary if
-                                       -- only pushing Jobs.
+producerMain = do
+  producer <- newProducerEnv
 
-  jobId <- perform mempty client $ MyJob "Hello world"
+  jobId <- perform mempty producer $ MyJob "Hello world"
 
   print jobId
 
-  closeClient client
+  closeProducer producer
 ```
 
 ### Configuration

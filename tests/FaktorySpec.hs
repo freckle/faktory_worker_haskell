@@ -6,8 +6,8 @@ import Faktory.Prelude
 
 import Control.Concurrent (forkIO, threadDelay)
 import Control.Concurrent.MVar
-import Faktory.Client
 import Faktory.Job
+import Faktory.Producer
 import Faktory.Settings
 import Faktory.Worker
 import Test.Hspec
@@ -16,11 +16,11 @@ spec :: Spec
 spec = describe "Faktory" $ do
   it "can push and process jobs" $ do
     settings <- envSettings
-    bracket (newClient settings Nothing) closeClient $ \client -> do
-      void $ flush client
-      void $ perform @Text mempty client "a"
-      void $ perform @Text mempty client "b"
-      void $ perform @Text mempty client "HALT"
+    bracket (newProducer settings) closeProducer $ \producer -> do
+      void $ flush producer
+      void $ perform @Text mempty producer "a"
+      void $ perform @Text mempty producer "b"
+      void $ perform @Text mempty producer "HALT"
 
     processedJobs <- newMVar ([] :: [Text])
     runWorker settings $ \job -> do
@@ -32,11 +32,11 @@ spec = describe "Faktory" $ do
 
   it "can push jobs with optional attributes" $ do
     settings <- envSettings
-    bracket (newClient settings Nothing) closeClient $ \client -> do
-      void $ flush client
-      void $ perform @Text once client "a"
-      void $ perform @Text (retry 0) client "b"
-      void $ perform @Text mempty client "HALT"
+    bracket (newProducer settings) closeProducer $ \producer -> do
+      void $ flush producer
+      void $ perform @Text once producer "a"
+      void $ perform @Text (retry 0) producer "b"
+      void $ perform @Text mempty producer "HALT"
 
     processedJobs <- newMVar ([] :: [Text])
     runWorker settings $ \job -> do
@@ -59,13 +59,11 @@ spec = describe "Faktory" $ do
     -- the Server and handles it correctly. Setting our own idle delay to 0
     -- ensures that we'll pick up the following HALT message immediately.
     --
-    void
-      $ forkIO
-      $ bracket (newClient settings Nothing) closeClient
-      $ \client -> do
-          void $ flush client
-          threadDelay $ 2 * 1000000 + 250000
-          void $ perform @Text mempty client "HALT"
+    void $ forkIO $ bracket (newProducer settings) closeProducer $ \producer ->
+      do
+        void $ flush producer
+        threadDelay $ 2 * 1000000 + 250000
+        void $ perform @Text mempty producer "HALT"
 
     processedJobs <- newMVar ([] :: [Text])
     runWorker settings $ \job -> do
