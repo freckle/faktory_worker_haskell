@@ -51,7 +51,6 @@ import Data.Aeson
 import Prelude
 import Faktory.Producer
 import Faktory.Job
-import Faktory.Settings
 import Faktory.Worker
 import GHC.Generics
 
@@ -79,17 +78,13 @@ newtype MyJob = MyJob
 ### Worker
 
 ```haskell
-workerMain = do
-  settings <- envSettings
-  workerSettings <- envWorkerSettings
+workerMain = runWorkerEnv $ \job ->
+  -- Process your Job here
+  putStrLn $ myJobMessage job
 
-  runWorker settings workerSettings $ \job ->
-    -- Process your Job here
-    putStrLn $ myJobMessage job
-
-    -- If any exception is thrown, the job will be marked as Failed in Faktory
-    -- and retried. Note: you will not otherwise hear about any such exceptions,
-    -- unless you catch-and-rethrow them yourself.
+  -- If any exception is thrown, the job will be marked as Failed in Faktory
+  -- and retried. Note: you will not otherwise hear about any such exceptions,
+  -- unless you catch-and-rethrow them yourself.
 ```
 
 ### Producer
@@ -117,9 +112,9 @@ When using `envSettings`, the following variables will be used:
   to the Faktory server. Format is `tcp(+tls)://(:password@)host:port`. Defaults
   to `tcp://localhost:4719`.
 
-When using `envWorkerSettings`, the following variable is also used:
+When using `envWorkerSettings`, the following variables are also used:
 
-- `FAKTORY_QUEUE`: the name of the queue to consume from.
+- `FAKTORY_QUEUE`: the name of the queue to consume from. Default is "default".
 
 ## Examples
 
