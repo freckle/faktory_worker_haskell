@@ -115,6 +115,8 @@ When using `envSettings`, the following variables will be used:
 When using `envWorkerSettings`, the following variables are also used:
 
 - `FAKTORY_QUEUE`: the name of the queue to consume from. Default is "default".
+- `FAKTORY_WORKER_ID`: the Id to use for this Worker. Default is to assign a
+  random one.
 
 ## Examples
 

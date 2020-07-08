@@ -60,7 +60,7 @@ instance ToJSON FailPayload where
 runWorker
   :: FromJSON args => Settings -> WorkerSettings -> (args -> IO ()) -> IO ()
 runWorker settings workerSettings f = do
-  workerId <- randomWorkerId
+  workerId <- maybe randomWorkerId pure $ settingsId workerSettings
   client <- newClient settings $ Just workerId
   beatThreadId <- forkIOWithThrowToParent $ forever $ heartBeat client workerId
 

@@ -50,18 +50,24 @@ envSettings = do
 
 data WorkerSettings = WorkerSettings
   { settingsQueue :: Queue
+  , settingsId :: Maybe WorkerId
   , settingsIdleDelay :: Int
   }
 
 defaultWorkerSettings :: WorkerSettings
-defaultWorkerSettings =
-  WorkerSettings { settingsQueue = defaultQueue, settingsIdleDelay = 1 }
+defaultWorkerSettings = WorkerSettings
+  { settingsQueue = defaultQueue
+  , settingsId = Nothing
+  , settingsIdleDelay = 1
+  }
 
 envWorkerSettings :: IO WorkerSettings
 envWorkerSettings = do
   mQueue <- lookupEnv "FAKTORY_QUEUE"
+  mWorkerId <- lookupEnv "FAKTORY_WORKER_ID"
   pure defaultWorkerSettings
     { settingsQueue = maybe defaultQueue (Queue . pack) mQueue
+    , settingsId = WorkerId <$> mWorkerId
     }
 
 newtype Queue = Queue Text
