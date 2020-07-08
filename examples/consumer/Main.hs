@@ -17,7 +17,8 @@ main :: IO ()
 main = do
   putStrLn "Starting consumer loop"
   settings <- envSettings
-  runWorker settings $ \job -> do
+  workerSettings <- envWorkerSettings
+  runWorker settings workerSettings $ \job -> do
     let message = jobMessage job
 
     if message == "BOOM"

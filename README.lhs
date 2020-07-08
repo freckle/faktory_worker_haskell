@@ -81,8 +81,9 @@ newtype MyJob = MyJob
 ```haskell
 workerMain = do
   settings <- envSettings
+  workerSettings <- envWorkerSettings
 
-  runWorker settings $ \job ->
+  runWorker settings workerSettings $ \job ->
     -- Process your Job here
     putStrLn $ myJobMessage job
 
@@ -110,13 +111,15 @@ producerMain = do
 
 When using `envSettings`, the following variables will be used:
 
-- `FAKTORY_QUEUE`: the name of the queue to consume from. This is Worker-only,
-  for `perform`, a non-default Queue should be given by the `queue` option
 - `FAKTORY_PROVIDER`: the name of another environment variable where the
   connection string can be found. Defaults to `FAKTORY_URL`.
 - `FAKTORY_URL` (or whatever you named in `FAKTORY_PROVIDER`): connection string
   to the Faktory server. Format is `tcp(+tls)://(:password@)host:port`. Defaults
   to `tcp://localhost:4719`.
+
+When using `envWorkerSettings`, the following variable is also used:
+
+- `FAKTORY_QUEUE`: the name of the queue to consume from.
 
 ## Examples
 

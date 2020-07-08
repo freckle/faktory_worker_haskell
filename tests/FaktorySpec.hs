@@ -16,6 +16,7 @@ spec :: Spec
 spec = describe "Faktory" $ do
   it "can push and process jobs" $ do
     settings <- envSettings
+    workerSettings <- envWorkerSettings
     bracket (newProducer settings) closeProducer $ \producer -> do
       void $ flush producer
       void $ perform @Text mempty producer "a"
@@ -23,7 +24,7 @@ spec = describe "Faktory" $ do
       void $ perform @Text mempty producer "HALT"
 
     processedJobs <- newMVar ([] :: [Text])
-    runWorker settings $ \job -> do
+    runWorker settings workerSettings $ \job -> do
       modifyMVar_ processedJobs $ pure . (job :)
       when (job == "HALT") $ throw WorkerHalt
 
@@ -32,6 +33,7 @@ spec = describe "Faktory" $ do
 
   it "can push jobs with optional attributes" $ do
     settings <- envSettings
+    workerSettings <- envWorkerSettings
     bracket (newProducer settings) closeProducer $ \producer -> do
       void $ flush producer
       void $ perform @Text once producer "a"
@@ -39,7 +41,7 @@ spec = describe "Faktory" $ do
       void $ perform @Text mempty producer "HALT"
 
     processedJobs <- newMVar ([] :: [Text])
-    runWorker settings $ \job -> do
+    runWorker settings workerSettings $ \job -> do
       modifyMVar_ processedJobs $ pure . (job :)
       when (job == "HALT") $ throw WorkerHalt
 
@@ -47,8 +49,9 @@ spec = describe "Faktory" $ do
     jobs `shouldMatchList` ["a", "b", "HALT"]
 
   it "correctly handles fetch timeouts" $ do
-    settings' <- envSettings
-    let settings = settings' { settingsWorkerIdleDelay = 0 }
+    settings <- envSettings
+    workerSettings' <- envWorkerSettings
+    let workerSettings = workerSettings' { settingsIdleDelay = 0 }
 
     -- start a background thread that waits for longer than the fetch timeout,
     -- then stops the worker.
@@ -66,7 +69,7 @@ spec = describe "Faktory" $ do
         void $ perform @Text mempty producer "HALT"
 
     processedJobs <- newMVar ([] :: [Text])
-    runWorker settings $ \job -> do
+    runWorker settings workerSettings $ \job -> do
       modifyMVar_ processedJobs $ pure . (job :)
       when (job == "HALT") $ throw WorkerHalt
 

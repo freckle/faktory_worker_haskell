@@ -1,13 +1,18 @@
 module Faktory.Settings
   ( Settings(..)
-  , ConnectionInfo(..)
   , defaultSettings
   , envSettings
+  , WorkerSettings(..)
+  , defaultWorkerSettings
+  , envWorkerSettings
   , Queue(..)
   , queueArg
   , defaultQueue
   , WorkerId
   , randomWorkerId
+
+  -- * Re-exports
+  , ConnectionInfo(..)
   ) where
 
 import Faktory.Prelude
@@ -22,20 +27,16 @@ import System.IO (hPutStrLn, stderr)
 import System.Random
 
 data Settings = Settings
-  { settingsQueue :: Queue
-  , settingsConnection :: ConnectionInfo
+  { settingsConnection :: ConnectionInfo
   , settingsLogDebug :: String -> IO ()
   , settingsLogError :: String -> IO ()
-  , settingsWorkerIdleDelay :: Int
   }
 
 defaultSettings :: Settings
 defaultSettings = Settings
-  { settingsQueue = defaultQueue
-  , settingsConnection = defaultConnectionInfo
+  { settingsConnection = defaultConnectionInfo
   , settingsLogDebug = \_msg -> pure ()
   , settingsLogError = hPutStrLn stderr . ("[ERROR]: " <>)
-  , settingsWorkerIdleDelay = 1
   }
 
 -- | Defaults, but read @'Connection'@ from the environment
@@ -44,11 +45,23 @@ defaultSettings = Settings
 --
 envSettings :: IO Settings
 envSettings = do
-  mQueue <- lookupEnv "FAKTORY_QUEUE"
   connection <- envConnectionInfo
-  pure defaultSettings
+  pure defaultSettings { settingsConnection = connection }
+
+data WorkerSettings = WorkerSettings
+  { settingsQueue :: Queue
+  , settingsIdleDelay :: Int
+  }
+
+defaultWorkerSettings :: WorkerSettings
+defaultWorkerSettings =
+  WorkerSettings { settingsQueue = defaultQueue, settingsIdleDelay = 1 }
+
+envWorkerSettings :: IO WorkerSettings
+envWorkerSettings = do
+  mQueue <- lookupEnv "FAKTORY_QUEUE"
+  pure defaultWorkerSettings
     { settingsQueue = maybe defaultQueue (Queue . pack) mQueue
-    , settingsConnection = connection
     }
 
 newtype Queue = Queue Text
