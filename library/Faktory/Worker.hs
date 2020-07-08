@@ -56,28 +56,35 @@ instance ToJSON FailPayload where
   toJSON = genericToJSON $ aesonPrefix snakeCase
   toEncoding = genericToEncoding $ aesonPrefix snakeCase
 
-runWorker :: FromJSON args => Settings -> (args -> IO ()) -> IO ()
-runWorker settings f = do
+runWorker
+  :: FromJSON args => Settings -> WorkerSettings -> (args -> IO ()) -> IO ()
+runWorker settings workerSettings f = do
   workerId <- randomWorkerId
   client <- newClient settings $ Just workerId
   beatThreadId <- forkIOWithThrowToParent $ forever $ heartBeat client workerId
 
-  forever (processorLoop client settings f)
+  forever (processorLoop client settings workerSettings f)
     `catch` (\(_ex :: WorkerHalt) -> pure ())
     `finally` (killThread beatThreadId >> closeClient client)
 
-processorLoop :: FromJSON arg => Client -> Settings -> (arg -> IO ()) -> IO ()
-processorLoop client settings f = do
+processorLoop
+  :: FromJSON arg
+  => Client
+  -> Settings
+  -> WorkerSettings
+  -> (arg -> IO ())
+  -> IO ()
+processorLoop client settings workerSettings f = do
   let
     processAndAck job = do
       f $ jobArg job
       ackJob client job
 
-  emJob <- fetchJob client $ settingsQueue settings
+  emJob <- fetchJob client $ settingsQueue workerSettings
 
   case emJob of
     Left err -> settingsLogError settings $ "Invalid Job: " <> err
-    Right Nothing -> threadDelaySeconds $ settingsWorkerIdleDelay settings
+    Right Nothing -> threadDelaySeconds $ settingsIdleDelay workerSettings
     Right (Just job) ->
       processAndAck job
         `catches` [ Handler $ \(ex :: WorkerHalt) -> throw ex
