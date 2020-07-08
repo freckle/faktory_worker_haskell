@@ -6,6 +6,7 @@
 module Faktory.Worker
   ( WorkerHalt(..)
   , runWorker
+  , runWorkerEnv
   )
 where
 
@@ -66,6 +67,12 @@ runWorker settings workerSettings f = do
   forever (processorLoop client settings workerSettings f)
     `catch` (\(_ex :: WorkerHalt) -> pure ())
     `finally` (killThread beatThreadId >> closeClient client)
+
+runWorkerEnv :: FromJSON args => (args -> IO ()) -> IO ()
+runWorkerEnv f = do
+  settings <- envSettings
+  workerSettings <- envWorkerSettings
+  runWorker settings workerSettings f
 
 processorLoop
   :: FromJSON arg

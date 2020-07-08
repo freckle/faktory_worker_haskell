@@ -15,16 +15,14 @@ import Test.Hspec
 spec :: Spec
 spec = describe "Faktory" $ do
   it "can push and process jobs" $ do
-    settings <- envSettings
-    workerSettings <- envWorkerSettings
-    bracket (newProducer settings) closeProducer $ \producer -> do
+    bracket newProducerEnv closeProducer $ \producer -> do
       void $ flush producer
       void $ perform @Text mempty producer "a"
       void $ perform @Text mempty producer "b"
       void $ perform @Text mempty producer "HALT"
 
     processedJobs <- newMVar ([] :: [Text])
-    runWorker settings workerSettings $ \job -> do
+    runWorkerEnv $ \job -> do
       modifyMVar_ processedJobs $ pure . (job :)
       when (job == "HALT") $ throw WorkerHalt
 
@@ -32,16 +30,14 @@ spec = describe "Faktory" $ do
     jobs `shouldMatchList` ["a", "b", "HALT"]
 
   it "can push jobs with optional attributes" $ do
-    settings <- envSettings
-    workerSettings <- envWorkerSettings
-    bracket (newProducer settings) closeProducer $ \producer -> do
+    bracket newProducerEnv closeProducer $ \producer -> do
       void $ flush producer
       void $ perform @Text once producer "a"
       void $ perform @Text (retry 0) producer "b"
       void $ perform @Text mempty producer "HALT"
 
     processedJobs <- newMVar ([] :: [Text])
-    runWorker settings workerSettings $ \job -> do
+    runWorkerEnv $ \job -> do
       modifyMVar_ processedJobs $ pure . (job :)
       when (job == "HALT") $ throw WorkerHalt
 

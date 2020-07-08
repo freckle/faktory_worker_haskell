@@ -4,7 +4,6 @@ import Prelude
 
 import Control.Exception.Safe
 import Data.Aeson
-import Faktory.Settings
 import Faktory.Worker
 import GHC.Generics
 
@@ -16,9 +15,7 @@ newtype Job = Job { jobMessage :: String }
 main :: IO ()
 main = do
   putStrLn "Starting consumer loop"
-  settings <- envSettings
-  workerSettings <- envWorkerSettings
-  runWorker settings workerSettings $ \job -> do
+  runWorkerEnv $ \job -> do
     let message = jobMessage job
 
     if message == "BOOM"
