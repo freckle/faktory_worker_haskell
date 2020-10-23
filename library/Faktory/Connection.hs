@@ -107,4 +107,4 @@ parseConnection = go <?> "tcp(+tls)://(:<password>@)<host>:<port>(/namespace)"
       <*> manyTill anySingle (char ':')
       <*> (read <$> some digitChar)
       <*> (toNamespace <$> optional (char '/' *> some anySingle))
-  toNamespace = Namespace . pack . fromMaybe ""
+  toNamespace = Namespace . maybe "" pack
