@@ -1,6 +1,10 @@
-## [*Unreleased*](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.1.1...master)
+## [*Unreleased*](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.1.3...master)
 
 None
+
+## [v1.0.1.3](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.1.2...v1.0.1.3)
+
+- Add support for queue namespacing
 
 ## [v1.0.1.2](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.1.1...v1.0.1.2)
 
