@@ -112,7 +112,7 @@ When using `envSettings`, the following variables will be used:
   to the Faktory server. Format is
   `tcp(+tls)://(:password@)host:port(/namespace)`. Defaults to
   `tcp://localhost:4719`. `namespace` is prependend to queue names on job
-  submission.
+  submission and worker consumption.
 
 When using `envWorkerSettings`, the following variables are also used:
 

@@ -83,11 +83,13 @@ processorLoop
   -> IO ()
 processorLoop client settings workerSettings f = do
   let
+    namespace = connectionInfoNamespace $ settingsConnection settings
     processAndAck job = do
       f $ jobArg job
       ackJob client job
 
-  emJob <- fetchJob client $ settingsQueue workerSettings
+  emJob <- fetchJob client $ namespaceQueue namespace $ settingsQueue
+    workerSettings
 
   case emJob of
     Left err -> settingsLogError settings $ "Invalid Job: " <> err

@@ -30,7 +30,7 @@ spec = do
         connectionInfoPassword `shouldBe` Nothing
         connectionInfoHostName `shouldBe` "foo"
         connectionInfoPort `shouldBe` 123
-        connectionInfoNamespace `shouldBe` Nothing
+        connectionInfoNamespace `shouldBe` Namespace ""
 
     it "parses tls and password" $ do
       let
@@ -57,7 +57,7 @@ spec = do
         ConnectionInfo {..} <- envConnectionInfo
         connectionInfoHostName `shouldBe` "localhost"
         connectionInfoPort `shouldBe` 7419
-        connectionInfoNamespace `shouldBe` Just "prefix"
+        connectionInfoNamespace `shouldBe` Namespace "prefix"
 
     it "follows _PROVIDER to find _URL" $ do
       let

@@ -1,5 +1,6 @@
 module Faktory.Connection
   ( ConnectionInfo(..)
+  , Namespace(..)
   , defaultConnectionInfo
   , envConnectionInfo
   , connect
@@ -25,12 +26,15 @@ import Text.Megaparsec
   )
 import Text.Megaparsec.Char (char, digitChar, string, upperChar)
 
+newtype Namespace = Namespace Text
+  deriving newtype (Eq, Show)
+
 data ConnectionInfo = ConnectionInfo
   { connectionInfoTls :: Bool
   , connectionInfoPassword :: Maybe String
   , connectionInfoHostName :: HostName
   , connectionInfoPort :: PortNumber
-  , connectionInfoNamespace :: Maybe String
+  , connectionInfoNamespace :: Namespace
   }
   deriving stock (Eq, Show)
 
@@ -40,7 +44,7 @@ defaultConnectionInfo = ConnectionInfo
   , connectionInfoPassword = Nothing
   , connectionInfoHostName = "localhost"
   , connectionInfoPort = 7419
-  , connectionInfoNamespace = Nothing
+  , connectionInfoNamespace = Namespace ""
   }
 
 -- | Parse a @'Connection'@ from environment variables
@@ -102,4 +106,5 @@ parseConnection = go <?> "tcp(+tls)://(:<password>@)<host>:<port>(/namespace)"
       <*> optional (char ':' *> manyTill anySingle (char '@'))
       <*> manyTill anySingle (char ':')
       <*> (read <$> some digitChar)
-      <*> optional (char '/' *> some anySingle)
+      <*> (toNamespace <$> optional (char '/' *> some anySingle))
+  toNamespace = Namespace . pack . fromMaybe ""
