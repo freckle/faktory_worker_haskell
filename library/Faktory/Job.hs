@@ -20,9 +20,11 @@ import Data.Aeson
 import Data.Aeson.Casing
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NE
+import Data.Maybe (fromMaybe)
 import Data.Time
-import Faktory.Producer (Producer, pushJob)
-import Faktory.Settings (Queue)
+import Faktory.Client (Client(..))
+import Faktory.Producer (Producer(..), pushJob)
+import Faktory.Settings
 import GHC.Generics
 import GHC.Stack
 import System.Random
@@ -68,16 +70,24 @@ newtype JobOptions = JobOptions [JobUpdate]
 perform
   :: (HasCallStack, ToJSON arg) => JobOptions -> Producer -> arg -> IO JobId
 perform options producer arg = do
-  job <- applyOptions options =<< newJob arg
+  let
+    namespace =
+      connectionInfoNamespace
+        $ settingsConnection
+        $ clientSettings
+        $ producerClient producer
+  job <- applyOptions namespace options =<< newJob arg
   jobJid job <$ pushJob producer job
 
-applyOptions :: JobOptions -> Job arg -> IO (Job arg)
-applyOptions (JobOptions patches) = go patches
+applyOptions :: Maybe String -> JobOptions -> Job arg -> IO (Job arg)
+applyOptions namespace (JobOptions patches) = go patches
  where
+  queuePrefix = pack $ fromMaybe "" namespace
+  namespaceQueue (Queue q) = Queue $ mappend queuePrefix q
   go [] job = pure job
   go (set : sets) job = case set of
     SetRetry n -> go sets $ job { jobRetry = Just n }
-    SetQueue q -> go sets $ job { jobQueue = Just q }
+    SetQueue q -> go sets $ job { jobQueue = Just $ namespaceQueue q }
     SetJobtype jt -> go sets $ job { jobJobtype = jt }
     SetAt time -> go sets $ job { jobAt = Just time }
     SetIn diff -> do

@@ -30,6 +30,7 @@ data ConnectionInfo = ConnectionInfo
   , connectionInfoPassword :: Maybe String
   , connectionInfoHostName :: HostName
   , connectionInfoPort :: PortNumber
+  , connectionInfoNamespace :: Maybe String
   }
   deriving stock (Eq, Show)
 
@@ -39,6 +40,7 @@ defaultConnectionInfo = ConnectionInfo
   , connectionInfoPassword = Nothing
   , connectionInfoHostName = "localhost"
   , connectionInfoPort = 7419
+  , connectionInfoNamespace = Nothing
   }
 
 -- | Parse a @'Connection'@ from environment variables
@@ -46,7 +48,7 @@ defaultConnectionInfo = ConnectionInfo
 -- > FAKTORY_PROVIDER=FAKTORY_URL
 -- > FAKTORY_URL=tcp://:my-password@localhost:7419
 --
--- Supported format is @tcp(+tls):\/\/(:password@)host:port@.
+-- Supported format is @tcp(+tls):\/\/(:password@)host:port(/namespace)@.
 --
 -- See <https://github.com/contribsys/faktory/wiki/Worker-Lifecycle#url-configuration>.
 --
@@ -92,7 +94,7 @@ parseProvider =
   some (upperChar <|> char '_') <?> "an environment variable name"
 
 parseConnection :: Parser ConnectionInfo
-parseConnection = go <?> "tcp(+tls)://(:<password>@)<host>:<port>"
+parseConnection = go <?> "tcp(+tls)://(:<password>@)<host>:<port>(/namespace)"
  where
   go =
     ConnectionInfo
@@ -100,3 +102,4 @@ parseConnection = go <?> "tcp(+tls)://(:<password>@)<host>:<port>"
       <*> optional (char ':' *> manyTill anySingle (char '@'))
       <*> manyTill anySingle (char ':')
       <*> (read <$> some digitChar)
+      <*> optional (char '/' *> some anySingle)
