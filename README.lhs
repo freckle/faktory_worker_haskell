@@ -109,8 +109,10 @@ When using `envSettings`, the following variables will be used:
 - `FAKTORY_PROVIDER`: the name of another environment variable where the
   connection string can be found. Defaults to `FAKTORY_URL`.
 - `FAKTORY_URL` (or whatever you named in `FAKTORY_PROVIDER`): connection string
-  to the Faktory server. Format is `tcp(+tls)://(:password@)host:port`. Defaults
-  to `tcp://localhost:4719`.
+  to the Faktory server. Format is
+  `tcp(+tls)://(:password@)host:port(/namespace)`. Defaults to
+  `tcp://localhost:4719`. `namespace` is prependend to queue names on job
+  submission and worker consumption.
 
 When using `envWorkerSettings`, the following variables are also used:
 

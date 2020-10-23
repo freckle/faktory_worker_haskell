@@ -6,6 +6,7 @@ module Faktory.Settings
   , defaultWorkerSettings
   , envWorkerSettings
   , Queue(..)
+  , namespaceQueue
   , queueArg
   , defaultQueue
   , WorkerId
@@ -13,6 +14,7 @@ module Faktory.Settings
 
   -- * Re-exports
   , ConnectionInfo(..)
+  , Namespace(..)
   ) where
 
 import Faktory.Prelude
@@ -72,6 +74,9 @@ envWorkerSettings = do
 
 newtype Queue = Queue Text
   deriving newtype (IsString, FromJSON, ToJSON)
+
+namespaceQueue :: Namespace -> Queue -> Queue
+namespaceQueue (Namespace n) (Queue q) = Queue $ mappend n q
 
 queueArg :: Queue -> ByteString
 queueArg (Queue q) = fromStrict $ encodeUtf8 q

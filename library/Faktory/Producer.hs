@@ -1,5 +1,5 @@
 module Faktory.Producer
-  ( Producer
+  ( Producer(..)
   , newProducer
   , newProducerEnv
   , closeProducer

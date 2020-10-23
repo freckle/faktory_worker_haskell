@@ -1,7 +1,7 @@
 module Faktory.Client
   (
   -- * Client operations
-    Client
+    Client(..)
   , newClient
   , closeClient
 

@@ -1,5 +1,6 @@
 module Faktory.Connection
   ( ConnectionInfo(..)
+  , Namespace(..)
   , defaultConnectionInfo
   , envConnectionInfo
   , connect
@@ -25,11 +26,15 @@ import Text.Megaparsec
   )
 import Text.Megaparsec.Char (char, digitChar, string, upperChar)
 
+newtype Namespace = Namespace Text
+  deriving newtype (Eq, Show)
+
 data ConnectionInfo = ConnectionInfo
   { connectionInfoTls :: Bool
   , connectionInfoPassword :: Maybe String
   , connectionInfoHostName :: HostName
   , connectionInfoPort :: PortNumber
+  , connectionInfoNamespace :: Namespace
   }
   deriving stock (Eq, Show)
 
@@ -39,6 +44,7 @@ defaultConnectionInfo = ConnectionInfo
   , connectionInfoPassword = Nothing
   , connectionInfoHostName = "localhost"
   , connectionInfoPort = 7419
+  , connectionInfoNamespace = Namespace ""
   }
 
 -- | Parse a @'Connection'@ from environment variables
@@ -46,7 +52,7 @@ defaultConnectionInfo = ConnectionInfo
 -- > FAKTORY_PROVIDER=FAKTORY_URL
 -- > FAKTORY_URL=tcp://:my-password@localhost:7419
 --
--- Supported format is @tcp(+tls):\/\/(:password@)host:port@.
+-- Supported format is @tcp(+tls):\/\/(:password@)host:port(/namespace)@.
 --
 -- See <https://github.com/contribsys/faktory/wiki/Worker-Lifecycle#url-configuration>.
 --
@@ -92,7 +98,7 @@ parseProvider =
   some (upperChar <|> char '_') <?> "an environment variable name"
 
 parseConnection :: Parser ConnectionInfo
-parseConnection = go <?> "tcp(+tls)://(:<password>@)<host>:<port>"
+parseConnection = go <?> "tcp(+tls)://(:<password>@)<host>:<port>(/namespace)"
  where
   go =
     ConnectionInfo
@@ -100,3 +106,5 @@ parseConnection = go <?> "tcp(+tls)://(:<password>@)<host>:<port>"
       <*> optional (char ':' *> manyTill anySingle (char '@'))
       <*> manyTill anySingle (char ':')
       <*> (read <$> some digitChar)
+      <*> (toNamespace <$> optional (char '/' *> some anySingle))
+  toNamespace = Namespace . maybe "" pack
