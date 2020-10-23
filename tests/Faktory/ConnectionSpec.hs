@@ -30,6 +30,7 @@ spec = do
         connectionInfoPassword `shouldBe` Nothing
         connectionInfoHostName `shouldBe` "foo"
         connectionInfoPort `shouldBe` 123
+        connectionInfoNamespace `shouldBe` Nothing
 
     it "parses tls and password" $ do
       let
@@ -44,6 +45,19 @@ spec = do
         connectionInfoPassword `shouldBe` Just "foo"
         connectionInfoHostName `shouldBe` "bar"
         connectionInfoPort `shouldBe` 123
+
+    it "parses namespace" $ do
+      let
+        env =
+          [ ("FAKTORY_PROVIDER", Nothing)
+          , ("FAKTORY_URL", Just "tcp://localhost:7419/prefix")
+          ]
+
+      withEnvironment env $ do
+        ConnectionInfo {..} <- envConnectionInfo
+        connectionInfoHostName `shouldBe` "localhost"
+        connectionInfoPort `shouldBe` 7419
+        connectionInfoNamespace `shouldBe` Just "prefix"
 
     it "follows _PROVIDER to find _URL" $ do
       let
