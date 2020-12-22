@@ -27,3 +27,17 @@ workflows:
       - stack-build/build-test-lint:
           name: "ghc-8.4.4 / lts-12.21"
           stack-yaml: stack-lts-12.21.yaml
+      - stack-build/build-test-nightly:
+          name: "nightly"
+
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - stack-build/build-test-nightly:
+          name: "nightly"
