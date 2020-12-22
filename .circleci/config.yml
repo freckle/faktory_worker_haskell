@@ -17,18 +17,22 @@ workflows:
     jobs:
       - stack-build/build-test-lint:
           name: "default"
+          executor: default
       - stack-build/build-test-lint:
           name: "ghc-8.8.2 / lts-15.3"
           stack-yaml: stack-lts-15.3.yaml
+          executor: default
       - stack-build/build-test-lint:
           name: "ghc-8.6.3 / lts-13.1"
           stack-yaml: stack-lts-13.1.yaml
-          weeder: false
+          executor: default
       - stack-build/build-test-lint:
           name: "ghc-8.4.4 / lts-12.21"
           stack-yaml: stack-lts-12.21.yaml
+          executor: default
       - stack-build/build-test-nightly:
           name: "nightly"
+          executor: default
 
   nightly:
     triggers:
@@ -41,3 +45,4 @@ workflows:
     jobs:
       - stack-build/build-test-nightly:
           name: "nightly"
+          executor: default
