@@ -90,18 +90,18 @@ default-extensions:
 library:
   source-dirs: library
   dependencies:
-    - aeson
+    - aeson < 1.6
     - aeson-casing
     - bytestring
     - connection
-    - cryptonite
-    - megaparsec
+    - cryptonite < 0.28
+    - megaparsec < 9.1
     - memory
     - network
     - random
     - safe-exceptions
     - scanner
-    - text
+    - text > 1.2 && < 1.4
     - time
     - unix
 
@@ -110,7 +110,7 @@ executables:
     main: Main.hs
     source-dirs: examples/producer
     dependencies:
-      - aeson
+      - aeson < 1.6
       - faktory
       - safe-exceptions
 
@@ -118,7 +118,7 @@ executables:
     main: Main.hs
     source-dirs: examples/consumer
     dependencies:
-      - aeson
+      - aeson < 1.6
       - faktory
       - safe-exceptions
 
@@ -136,7 +136,6 @@ tests:
     source-dirs: .
     ghc-options: -pgmL markdown-unlit
     dependencies:
-      - aeson
-      - base
+      - aeson < 1.6
       - faktory
       - markdown-unlit
