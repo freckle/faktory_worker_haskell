@@ -42,11 +42,6 @@ extra-doc-files:
   - CHANGELOG.md
   - README.lhs
 
-# TODO: figuer out syntax here
-# tested-with:
-#   - GHC==8.4.4
-#   - GHC==8.6.3
-
 ghc-options:
   -Weverything
   -Wno-missing-exported-signatures
@@ -57,6 +52,14 @@ ghc-options:
   -Wno-missing-local-signatures
   -Wno-monomorphism-restriction
   -Wno-missing-import-lists
+
+when:
+  condition: impl(ghc >= 8.10)
+  then:
+    ghc-options:
+      -Wno-missing-safe-haskell-mode
+      -Wno-prepositive-qualified-module
+  else: {}
 
 dependencies:
   - base >= 4.11 && < 5
@@ -89,20 +92,20 @@ default-extensions:
 library:
   source-dirs: library
   dependencies:
-    - aeson >= 1.3 && < 2
-    - aeson-casing >= 0.1 && < 1
-    - bytestring >= 0.1 && < 1
-    - connection >= 0.2 && < 1
-    - cryptonite >= 0.2 && < 1
-    - megaparsec >= 7 && < 8.1
-    - memory >= 0.1 && < 1
-    - network >= 2.6 && < 3.2
-    - random >= 1.1 && < 2
-    - safe-exceptions >= 0.1 && < 1
-    - scanner >= 0.2 && < 1
-    - text >= 1.2 && < 2
-    - time >= 1.8 && < 2
-    - unix >= 2.7 && < 3
+    - aeson
+    - aeson-casing
+    - bytestring
+    - connection
+    - cryptonite
+    - megaparsec
+    - memory
+    - network
+    - random
+    - safe-exceptions
+    - scanner
+    - text
+    - time
+    - unix
 
 executables:
   faktory-example-producer:
