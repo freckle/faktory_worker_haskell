@@ -53,6 +53,7 @@ import Faktory.Producer
 import Faktory.Job
 import Faktory.Worker
 import GHC.Generics
+import Text.Markdown.Unlit ()
 
 {- Don't actually run anything -}
 main :: IO ()
