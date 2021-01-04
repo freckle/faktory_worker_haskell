@@ -1,6 +1,10 @@
-## [*Unreleased*](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.1.3...master)
+## [*Unreleased*](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.1.4...master)
 
 None
+
+## [v1.0.1.4](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.1.3...v1.0.1.4)
+
+- Various CI and dependency bounds changes
 
 ## [v1.0.1.3](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.1.2...v1.0.1.3)
 
