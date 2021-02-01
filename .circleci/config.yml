@@ -24,6 +24,10 @@ workflows:
           name: "default"
           <<: *defaults
       - stack-build/build-test-lint:
+          name: "ghc-8.10.3 / lts-17.1"
+          stack-yaml: stack-lts-17.1.yaml
+          <<: *defaults
+      - stack-build/build-test-lint:
           name: "ghc-8.8.2 / lts-15.3"
           stack-yaml: stack-lts-15.3.yaml
           <<: *defaults
