@@ -129,6 +129,7 @@ tests:
     ghc-options: -rtsopts
     dependencies:
       - faktory
+      - async
       - hspec
 
   readme:
