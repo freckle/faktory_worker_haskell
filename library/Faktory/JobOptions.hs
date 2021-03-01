@@ -10,6 +10,7 @@ module Faktory.JobOptions
   , jobtype
   , at
   , in_
+  , custom
 
   -- * Enqueue-time modifiers
   , getAtFromSchedule
@@ -45,6 +46,7 @@ data JobOptions = JobOptions
   , joRetry :: Maybe (Last Int)
   , joQueue :: Maybe (Last Queue)
   , joSchedule :: Maybe (Last (Either UTCTime NominalDiffTime))
+  , joCustom :: Maybe (Last Value)
   }
   deriving stock Generic
   deriving (Semigroup, Monoid) via GenericSemigroupMonoid JobOptions
@@ -58,6 +60,7 @@ instance FromJSON JobOptions where
       <*> o .:? "retry"
       <*> o .:? "queue"
       <*> (fmap (Last . Right) <$> o .:? "at")
+      <*> o .:? "custom"
 
 getAtFromSchedule :: JobOptions -> IO (Maybe UTCTime)
 getAtFromSchedule options = for (getLast <$> joSchedule options) $ \case
@@ -87,3 +90,6 @@ at t = mempty { joSchedule = Just $ Last $ Left t }
 
 in_ :: NominalDiffTime -> JobOptions
 in_ i = mempty { joSchedule = Just $ Last $ Right i }
+
+custom :: ToJSON a => a -> JobOptions
+custom v = mempty { joCustom = Just $ Last $ toJSON v }

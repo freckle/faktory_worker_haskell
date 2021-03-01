@@ -9,6 +9,8 @@ module Faktory.Job
   , jobtype
   , at
   , in_
+  , custom
+  , buildJob
   , newJob
   , jobJid
   , jobArg
@@ -52,13 +54,7 @@ data Job arg = Job
 perform
   :: (HasCallStack, ToJSON arg) => JobOptions -> Producer -> arg -> IO JobId
 perform options producer arg = do
-  let
-    namespace =
-      connectionInfoNamespace
-        $ settingsConnection
-        $ clientSettings
-        $ producerClient producer
-  job <- applyOptions namespace options =<< newJob arg
+  job <- buildJob options producer arg
   jobJid job <$ pushJob producer job
 
 applyOptions :: Namespace -> JobOptions -> Job arg -> IO (Job arg)
@@ -66,6 +62,16 @@ applyOptions namespace options job = do
   scheduledAt <- getAtFromSchedule options
   let namespacedOptions = namespaceQueue namespace $ jobOptions job <> options
   pure $ job { jobAt = scheduledAt, jobOptions = namespacedOptions }
+
+-- | Construct a 'Job' and apply options and Producer settings
+buildJob :: JobOptions -> Producer -> arg -> IO (Job arg)
+buildJob options producer arg = applyOptions namespace options =<< newJob arg
+ where
+  namespace =
+    connectionInfoNamespace
+      $ settingsConnection
+      $ clientSettings
+      $ producerClient producer
 
 -- | Construct a 'Job' with default 'JobOptions'
 newJob :: arg -> IO (Job arg)
@@ -95,6 +101,7 @@ toPairs Job {..} =
   , "jobtype" .= joJobtype jobOptions
   , "retry" .= joRetry jobOptions
   , "queue" .= joQueue jobOptions
+  , "custom" .= joCustom jobOptions
   ]
 
 -- brittany-disable-next-binding
