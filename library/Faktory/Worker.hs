@@ -58,7 +58,11 @@ instance ToJSON FailPayload where
   toEncoding = genericToEncoding $ aesonPrefix snakeCase
 
 runWorker
-  :: FromJSON args => Settings -> WorkerSettings -> (args -> IO ()) -> IO ()
+  :: (HasCallStack, FromJSON args)
+  => Settings
+  -> WorkerSettings
+  -> (args -> IO ())
+  -> IO ()
 runWorker settings workerSettings f = do
   workerId <- maybe randomWorkerId pure $ settingsId workerSettings
   client <- newClient settings $ Just workerId
@@ -75,7 +79,7 @@ runWorkerEnv f = do
   runWorker settings workerSettings f
 
 processorLoop
-  :: FromJSON arg
+  :: (HasCallStack, FromJSON arg)
   => Client
   -> Settings
   -> WorkerSettings
