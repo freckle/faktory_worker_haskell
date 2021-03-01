@@ -9,6 +9,7 @@ module Faktory.Client
   , command_
   , commandOK
   , commandJSON
+  , commandByteString
   ) where
 
 import Faktory.Prelude
@@ -120,15 +121,14 @@ closeClient Client {..} = withMVar clientConnection $ \conn -> do
 
 -- | Send a command, read and discard the response
 command_ :: Client -> ByteString -> [ByteString] -> IO ()
-command_ Client {..} cmd args = withMVar clientConnection $ \conn -> do
-  sendUnsafe clientSettings conn cmd args
-  void $ fromRightThrows =<< recvUnsafe clientSettings conn
+command_ client cmd args = do
+  response <- commandByteString client cmd args
+  void $ fromRightThrows response
 
 -- | Send a command, assert the response is @OK@
 commandOK :: HasCallStack => Client -> ByteString -> [ByteString] -> IO ()
-commandOK Client {..} cmd args = withMVar clientConnection $ \conn -> do
-  sendUnsafe clientSettings conn cmd args
-  response <- recvUnsafe clientSettings conn
+commandOK client cmd args = do
+  response <- commandByteString client cmd args
   unless (response == Right (Just "OK"))
     $ throwString
     $ "Server not OK. Reply was: "
@@ -141,10 +141,19 @@ commandJSON
   -> ByteString
   -> [ByteString]
   -> IO (Either String (Maybe a))
-commandJSON Client {..} cmd args = withMVar clientConnection $ \conn -> do
-  sendUnsafe clientSettings conn cmd args
-  emByteString <- recvUnsafe clientSettings conn
+commandJSON client cmd args = do
+  emByteString <- commandByteString client cmd args
   either (pure . Left) (pure . traverse eitherDecode) emByteString
+
+commandByteString
+  :: Client
+  -> ByteString
+  -> [ByteString]
+  -> IO (Either String (Maybe ByteString))
+commandByteString Client {..} cmd args = withMVar clientConnection $ \conn ->
+  do
+    sendUnsafe clientSettings conn cmd args
+    recvUnsafe clientSettings conn
 
 -- | Send a command to the Server socket
 --
