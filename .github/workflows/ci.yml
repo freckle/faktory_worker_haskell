@@ -19,10 +19,8 @@ jobs:
       matrix:
         stack-yaml:
           - stack.yaml
-          # - stack-lts-17.1.yaml
-          # - stack-lts-15.3.yaml
-          # - stack-lts-13.1.yaml
-          # - stack-lts-12.21.yaml
+          - stack-lts-17.1.yaml
+          - stack-lts-15.3.yaml
       fail-fast: false
 
     steps:
