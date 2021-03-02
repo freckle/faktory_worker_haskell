@@ -60,7 +60,7 @@ when:
     -Wno-prepositive-qualified-module
 
 dependencies:
-  - base >= 4.11 && < 5
+  - base >= 4.13 && < 5
 
 default-extensions:
   - BangPatterns
