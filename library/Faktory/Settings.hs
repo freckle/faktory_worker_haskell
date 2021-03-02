@@ -73,6 +73,7 @@ envWorkerSettings = do
     }
 
 newtype Queue = Queue Text
+  deriving stock (Eq, Show)
   deriving newtype (IsString, FromJSON, ToJSON)
 
 namespaceQueue :: Namespace -> Queue -> Queue
