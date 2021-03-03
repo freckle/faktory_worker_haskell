@@ -4,6 +4,7 @@ module Faktory.JobOptionsSpec
 
 import Faktory.Prelude
 
+import Data.Aeson
 import Data.Semigroup (Last(..))
 import Data.Time
   ( DiffTime
@@ -14,6 +15,7 @@ import Data.Time
   , secondsToDiffTime
   )
 import Data.Time.Calendar (fromGregorian)
+import Faktory.Job.Custom
 import Faktory.JobOptions
 import Faktory.Settings (Namespace(..), Queue(..))
 import Test.Hspec
@@ -26,6 +28,23 @@ spec = do
         let options = retry 1 <> retry 2
 
         fmap getLast (joRetry options) `shouldBe` Just 2
+
+      it "merges custom fields" $ do
+        let
+          custom1 = object ["a" .= True, "b" .= True, "c" .= True]
+          custom2 = object ["a" .= False, "d" .= False]
+          options = custom custom1 <> custom custom2
+
+        joCustom options
+          `shouldBe` Just
+                       (toCustom
+                       $ object
+                           [ "a" .= False
+                           , "b" .= True
+                           , "c" .= True
+                           , "d" .= False
+                           ]
+                       )
 
     describe "getAtFromSchedule" $ do
       it "sets at based on in" $ do

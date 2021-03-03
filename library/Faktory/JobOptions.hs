@@ -23,6 +23,7 @@ import Data.Aeson
 import Data.Semigroup (Last(..))
 import Data.Semigroup.Generic
 import Data.Time
+import Faktory.Job.Custom
 import Faktory.Settings (Namespace, Queue)
 import qualified Faktory.Settings as Settings
 import GHC.Generics
@@ -46,7 +47,7 @@ data JobOptions = JobOptions
   , joRetry :: Maybe (Last Int)
   , joQueue :: Maybe (Last Queue)
   , joSchedule :: Maybe (Last (Either UTCTime NominalDiffTime))
-  , joCustom :: Maybe (Last Value)
+  , joCustom :: Maybe Custom
   }
   deriving stock Generic
   deriving (Semigroup, Monoid) via GenericSemigroupMonoid JobOptions
@@ -92,4 +93,4 @@ in_ :: NominalDiffTime -> JobOptions
 in_ i = mempty { joSchedule = Just $ Last $ Right i }
 
 custom :: ToJSON a => a -> JobOptions
-custom v = mempty { joCustom = Just $ Last $ toJSON v }
+custom v = mempty { joCustom = Just $ toCustom v }
