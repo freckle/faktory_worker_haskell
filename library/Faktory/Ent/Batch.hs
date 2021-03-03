@@ -66,32 +66,20 @@ data BatchOptions arg = BatchOptions
   , boComplete :: Maybe (Last (Job arg))
   }
   deriving stock Generic
-  deriving Semigroup via GenericSemigroupMonoid (BatchOptions arg)
+  deriving (Semigroup, Monoid) via GenericSemigroupMonoid (BatchOptions arg)
 
 instance ToJSON arg => ToJSON (BatchOptions arg) where
   toJSON = genericToJSON $ aesonPrefix snakeCase
   toEncoding = genericToEncoding $ aesonPrefix snakeCase
 
 description :: Text -> BatchOptions arg
-description d = BatchOptions
-  { boDescription = Just $ Last d
-  , boSuccess = Nothing
-  , boComplete = Nothing
-  }
+description d = mempty { boDescription = Just $ Last d }
 
 complete :: Job arg -> BatchOptions arg
-complete job = BatchOptions
-  { boDescription = Nothing
-  , boSuccess = Nothing
-  , boComplete = Just $ Last job
-  }
+complete job = mempty { boComplete = Just $ Last job }
 
 success :: Job arg -> BatchOptions arg
-success job = BatchOptions
-  { boDescription = Nothing
-  , boSuccess = Just $ Last job
-  , boComplete = Nothing
-  }
+success job = mempty { boSuccess = Just $ Last job }
 
 runBatchT :: ToJSON arg => BatchOptions arg -> Producer -> BatchT a -> IO a
 runBatchT options producer (BatchT f) = do
