@@ -15,7 +15,7 @@
 -- -- you would pass to 'perform' the Job.
 -- onComplete <- buildJob mempty producer myJob
 --
--- 'runBatchT' ('complete' onComplete <> 'description' "My Batch") producer $ do
+-- 'runBatch' ('complete' onComplete <> 'description' "My Batch") producer $ do
 --   -- Use 'batchPerform' instead of 'perform'
 --   void $ 'batchPerform' mempty producer myBatchedJob1
 --   void $ 'batchPerform' mempty producer myBatchedJob2
@@ -33,8 +33,8 @@ module Faktory.Ent.Batch
     , success
 
     -- * Running
-    , runBatchT
-    , BatchT
+    , runBatch
+    , Batch
     , batchPerform
     )
 where
@@ -54,7 +54,7 @@ import Faktory.Producer
 import GHC.Generics
 import GHC.Stack
 
-newtype BatchT a = BatchT (ReaderT BatchId IO a)
+newtype Batch a = Batch (ReaderT BatchId IO a)
   deriving newtype (Functor, Applicative, Monad, MonadIO, MonadReader BatchId)
 
 newtype BatchId = BatchId Text
@@ -81,8 +81,8 @@ complete job = mempty { boComplete = Just $ Last job }
 success :: Job arg -> BatchOptions arg
 success job = mempty { boSuccess = Just $ Last job }
 
-runBatchT :: ToJSON arg => BatchOptions arg -> Producer -> BatchT a -> IO a
-runBatchT options producer (BatchT f) = do
+runBatch :: ToJSON arg => BatchOptions arg -> Producer -> Batch a -> IO a
+runBatch options producer (Batch f) = do
   bid <- newBatch producer options
   result <- runReaderT f bid
   result <$ commitBatch producer bid
@@ -94,10 +94,10 @@ newtype CustomBatchId = CustomBatchId
   deriving anyclass ToJSON
 
 batchPerform
-  :: (HasCallStack, ToJSON arg) => JobOptions -> Producer -> arg -> BatchT JobId
+  :: (HasCallStack, ToJSON arg) => JobOptions -> Producer -> arg -> Batch JobId
 batchPerform options producer arg = do
   bid <- ask
-  BatchT $ lift $ perform (options <> custom (CustomBatchId bid)) producer arg
+  Batch $ lift $ perform (options <> custom (CustomBatchId bid)) producer arg
 
 newBatch :: ToJSON arg => Producer -> BatchOptions arg -> IO BatchId
 newBatch producer options = do
