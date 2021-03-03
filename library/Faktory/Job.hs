@@ -84,22 +84,18 @@ jobArg :: Job arg -> arg
 jobArg Job {..} = NE.head jobArgs
 
 instance ToJSON args => ToJSON (Job args) where
-  toJSON Job {..} = object
-    [ "jid" .= jobJid
-    , "at" .= jobAt
-    , "args" .= jobArgs
-    , "jobtype" .= joJobtype jobOptions
-    , "retry" .= joRetry jobOptions
-    , "queue" .= joQueue jobOptions
-    ]
-  toEncoding Job {..} = pairs $ mconcat
-    [ "jid" .= jobJid
-    , "at" .= jobAt
-    , "args" .= jobArgs
-    , "jobtype" .= joJobtype jobOptions
-    , "retry" .= joRetry jobOptions
-    , "queue" .= joQueue jobOptions
-    ]
+  toJSON = object . toPairs
+  toEncoding = pairs . mconcat . toPairs
+
+toPairs :: (KeyValue a, ToJSON arg) => Job arg -> [a]
+toPairs Job {..} =
+  [ "jid" .= jobJid
+  , "at" .= jobAt
+  , "args" .= jobArgs
+  , "jobtype" .= joJobtype jobOptions
+  , "retry" .= joRetry jobOptions
+  , "queue" .= joQueue jobOptions
+  ]
 
 -- brittany-disable-next-binding
 
