@@ -97,7 +97,7 @@ batchPerform
   :: (HasCallStack, ToJSON arg) => JobOptions -> Producer -> arg -> BatchT JobId
 batchPerform options producer arg = do
   bid <- ask
-  BatchT $ lift $ perform (custom (CustomBatchId bid) <> options) producer arg
+  BatchT $ lift $ perform (options <> custom (CustomBatchId bid)) producer arg
 
 newBatch :: ToJSON arg => Producer -> BatchOptions arg -> IO BatchId
 newBatch producer options = do
