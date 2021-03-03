@@ -53,8 +53,8 @@ spec = describe "Faktory" $ do
         void $ runBatch (success c) producer $ do
           void $ batchPerform @Text mempty producer "a"
           void $ batchPerform @Text mempty producer "b"
-          -- Give a little time for Faktory to fire the callback
-          liftIO $ threadDelay 1000000
+        -- Give a little time for Faktory to fire the callback
+        liftIO $ threadDelay 500000
 
       jobs `shouldMatchList` ["a", "b", "c", "HALT"]
 
@@ -64,7 +64,7 @@ spec = describe "Faktory" $ do
         void $ runBatch (success c) producer $ do
           void $ batchPerform @Text mempty producer "BOOM"
           void $ batchPerform @Text mempty producer "b"
-          liftIO $ threadDelay 1000000
+        liftIO $ threadDelay 500000
 
       jobs `shouldMatchList` ["BOOM", "b", "HALT"]
 
@@ -74,7 +74,7 @@ spec = describe "Faktory" $ do
         void $ runBatch (complete c) producer $ do
           void $ batchPerform @Text mempty producer "a"
           void $ batchPerform @Text mempty producer "b"
-          liftIO $ threadDelay 1000000
+        liftIO $ threadDelay 500000
 
       jobs `shouldMatchList` ["a", "b", "c", "HALT"]
 
@@ -84,7 +84,7 @@ spec = describe "Faktory" $ do
         void $ runBatch (complete c) producer $ do
           void $ batchPerform @Text mempty producer "BOOM"
           void $ batchPerform @Text mempty producer "b"
-          liftIO $ threadDelay 1000000
+        liftIO $ threadDelay 500000
 
       jobs `shouldMatchList` ["BOOM", "b", "c", "HALT"]
 
@@ -96,12 +96,11 @@ spec = describe "Faktory" $ do
         void $ runBatch options producer $ do
           void $ batchPerform @Text mempty producer "a"
           void $ batchPerform @Text mempty producer "b"
-          liftIO $ threadDelay 1000000
+        liftIO $ threadDelay 500000
 
       jobs `shouldMatchList` ["a", "b", "d", "HALT"]
 
-    -- https://github.com/contribsys/faktory/issues/340
-    xit "runs success and complete if all Jobs were successful" $ do
+    it "runs success and complete if all Jobs were successful" $ do
       jobs <- workerTestCase $ \producer -> do
         c <- buildJob @Text mempty producer "c"
         d <- buildJob @Text mempty producer "d"
@@ -109,7 +108,7 @@ spec = describe "Faktory" $ do
         void $ runBatch options producer $ do
           void $ batchPerform @Text mempty producer "a"
           void $ batchPerform @Text mempty producer "b"
-          liftIO $ threadDelay 1000000
+        liftIO $ threadDelay 500000
 
       jobs `shouldMatchList` ["a", "b", "c", "d", "HALT"]
 
