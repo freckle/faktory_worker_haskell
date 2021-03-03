@@ -1,6 +1,6 @@
 ---
 name: faktory
-version: 1.0.1.6
+version: 1.0.2.0
 category: Network
 author: Freckle Engineering
 maintainer: engineering@freckle.com
@@ -132,10 +132,10 @@ tests:
     ghc-options: -rtsopts
     dependencies:
       - faktory
-      - aeson
+      - aeson < 1.6
       - async
       - hspec
-      - time
+      - time < 1.12
 
   readme:
     main: README.lhs

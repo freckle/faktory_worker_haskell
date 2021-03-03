@@ -1,11 +1,16 @@
-## [*Unreleased*](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.1.6...main)
+## [*Unreleased*](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.2.0...main)
 
 None
+
+## [v1.0.2.0](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.1.6...v1.0.2.0)
+
+- Partial `BATCH` support (Enterprise only)
+- Support for `custom` field in Job payloads
+- Lower-level `buildJob` and `commandByteString` functions
 
 ## [v1.0.1.6](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.1.5...v1.0.1.6)
 
 - Relax dependencies upper bounds
-
 
 ## [v1.0.1.5](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.1.4...v1.0.1.5)
 
