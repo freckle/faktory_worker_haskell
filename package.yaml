@@ -100,12 +100,12 @@ library:
     - mtl
     - network
     - random < 1.3
-    - safe-exceptions
     - semigroups
     - scanner
     - text > 1.2 && < 1.4
     - time < 1.12
     - unix
+    - unliftio
     - unordered-containers
 
 executables:
@@ -115,7 +115,16 @@ executables:
     dependencies:
       - aeson < 1.6
       - faktory
-      - safe-exceptions
+      - unliftio
+
+  faktory-example-producer-conduit:
+    main: Main.hs
+    source-dirs: examples/producer-conduit
+    dependencies:
+      - aeson < 1.6
+      - conduit
+      - faktory
+      - unliftio
 
   faktory-example-consumer:
     main: Main.hs
@@ -123,7 +132,7 @@ executables:
     dependencies:
       - aeson < 1.6
       - faktory
-      - safe-exceptions
+      - unliftio
 
 tests:
   hspec:

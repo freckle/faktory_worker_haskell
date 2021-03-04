@@ -100,7 +100,7 @@ processorLoop client settings workerSettings f = do
     Right Nothing -> threadDelaySeconds $ settingsIdleDelay workerSettings
     Right (Just job) ->
       processAndAck job
-        `catches` [ Handler $ \(ex :: WorkerHalt) -> throw ex
+        `catches` [ Handler $ \(ex :: WorkerHalt) -> throwIO ex
                   , Handler $ \(ex :: SomeException) ->
                     failJob client job $ T.pack $ show ex
                   ]

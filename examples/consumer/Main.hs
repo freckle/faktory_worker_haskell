@@ -2,10 +2,10 @@ module Main (main) where
 
 import Prelude
 
-import Control.Exception.Safe
 import Data.Aeson
 import Faktory.Worker
 import GHC.Generics
+import UnliftIO.Exception (throwString)
 
 -- | Must match examples/producer
 newtype Job = Job { jobMessage :: String }

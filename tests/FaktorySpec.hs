@@ -50,7 +50,7 @@ spec = describe "Faktory" $ do
     it "runs a success job if all in-batch jobs succeed" $ do
       jobs <- workerTestCase $ \producer -> do
         c <- buildJob @Text mempty producer "c"
-        void $ runBatch (success c) producer $ do
+        void $ runBatchT (success c) producer $ do
           void $ batchPerform @Text mempty producer "a"
           void $ batchPerform @Text mempty producer "b"
         -- Give a little time for Faktory to fire the callback
@@ -61,7 +61,7 @@ spec = describe "Faktory" $ do
     it "does not run a success job if all jobs don't succeed" $ do
       jobs <- workerTestCase $ \producer -> do
         c <- buildJob @Text mempty producer "c"
-        void $ runBatch (success c) producer $ do
+        void $ runBatchT (success c) producer $ do
           void $ batchPerform @Text mempty producer "BOOM"
           void $ batchPerform @Text mempty producer "b"
         liftIO $ threadDelay 500000
@@ -71,7 +71,7 @@ spec = describe "Faktory" $ do
     it "runs a job on complete" $ do
       jobs <- workerTestCase $ \producer -> do
         c <- buildJob @Text mempty producer "c"
-        void $ runBatch (complete c) producer $ do
+        void $ runBatchT (complete c) producer $ do
           void $ batchPerform @Text mempty producer "a"
           void $ batchPerform @Text mempty producer "b"
         liftIO $ threadDelay 500000
@@ -81,7 +81,7 @@ spec = describe "Faktory" $ do
     it "runs a job on complete, even if in-batch jobs fail" $ do
       jobs <- workerTestCase $ \producer -> do
         c <- buildJob @Text mempty producer "c"
-        void $ runBatch (complete c) producer $ do
+        void $ runBatchT (complete c) producer $ do
           void $ batchPerform @Text mempty producer "BOOM"
           void $ batchPerform @Text mempty producer "b"
         liftIO $ threadDelay 500000
@@ -93,7 +93,7 @@ spec = describe "Faktory" $ do
         c <- buildJob @Text mempty producer "c"
         d <- buildJob @Text mempty producer "d"
         let options = description "foo" <> success c <> success d
-        void $ runBatch options producer $ do
+        void $ runBatchT options producer $ do
           void $ batchPerform @Text mempty producer "a"
           void $ batchPerform @Text mempty producer "b"
         liftIO $ threadDelay 500000
@@ -105,7 +105,7 @@ spec = describe "Faktory" $ do
         c <- buildJob @Text mempty producer "c"
         d <- buildJob @Text mempty producer "d"
         let options = description "foo" <> complete c <> success d
-        void $ runBatch options producer $ do
+        void $ runBatchT options producer $ do
           void $ batchPerform @Text mempty producer "a"
           void $ batchPerform @Text mempty producer "b"
         liftIO $ threadDelay 500000
@@ -130,8 +130,8 @@ workerTestCaseWith editSettings run = do
   processedJobs <- newMVar []
   a <- async $ runWorker settings workerSettings $ \job -> do
     modifyMVar_ processedJobs $ pure . (job :)
-    when (job == "BOOM") $ throw $ userError "BOOM"
-    when (job == "HALT") $ throw WorkerHalt
+    when (job == "BOOM") $ throwIO $ userError "BOOM"
+    when (job == "HALT") $ throwIO WorkerHalt
 
   bracket newProducerEnv closeProducer $ \producer -> do
     run producer

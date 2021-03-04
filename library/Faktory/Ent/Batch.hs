@@ -15,7 +15,7 @@
 -- -- you would pass to 'perform' the Job.
 -- onComplete <- buildJob mempty producer myJob
 --
--- 'runBatch' ('complete' onComplete <> 'description' "My Batch") producer $ do
+-- 'runBatchT' ('complete' onComplete <> 'description' "My Batch") producer $ do
 --   -- Use 'batchPerform' instead of 'perform'
 --   void $ 'batchPerform' mempty producer myBatchedJob1
 --   void $ 'batchPerform' mempty producer myBatchedJob2
@@ -33,8 +33,8 @@ module Faktory.Ent.Batch
     , success
 
     -- * Running
-    , runBatch
-    , Batch
+    , runBatchT
+    , BatchT
     , batchPerform
     )
 where
@@ -54,8 +54,15 @@ import Faktory.Producer
 import GHC.Generics
 import GHC.Stack
 
-newtype Batch a = Batch (ReaderT BatchId IO a)
-  deriving newtype (Functor, Applicative, Monad, MonadIO, MonadReader BatchId)
+newtype BatchT m a = BatchT (ReaderT BatchId m a)
+  deriving newtype
+    ( Functor
+    , Applicative
+    , Monad
+    , MonadIO
+    , MonadReader BatchId
+    , MonadTrans
+    )
 
 newtype BatchId = BatchId Text
   deriving newtype ToJSON
@@ -81,8 +88,13 @@ complete job = mempty { boComplete = Just $ Last job }
 success :: Job arg -> BatchOptions arg
 success job = mempty { boSuccess = Just $ Last job }
 
-runBatch :: ToJSON arg => BatchOptions arg -> Producer -> Batch a -> IO a
-runBatch options producer (Batch f) = do
+runBatchT
+  :: (MonadIO m, ToJSON arg)
+  => BatchOptions arg
+  -> Producer
+  -> BatchT m a
+  -> m a
+runBatchT options producer (BatchT f) = do
   bid <- newBatch producer options
   result <- runReaderT f bid
   result <$ commitBatch producer bid
@@ -94,25 +106,29 @@ newtype CustomBatchId = CustomBatchId
   deriving anyclass ToJSON
 
 batchPerform
-  :: (HasCallStack, ToJSON arg) => JobOptions -> Producer -> arg -> Batch JobId
+  :: forall arg m
+   . (HasCallStack, MonadIO m, ToJSON arg)
+  => JobOptions
+  -> Producer
+  -> arg
+  -> BatchT m JobId
 batchPerform options producer arg = do
   bid <- ask
-  Batch $ lift $ perform (options <> custom (CustomBatchId bid)) producer arg
+  liftIO $ perform (options <> custom (CustomBatchId bid)) producer arg
 
-newBatch :: ToJSON arg => Producer -> BatchOptions arg -> IO BatchId
+newBatch
+  :: (MonadIO m, ToJSON arg) => Producer -> BatchOptions arg -> m BatchId
 newBatch producer options = do
-  result <- commandByteString
-    (producerClient producer)
-    "BATCH NEW"
-    [encode options]
+  result <- liftIO
+    $ commandByteString (producerClient producer) "BATCH NEW" [encode options]
   case result of
     Left err -> batchNewError err
     Right Nothing -> batchNewError "No BatchId returned"
     Right (Just bs) -> pure $ BatchId $ decodeUtf8 $ BSL.toStrict bs
   where batchNewError err = throwString $ "BATCH NEW error: " <> err
 
-commitBatch :: Producer -> BatchId -> IO ()
-commitBatch producer (BatchId bid) = command_
+commitBatch :: MonadIO m => Producer -> BatchId -> m ()
+commitBatch producer (BatchId bid) = liftIO $ command_
   (producerClient producer)
   "BATCH COMMIT"
   [BSL.fromStrict $ encodeUtf8 bid]
