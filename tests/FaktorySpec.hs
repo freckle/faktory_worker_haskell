@@ -8,6 +8,7 @@ import Control.Concurrent (threadDelay)
 import Control.Concurrent.Async
 import Control.Concurrent.MVar
 import Control.Monad.IO.Class (liftIO)
+import Data.Time (getCurrentTime)
 import Faktory.Ent.Batch
 import Faktory.Job
 import Faktory.Producer
@@ -30,6 +31,19 @@ spec = describe "Faktory" $ do
       void $ perform @Text (retry 0) producer "b"
 
     jobs `shouldMatchList` ["a", "b", "HALT"]
+
+  it "can push Jobs to run at a given time" $ do
+    now <- getCurrentTime
+    jobs <- workerTestCase $ \producer -> do
+      void $ perform @Text (at now) producer "a"
+
+    jobs `shouldMatchList` ["a", "HALT"]
+
+  it "can push Jobs to run in a given amount of seconds" $ do
+    jobs <- workerTestCase $ \producer -> do
+      void $ perform @Text (in_ 0) producer "a"
+
+    jobs `shouldMatchList` ["a", "HALT"]
 
   it "correctly handles fetch timeouts" $ do
     -- Pause longer than the fetch timeout

@@ -60,7 +60,7 @@ instance FromJSON JobOptions where
       <$> o .:? "jobtype"
       <*> o .:? "retry"
       <*> o .:? "queue"
-      <*> (fmap (Last . Right) <$> o .:? "at")
+      <*> (fmap (Last . Left) <$> o .:? "at")
       <*> o .:? "custom"
 
 getAtFromSchedule :: JobOptions -> IO (Maybe UTCTime)
