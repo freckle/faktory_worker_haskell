@@ -1,6 +1,10 @@
-## [*Unreleased*](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.2.0...main)
+## [*Unreleased*](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.2.1...main)
 
 None
+
+## [v1.0.2.1](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.2.0...v1.0.2.1)
+
+- Fix bug in `at` parsing of consumed Job payloads
 
 ## [v1.0.2.0](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.1.6...v1.0.2.0)
 
