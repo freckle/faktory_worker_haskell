@@ -1,6 +1,6 @@
 ---
 name: faktory
-version: 1.0.2.1
+version: 1.0.2.2
 category: Network
 author: Freckle Engineering
 maintainer: engineering@freckle.com
@@ -94,9 +94,9 @@ library:
     - aeson-casing
     - bytestring < 0.12
     - connection
-    - cryptonite < 0.29
+    - cryptonite < 0.30
     - megaparsec < 9.1
-    - memory
+    - memory < 0.17
     - mtl
     - network
     - random < 1.3
