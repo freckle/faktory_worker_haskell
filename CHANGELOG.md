@@ -1,6 +1,10 @@
-## [*Unreleased*](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.2.3...main)
+## [*Unreleased*](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.3.0...main)
 
 None
+
+## [v1.0.3.0](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.2.3...v1.0.3.0)
+
+- Support for `TRACK` (Enterprise only)
 
 ## [v1.0.2.3](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.2.2...v1.0.2.3)
 
