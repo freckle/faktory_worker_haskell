@@ -4,7 +4,7 @@ cabal-version: 1.18
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 883fecbeab7250855b99c60f1429e15babb4176004a5110847a403229173c608
+-- hash: 636e85068008823ca5f9c02bc51f222d5536942631d231394ee0d90045976f62
 
 name:           faktory
 version:        1.0.2.3
@@ -59,9 +59,11 @@ library
       Faktory.Client
       Faktory.Connection
       Faktory.Ent.Batch
+      Faktory.Ent.Tracking
       Faktory.Job
       Faktory.Job.Custom
       Faktory.JobOptions
+      Faktory.JobState
       Faktory.Prelude
       Faktory.Producer
       Faktory.Protocol
@@ -103,6 +105,7 @@ library
     , bytestring
     , connection
     , cryptonite
+    , errors
     , megaparsec
     , memory
     , mtl
@@ -205,6 +208,7 @@ test-suite hspec
   other-modules:
       Faktory.ConnectionSpec
       Faktory.Ent.BatchSpec
+      Faktory.Ent.TrackingSpec
       Faktory.JobOptionsSpec
       Faktory.Test
       FaktorySpec

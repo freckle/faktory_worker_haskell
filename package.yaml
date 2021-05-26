@@ -95,6 +95,7 @@ library:
     - bytestring
     - connection
     - cryptonite
+    - errors
     - megaparsec
     - memory
     - mtl
