@@ -25,19 +25,18 @@
 -- Jobs to the Batch. PRs welcome.
 --
 module Faktory.Ent.Batch
-    (
-    -- * Options
-      BatchOptions
-    , description
-    , complete
-    , success
+  (
+  -- * Options
+    BatchOptions
+  , description
+  , complete
+  , success
 
-    -- * Running
-    , runBatch
-    , Batch
-    , batchPerform
-    )
-where
+  -- * Running
+  , runBatch
+  , Batch
+  , batchPerform
+  ) where
 
 import Faktory.Prelude
 
