@@ -36,6 +36,11 @@ module Faktory.Ent.Batch
   , runBatch
   , Batch
   , batchPerform
+
+  -- * Low-level
+  , CustomBatchId(..)
+  , newBatch
+  , commitBatch
   ) where
 
 import Faktory.Prelude
