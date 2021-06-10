@@ -1,6 +1,10 @@
-## [*Unreleased*](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.3.0...main)
+## [*Unreleased*](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.3.1...main)
 
 None
+
+## [v1.0.3.1](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.3.0...v1.0.3.1)
+
+- Export lower-level `BATCH` functions
 
 ## [v1.0.3.0](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.2.3...v1.0.3.0)
 
