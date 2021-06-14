@@ -5,7 +5,9 @@ module Faktory.Ent.BatchSpec
 import Faktory.Test
 
 import Control.Concurrent (threadDelay)
+import Control.Monad.Reader
 import Faktory.Ent.Batch
+import qualified Faktory.Ent.Batch.Status as BatchStatus
 
 spec :: Spec
 spec = do
@@ -74,3 +76,22 @@ spec = do
         liftIO $ threadDelay 500000
 
       jobs `shouldMatchList` ["a", "b", "c", "d", "HALT"]
+
+    it "supports BATCH STATUS" $ do
+      batchId <- withWorker id $ withProducer $ \producer -> do
+        c <- buildJob @Text mempty producer "c"
+        d <- buildJob @Text mempty producer "d"
+        let options = description "foo" <> complete c <> success d
+        batchId <- runBatch options producer $ do
+          void $ batchPerform @Text mempty producer "a"
+          void $ batchPerform @Text mempty producer "b"
+          ask
+        batchId <$ liftIO (threadDelay 500000)
+
+      emStatus <- bracket newProducerEnv closeProducer
+        $ \producer -> BatchStatus.batchStatus producer batchId
+
+      fmap (fmap BatchStatus.description) emStatus `shouldBe` Right (Just "foo")
+      fmap (fmap BatchStatus.total) emStatus `shouldBe` Right (Just 2)
+      fmap (fmap BatchStatus.pending) emStatus `shouldBe` Right (Just 0)
+      fmap (fmap BatchStatus.failed) emStatus `shouldBe` Right (Just 0)

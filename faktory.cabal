@@ -4,7 +4,7 @@ cabal-version: 1.18
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 76c9c3936ed963ad73db63ab0896b13ea2dd4e0554222ccdfd7850e0a29ac352
+-- hash: 6f4a3ffef9141ff96c50ea7470ff7bde2223347fad180d1d1cb3922a879ae2a6
 
 name:           faktory
 version:        1.0.3.1
@@ -59,6 +59,7 @@ library
       Faktory.Client
       Faktory.Connection
       Faktory.Ent.Batch
+      Faktory.Ent.Batch.Status
       Faktory.Ent.Tracking
       Faktory.Job
       Faktory.Job.Custom
@@ -246,6 +247,7 @@ test-suite hspec
     , base >=4.13 && <5
     , faktory
     , hspec
+    , mtl
     , time
   if impl(ghc >= 8.10)
     ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module

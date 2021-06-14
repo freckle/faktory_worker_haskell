@@ -6,6 +6,7 @@
 module Faktory.Job.Custom
     ( Custom
     , toCustom
+    , fromCustom
     ) where
 
 import Faktory.Prelude
@@ -19,6 +20,12 @@ newtype Custom = Custom Value
 
 toCustom :: ToJSON a => a -> Custom
 toCustom = Custom . toJSON
+
+-- | Read a 'Custom' value to a type using 'FromJSON'
+fromCustom :: FromJSON a => Custom -> Either String a
+fromCustom (Custom v) = case fromJSON v of
+  Error e -> Left e
+  Success a -> Right a
 
 instance Semigroup Custom where
   (Custom (Object a)) <> (Custom (Object b)) =
