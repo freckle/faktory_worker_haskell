@@ -79,9 +79,10 @@ newtype MyJob = MyJob
 ### Worker
 
 ```haskell
-workerMain = runWorkerEnv $ \job ->
+workerMain = runWorkerEnv $ \job -> do
   -- Process your Job here
-  putStrLn $ myJobMessage job
+  putStrLn $ jobJid job
+  putStrLn $ myJobMessage $ jobArg job
 
   -- If any exception is thrown, the job will be marked as Failed in Faktory
   -- and retried. Note: you will not otherwise hear about any such exceptions,

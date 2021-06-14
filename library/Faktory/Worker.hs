@@ -7,6 +7,7 @@ module Faktory.Worker
   ( WorkerHalt(..)
   , runWorker
   , runWorkerEnv
+  , jobArg
   )
 where
 
@@ -61,7 +62,7 @@ runWorker
   :: (HasCallStack, FromJSON args)
   => Settings
   -> WorkerSettings
-  -> (args -> IO ())
+  -> (Job args -> IO ())
   -> IO ()
 runWorker settings workerSettings f = do
   workerId <- maybe randomWorkerId pure $ settingsId workerSettings
@@ -72,7 +73,7 @@ runWorker settings workerSettings f = do
     `catch` (\(_ex :: WorkerHalt) -> pure ())
     `finally` (killThread beatThreadId >> closeClient client)
 
-runWorkerEnv :: FromJSON args => (args -> IO ()) -> IO ()
+runWorkerEnv :: FromJSON args => (Job args -> IO ()) -> IO ()
 runWorkerEnv f = do
   settings <- envSettings
   workerSettings <- envWorkerSettings
@@ -83,13 +84,13 @@ processorLoop
   => Client
   -> Settings
   -> WorkerSettings
-  -> (arg -> IO ())
+  -> (Job arg -> IO ())
   -> IO ()
 processorLoop client settings workerSettings f = do
   let
     namespace = connectionInfoNamespace $ settingsConnection settings
     processAndAck job = do
-      f $ jobArg job
+      f job
       ackJob client job
 
   emJob <- fetchJob client $ namespaceQueue namespace $ settingsQueue
