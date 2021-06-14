@@ -16,7 +16,7 @@ main :: IO ()
 main = do
   putStrLn "Starting consumer loop"
   runWorkerEnv $ \job -> do
-    let message = jobMessage job
+    let message = jobMessage $ jobArg job
 
     if message == "BOOM"
       then throwString "Producer exception: BOOM"

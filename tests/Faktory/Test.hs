@@ -33,7 +33,8 @@ workerTestCaseWith editSettings run = do
   workerSettings <- editSettings <$> envWorkerSettings
 
   processedJobs <- newMVar []
-  a <- async $ runWorker settings workerSettings $ \job -> do
+  a <- async $ runWorker settings workerSettings $ \faktoryJob -> do
+    let job = jobArg faktoryJob
     modifyMVar_ processedJobs $ pure . (job :)
     when (job == "BOOM") $ throw $ userError "BOOM"
     when (job == "HALT") $ throw WorkerHalt
