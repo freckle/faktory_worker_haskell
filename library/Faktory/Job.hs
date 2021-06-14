@@ -14,6 +14,7 @@ module Faktory.Job
   , newJob
   , jobJid
   , jobArg
+  , jobOptions
   ) where
 
 import Faktory.Prelude

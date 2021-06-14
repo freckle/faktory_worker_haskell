@@ -38,6 +38,7 @@ module Faktory.Ent.Batch
   , batchPerform
 
   -- * Low-level
+  , BatchId(..)
   , CustomBatchId(..)
   , newBatch
   , commitBatch
@@ -62,7 +63,7 @@ newtype Batch a = Batch (ReaderT BatchId IO a)
   deriving newtype (Functor, Applicative, Monad, MonadIO, MonadReader BatchId)
 
 newtype BatchId = BatchId Text
-  deriving newtype ToJSON
+  deriving newtype (FromJSON, ToJSON)
 
 data BatchOptions arg = BatchOptions
   { boDescription :: Maybe (Last Text)
