@@ -11,13 +11,13 @@ import Faktory.Ent.Tracking
 
 spec :: Spec
 spec = do
-  describe "trackPerform" $ do
-    it "enqueues with TRACK so we can get details" $ do
+  describe "tracked" $ do
+    it "adds custom option so we can use TRACK GET later" $ do
       var <- newMVar []
       void $ workerTestCase $ \producer -> do
-        a <- trackPerform @Text mempty producer "a"
+        a <- perform @Text tracked producer "a"
         modifyMVar_ var $ pure . (<> [a])
-        b <- trackPerform @Text mempty producer "BOOM"
+        b <- perform @Text tracked producer "BOOM"
         modifyMVar_ var $ pure . (<> [b])
 
       enqueuedJobIds <- readMVar var
@@ -40,7 +40,7 @@ spec = do
     it "updates Job Details" $ do
       var <- newMVar []
       void $ workerTestCase $ \producer -> do
-        a <- trackPerform @Text mempty producer "a"
+        a <- perform @Text tracked producer "a"
         modifyMVar_ var $ pure . (<> [a])
 
       enqueuedJobIds <- readMVar var
