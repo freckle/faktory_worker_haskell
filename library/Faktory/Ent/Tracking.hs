@@ -4,6 +4,7 @@
 --
 module Faktory.Ent.Tracking
   ( CustomTrack(..)
+  , tracked
   , trackPerform
 
   , JobDetails(..)
@@ -36,6 +37,9 @@ newtype CustomTrack = CustomTrack
   deriving stock Generic
   deriving anyclass ToJSON
 
+tracked :: JobOptions
+tracked = custom (CustomTrack 1)
+
 -- | 'perform', but adding @{ custom: { track: 1 } }@
 --
 -- Equivalent to:
@@ -47,6 +51,7 @@ newtype CustomTrack = CustomTrack
 trackPerform
   :: (HasCallStack, ToJSON arg) => JobOptions -> Producer -> arg -> IO JobId
 trackPerform options = perform (options <> custom (CustomTrack 1))
+{-# DEPRECATED trackPerform "Use ‘perform (options <> tracked)’ instead" #-}
 
 data JobDetails = JobDetails
   { jdJid :: JobId
