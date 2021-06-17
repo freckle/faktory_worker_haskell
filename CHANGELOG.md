@@ -1,6 +1,19 @@
-## [*Unreleased*](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.3.1...main)
+## [*Unreleased*](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.0.0...main)
 
 None
+
+## [v1.1.0.0](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.3.1...v1.1.0.0)
+
+- Pass value of type `Job arg` (not `arg`) to run-worker loops
+
+  This will give consumer loops access to details like `jobJid` and
+  `jobOptions`, so they can (for example) call `TRACK SET`.
+
+  Call `jobArg` to get back what you were getting before this change.
+
+- Support `BATCH STATUS`
+- Add `tracked` Job Option
+- Deprecate `trackPerform` (use `perform (options <> tracked)` instead)
 
 ## [v1.0.3.1](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.3.0...v1.0.3.1)
 
