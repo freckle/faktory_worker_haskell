@@ -15,6 +15,7 @@ module Faktory.Job
   , jobJid
   , jobArg
   , jobOptions
+  , jobRetriesRemaining
   ) where
 
 import Faktory.Prelude
@@ -22,9 +23,11 @@ import Faktory.Prelude
 import Data.Aeson
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NE
+import Data.Semigroup (Last(..))
 import Data.Time (UTCTime)
 import Faktory.Client (Client(..))
 import Faktory.Connection (ConnectionInfo(..))
+import Faktory.JobFailure
 import Faktory.JobOptions
 import Faktory.Producer (Producer(..), pushJob)
 import Faktory.Settings (Namespace, Settings(..))
@@ -39,6 +42,7 @@ data Job arg = Job
   -- ^ Faktory needs to serialize args as a list, but we like a single-argument
   -- interface so that's what we expose. See @'jobArg'@.
   , jobOptions :: JobOptions
+  , jobFailure :: Maybe JobFailure
   }
 
 -- | Perform a Job with the given options
@@ -85,10 +89,17 @@ newJob arg = do
     , jobAt = Nothing
     , jobArgs = pure arg
     , jobOptions = jobtype "Default"
+    , jobFailure = Nothing
     }
 
 jobArg :: Job arg -> arg
 jobArg Job {..} = NE.head jobArgs
+
+jobRetriesRemaining :: Job arg -> Int
+jobRetriesRemaining job = max 0 $ enqueuedRetry - attemptCount
+ where
+  enqueuedRetry = maybe faktoryDefaultRetry getLast $ joRetry $ jobOptions job
+  attemptCount = maybe 0 ((+ 1) . jfRetryCount) $ jobFailure job
 
 instance ToJSON args => ToJSON (Job args) where
   toJSON = object . toPairs
@@ -113,5 +124,13 @@ instance FromJSON args => FromJSON (Job args) where
     <*> o .:? "at"
     <*> o .: "args"
     <*> parseJSON (Object o)
+    <*> o .:? "failure"
 
 type JobId = String
+
+-- | https://github.com/contribsys/faktory/wiki/Job-Errors#the-process
+--
+-- > By default Faktory will retry a job 25 times
+--
+faktoryDefaultRetry :: Int
+faktoryDefaultRetry = 25
