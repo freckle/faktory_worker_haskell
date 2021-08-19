@@ -1,6 +1,10 @@
-## [*Unreleased*](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.0.0...main)
+## [*Unreleased*](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.1.0...main)
 
 None
+
+## [v1.1.1.0](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.0.1...v1.1.1.0)
+
+- Add `jobRemainingRetries`
 
 ## [v1.1.0.0](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.0.3.1...v1.1.0.0)
 
