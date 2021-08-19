@@ -134,6 +134,7 @@ tests:
     dependencies:
       - faktory
       - aeson
+      - aeson-qq
       - async
       - hspec
       - mtl

@@ -4,7 +4,7 @@ cabal-version: 1.18
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a3c30d707e3f30cd0d1247e8ebf59d018160a9b448b3608e07607b126f30a7a4
+-- hash: 00ab48e4ab12fbd541c603178f5fa91fa1ab32169c371e1f12f1d9f441a6e076
 
 name:           faktory
 version:        1.1.0.0
@@ -63,6 +63,7 @@ library
       Faktory.Ent.Tracking
       Faktory.Job
       Faktory.Job.Custom
+      Faktory.JobFailure
       Faktory.JobOptions
       Faktory.JobState
       Faktory.Prelude
@@ -211,6 +212,7 @@ test-suite hspec
       Faktory.Ent.BatchSpec
       Faktory.Ent.TrackingSpec
       Faktory.JobOptionsSpec
+      Faktory.JobSpec
       Faktory.Test
       FaktorySpec
       Paths_faktory
@@ -243,6 +245,7 @@ test-suite hspec
   ghc-options: -Weverything -Wno-missing-exported-signatures -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-missing-import-lists -rtsopts
   build-depends:
       aeson
+    , aeson-qq
     , async
     , base >=4.13 && <5
     , faktory
