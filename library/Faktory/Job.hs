@@ -96,10 +96,10 @@ jobArg :: Job arg -> arg
 jobArg Job {..} = NE.head jobArgs
 
 jobRetriesRemaining :: Job arg -> Int
-jobRetriesRemaining job = max 0 $ enqueuedRetry - occurredRetries
+jobRetriesRemaining job = max 0 $ enqueuedRetry - attemptCount
   where
     enqueuedRetry = maybe faktoryDefaultRetry getLast $ joRetry $ jobOptions job
-    occurredRetries = maybe 0 ((+1) . jfRetryCount) $ jobFailure job
+    attemptCount = maybe 0 ((+1) . jfRetryCount) $ jobFailure job
 
 instance ToJSON args => ToJSON (Job args) where
   toJSON = object . toPairs
