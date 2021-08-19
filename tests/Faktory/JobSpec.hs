@@ -6,10 +6,10 @@ module Faktory.JobSpec
 
 import Faktory.Prelude
 
-import Data.Time (getCurrentTime)
-import Faktory.Job
 import Data.Aeson
 import Data.Aeson.QQ
+import Data.Time (getCurrentTime)
+import Faktory.Job
 import Test.Hspec
 
 spec :: Spec

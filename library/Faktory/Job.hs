@@ -22,13 +22,13 @@ import Faktory.Prelude
 
 import Data.Aeson
 import Data.List.NonEmpty (NonEmpty)
-import Data.Semigroup (Last(..))
 import qualified Data.List.NonEmpty as NE
+import Data.Semigroup (Last(..))
 import Data.Time (UTCTime)
 import Faktory.Client (Client(..))
 import Faktory.Connection (ConnectionInfo(..))
-import Faktory.JobOptions
 import Faktory.JobFailure
+import Faktory.JobOptions
 import Faktory.Producer (Producer(..), pushJob)
 import Faktory.Settings (Namespace, Settings(..))
 import GHC.Stack
