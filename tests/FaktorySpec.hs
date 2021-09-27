@@ -57,3 +57,9 @@ spec = describe "Faktory" $ do
       void $ perform @Text (reserveFor 1) producer "WAIT"
 
     jobs `shouldMatchList` ["HALT"]
+
+  it "processes jobs within reserve_for window" $ do
+    jobs <- workerTestCase $ \producer -> do
+      void $ perform @Text (reserveFor 4) producer "WAIT"
+
+    jobs `shouldMatchList` ["WAIT", "HALT"]
