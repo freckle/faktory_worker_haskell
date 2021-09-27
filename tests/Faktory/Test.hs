@@ -18,6 +18,7 @@ import Faktory.Job as X
 import Faktory.Producer as X
 import Test.Hspec as X
 
+import Control.Concurrent (threadDelay)
 import Control.Concurrent.Async
 import Control.Concurrent.MVar
 import Faktory.Settings
@@ -57,6 +58,7 @@ startWorker editSettings = do
 
     runWorker settings workerSettings $ \faktoryJob -> do
       let job = jobArg faktoryJob
+      when (job == "WAIT") $ threadDelay 3000
       modifyMVar_ processedJobs $ pure . (job :)
       when (job == "BOOM") $ throw $ userError "BOOM"
       when (job == "HALT") $ throw WorkerHalt
