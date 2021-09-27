@@ -6,6 +6,7 @@ module Faktory.JobOptions
   -- * Modifiers
   , retry
   , once
+  , reserveFor
   , queue
   , jobtype
   , at
@@ -27,6 +28,7 @@ import Faktory.Job.Custom
 import Faktory.Settings (Namespace, Queue)
 import qualified Faktory.Settings as Settings
 import GHC.Generics
+import Numeric.Natural (Natural)
 
 -- | Options for the execution of a job
 --
@@ -48,6 +50,7 @@ data JobOptions = JobOptions
   , joQueue :: Maybe (Last Queue)
   , joSchedule :: Maybe (Last (Either UTCTime NominalDiffTime))
   , joCustom :: Maybe Custom
+  , joReserveFor :: Maybe (Last Natural)
   }
   deriving stock Generic
   deriving (Semigroup, Monoid) via GenericSemigroupMonoid JobOptions
@@ -62,6 +65,7 @@ instance FromJSON JobOptions where
       <*> o .:? "queue"
       <*> (fmap (Last . Left) <$> o .:? "at")
       <*> o .:? "custom"
+      <*> o .:? "reserve_for"
 
 getAtFromSchedule :: JobOptions -> IO (Maybe UTCTime)
 getAtFromSchedule options = for (getLast <$> joSchedule options) $ \case
@@ -72,6 +76,9 @@ namespaceQueue :: Namespace -> JobOptions -> JobOptions
 namespaceQueue namespace options = case joQueue options of
   Nothing -> options
   Just (Last q) -> options <> queue (Settings.namespaceQueue namespace q)
+
+reserveFor :: Natural -> JobOptions
+reserveFor n = mempty { joReserveFor = Just $ Last n }
 
 retry :: Int -> JobOptions
 retry n = mempty { joRetry = Just $ Last n }

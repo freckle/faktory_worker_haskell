@@ -5,6 +5,7 @@ module Faktory.Job
   , perform
   , retry
   , once
+  , reserveFor
   , queue
   , jobtype
   , at
@@ -16,6 +17,7 @@ module Faktory.Job
   , jobArg
   , jobOptions
   , jobRetriesRemaining
+  , jobReserveFor
   ) where
 
 import Faktory.Prelude
@@ -26,6 +28,7 @@ import qualified Data.List.NonEmpty as NE
 import Data.Semigroup (Last(..))
 import Data.Time (UTCTime)
 import Faktory.Client (Client(..))
+import Numeric.Natural (Natural)
 import Faktory.Connection (ConnectionInfo(..))
 import Faktory.JobFailure
 import Faktory.JobOptions
@@ -101,12 +104,15 @@ jobRetriesRemaining job = max 0 $ enqueuedRetry - attemptCount
   enqueuedRetry = maybe faktoryDefaultRetry getLast $ joRetry $ jobOptions job
   attemptCount = maybe 0 ((+ 1) . jfRetryCount) $ jobFailure job
 
+jobReserveFor :: Job arg -> Maybe Natural
+jobReserveFor = fmap getLast . joReserveFor . jobOptions
+
 instance ToJSON args => ToJSON (Job args) where
   toJSON = object . toPairs
   toEncoding = pairs . mconcat . toPairs
 
 toPairs :: (KeyValue a, ToJSON arg) => Job arg -> [a]
-toPairs Job {..} =
+toPairs job@Job {..} =
   [ "jid" .= jobJid
   , "at" .= jobAt
   , "args" .= jobArgs
@@ -114,6 +120,7 @@ toPairs Job {..} =
   , "retry" .= joRetry jobOptions
   , "queue" .= joQueue jobOptions
   , "custom" .= joCustom jobOptions
+  , "reserve_for" .= jobReserveFor job
   ]
 
 -- brittany-disable-next-binding
