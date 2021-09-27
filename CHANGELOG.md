@@ -1,6 +1,9 @@
 ## [*Unreleased*](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.1.0...main)
 
-None
+- Add `reserveFor` and `jobReserveFor` for setting `ACK` window for individual
+  jobs.
+- Timeout jobs that have exceeded their `reserve_for` setting. Jobs without an
+  explicit `reserve_for` will default to Faktory's 1800 second timeout.
 
 ## [v1.1.1.0](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.0.1...v1.1.1.0)
 
