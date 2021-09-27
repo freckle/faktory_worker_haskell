@@ -51,3 +51,15 @@ spec = describe "Faktory" $ do
       threadDelay $ 2 * 1000000 + 250000
 
     jobs `shouldMatchList` ["HALT"]
+
+  it "does not process jobs when reserve_for timeout expires" $ do
+    jobs <- workerTestCase $ \producer -> do
+      void $ perform @Text (reserveFor 1) producer "WAIT"
+
+    jobs `shouldMatchList` ["HALT"]
+
+  it "processes jobs within reserve_for window" $ do
+    jobs <- workerTestCase $ \producer -> do
+      void $ perform @Text (reserveFor 4) producer "WAIT"
+
+    jobs `shouldMatchList` ["WAIT", "HALT"]
