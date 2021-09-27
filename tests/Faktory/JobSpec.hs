@@ -124,6 +124,16 @@ spec = do
 
       jobRetriesRemaining job `shouldBe` 0
 
+    it "handles reserve_for" $ do
+      job <- decodeJob [aesonQQ|
+        { "jid": "abc"
+        , "args": [""]
+        , "reserve_for": 3600
+        }
+      |]
+
+      jobReserveFor job `shouldBe` Just 3600
+
 decodeJob :: Value -> IO (Job Text)
 decodeJob v = case fromJSON v of
   Error err -> do
