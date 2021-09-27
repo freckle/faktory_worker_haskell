@@ -8,7 +8,6 @@ module Faktory.Test
   , withWorker
   , startWorker
   , haltWorker
-  , flushQueue
   )
 where
 
@@ -70,11 +69,3 @@ haltWorker :: Async a -> IO a
 haltWorker a = do
   withProducer $ \producer -> void $ perform @Text mempty producer "HALT"
   wait a
-
-flushQueue :: IO ()
-flushQueue = do
-  settings <- envSettings
-  workerSettings <- envWorkerSettings
-  a <- async $ runWorker settings workerSettings $ \faktoryJob ->
-    when (jobArg faktoryJob == ("HALT" :: Text)) $ throw WorkerHalt
-  haltWorker a

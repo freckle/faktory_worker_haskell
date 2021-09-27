@@ -55,6 +55,5 @@ spec = describe "Faktory" $ do
   it "does not process jobs when reserve_for timeout expires" $ do
     jobs <- workerTestCase $ \producer -> do
       void $ perform @Text (reserveFor 1) producer "WAIT"
-    flushQueue
 
     jobs `shouldMatchList` ["HALT"]
