@@ -91,9 +91,12 @@ processorLoop client settings workerSettings f = do
   let
     namespace = connectionInfoNamespace $ settingsConnection settings
     processAndAck job = do
-      void . timeout (getJobTTL job) $ do
+      mResult <- timeout (getJobTTL job) $ do
         f job
         ackJob client job
+      case mResult of
+        Nothing -> settingsLogError settings "Job reservation period expired."
+        Just{} -> pure ()
 
   emJob <- fetchJob client $ namespaceQueue namespace $ settingsQueue
     workerSettings
