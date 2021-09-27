@@ -8,6 +8,7 @@ module Faktory.Test
   , withWorker
   , startWorker
   , haltWorker
+  , flushQueue
   )
 where
 
@@ -18,6 +19,7 @@ import Faktory.Job as X
 import Faktory.Producer as X
 import Test.Hspec as X
 
+import Control.Concurrent (threadDelay)
 import Control.Concurrent.Async
 import Control.Concurrent.MVar
 import Faktory.Settings
@@ -57,6 +59,7 @@ startWorker editSettings = do
 
     runWorker settings workerSettings $ \faktoryJob -> do
       let job = jobArg faktoryJob
+      when (job == "WAIT") $ threadDelay 3000
       modifyMVar_ processedJobs $ pure . (job :)
       when (job == "BOOM") $ throw $ userError "BOOM"
       when (job == "HALT") $ throw WorkerHalt
@@ -67,3 +70,11 @@ haltWorker :: Async a -> IO a
 haltWorker a = do
   withProducer $ \producer -> void $ perform @Text mempty producer "HALT"
   wait a
+
+flushQueue :: IO ()
+flushQueue = do
+  settings <- envSettings
+  workerSettings <- envWorkerSettings
+  a <- async $ runWorker settings workerSettings $ \faktoryJob ->
+    when (jobArg faktoryJob == ("HALT" :: Text)) $ throw WorkerHalt
+  haltWorker a
