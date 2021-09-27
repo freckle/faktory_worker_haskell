@@ -28,13 +28,13 @@ import qualified Data.List.NonEmpty as NE
 import Data.Semigroup (Last(..))
 import Data.Time (UTCTime)
 import Faktory.Client (Client(..))
-import Numeric.Natural (Natural)
 import Faktory.Connection (ConnectionInfo(..))
 import Faktory.JobFailure
 import Faktory.JobOptions
 import Faktory.Producer (Producer(..), pushJob)
 import Faktory.Settings (Namespace, Settings(..))
 import GHC.Stack
+import Numeric.Natural (Natural)
 import System.Random
 
 data Job arg = Job
