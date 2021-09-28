@@ -18,7 +18,7 @@ import Data.Aeson
 import Data.Aeson.Casing
 import qualified Data.Text as T
 import Faktory.Client
-import Faktory.Job (Job, JobId, jobArg, jobJid, jobReserveFor)
+import Faktory.Job (Job, JobId, jobArg, jobJid, jobReserveForMicroSeconds)
 import Faktory.Settings
 import GHC.Generics
 import GHC.Stack
@@ -91,7 +91,7 @@ processorLoop client settings workerSettings f = do
   let
     namespace = connectionInfoNamespace $ settingsConnection settings
     processAndAck job = do
-      mResult <- timeout (getJobTTL job) $ do
+      mResult <- timeout (jobReserveForMicroSeconds job) $ do
         f job
         ackJob client job
       case mResult of
@@ -110,12 +110,6 @@ processorLoop client settings workerSettings f = do
                   , Handler $ \(ex :: SomeException) ->
                     failJob client job $ T.pack $ show ex
                   ]
-
-getJobTTL :: Job arg -> Int
-getJobTTL = (* 1000) . maybe faktoryTimeoutDefault fromIntegral . jobReserveFor
-
-faktoryTimeoutDefault :: Int
-faktoryTimeoutDefault = 1800
 
 -- | <https://github.com/contribsys/faktory/wiki/Worker-Lifecycle#heartbeat>
 heartBeat :: Client -> WorkerId -> IO ()

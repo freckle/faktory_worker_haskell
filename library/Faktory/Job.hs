@@ -17,7 +17,7 @@ module Faktory.Job
   , jobArg
   , jobOptions
   , jobRetriesRemaining
-  , jobReserveFor
+  , jobReserveForMicroSeconds
   ) where
 
 import Faktory.Prelude
@@ -34,7 +34,6 @@ import Faktory.JobOptions
 import Faktory.Producer (Producer(..), pushJob)
 import Faktory.Settings (Namespace, Settings(..))
 import GHC.Stack
-import Numeric.Natural (Natural)
 import System.Random
 
 data Job arg = Job
@@ -104,15 +103,22 @@ jobRetriesRemaining job = max 0 $ enqueuedRetry - attemptCount
   enqueuedRetry = maybe faktoryDefaultRetry getLast $ joRetry $ jobOptions job
   attemptCount = maybe 0 ((+ 1) . jfRetryCount) $ jobFailure job
 
-jobReserveFor :: Job arg -> Maybe Natural
-jobReserveFor = fmap getLast . joReserveFor . jobOptions
+jobReserveForMicroSeconds :: Job arg -> Int
+jobReserveForMicroSeconds =
+  (* 1000)
+    . maybe faktoryTimeoutDefault (fromIntegral . getLast)
+    . joReserveFor
+    . jobOptions
+
+faktoryTimeoutDefault :: Int
+faktoryTimeoutDefault = 1800
 
 instance ToJSON args => ToJSON (Job args) where
   toJSON = object . toPairs
   toEncoding = pairs . mconcat . toPairs
 
 toPairs :: (KeyValue a, ToJSON arg) => Job arg -> [a]
-toPairs job@Job {..} =
+toPairs Job {..} =
   [ "jid" .= jobJid
   , "at" .= jobAt
   , "args" .= jobArgs
@@ -120,7 +126,7 @@ toPairs job@Job {..} =
   , "retry" .= joRetry jobOptions
   , "queue" .= joQueue jobOptions
   , "custom" .= joCustom jobOptions
-  , "reserve_for" .= jobReserveFor job
+  , "reserve_for" .= joReserveFor jobOptions
   ]
 
 -- brittany-disable-next-binding

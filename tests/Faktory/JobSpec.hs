@@ -132,7 +132,7 @@ spec = do
         }
       |]
 
-      jobReserveFor job `shouldBe` Just 3600
+      jobReserveForMicroSeconds job `shouldBe` 3600000
 
 decodeJob :: Value -> IO (Job Text)
 decodeJob v = case fromJSON v of
