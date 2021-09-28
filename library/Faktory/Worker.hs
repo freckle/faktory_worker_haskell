@@ -18,7 +18,7 @@ import Data.Aeson
 import Data.Aeson.Casing
 import qualified Data.Text as T
 import Faktory.Client
-import Faktory.Job (Job, JobId, jobArg, jobJid, jobReserveForMicroSeconds)
+import Faktory.Job (Job, JobId, jobArg, jobJid, jobReserveForMicroseconds)
 import Faktory.Settings
 import GHC.Generics
 import GHC.Stack
@@ -91,7 +91,7 @@ processorLoop client settings workerSettings f = do
   let
     namespace = connectionInfoNamespace $ settingsConnection settings
     processAndAck job = do
-      mResult <- timeout (jobReserveForMicroSeconds job) $ do
+      mResult <- timeout (jobReserveForMicroseconds job) $ do
         f job
         ackJob client job
       case mResult of

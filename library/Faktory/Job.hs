@@ -17,7 +17,7 @@ module Faktory.Job
   , jobArg
   , jobOptions
   , jobRetriesRemaining
-  , jobReserveForMicroSeconds
+  , jobReserveForMicroseconds
   ) where
 
 import Faktory.Prelude
@@ -103,8 +103,8 @@ jobRetriesRemaining job = max 0 $ enqueuedRetry - attemptCount
   enqueuedRetry = maybe faktoryDefaultRetry getLast $ joRetry $ jobOptions job
   attemptCount = maybe 0 ((+ 1) . jfRetryCount) $ jobFailure job
 
-jobReserveForMicroSeconds :: Job arg -> Int
-jobReserveForMicroSeconds =
+jobReserveForMicroseconds :: Job arg -> Int
+jobReserveForMicroseconds =
   (* 1000)
     . maybe faktoryTimeoutDefault (fromIntegral . getLast)
     . joReserveFor
