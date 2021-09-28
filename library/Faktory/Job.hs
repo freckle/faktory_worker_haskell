@@ -105,7 +105,7 @@ jobRetriesRemaining job = max 0 $ enqueuedRetry - attemptCount
 
 jobReserveForMicroseconds :: Job arg -> Int
 jobReserveForMicroseconds =
-   maybe faktoryDefaultTimeout (secondToMicrosecond . fromIntegral . getLast)
+  maybe faktoryDefaultTimeout (secondToMicrosecond . fromIntegral . getLast)
     . joReserveFor
     . jobOptions
 
