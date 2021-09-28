@@ -96,7 +96,7 @@ processorLoop client settings workerSettings f = do
         ackJob client job
       case mResult of
         Nothing -> settingsLogError settings "Job reservation period expired."
-        Just{} -> pure ()
+        Just () -> pure ()
 
   emJob <- fetchJob client $ namespaceQueue namespace $ settingsQueue
     workerSettings
