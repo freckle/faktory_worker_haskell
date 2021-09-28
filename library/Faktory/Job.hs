@@ -105,13 +105,9 @@ jobRetriesRemaining job = max 0 $ enqueuedRetry - attemptCount
 
 jobReserveForMicroseconds :: Job arg -> Int
 jobReserveForMicroseconds =
-  (* 1000)
-    . maybe faktoryTimeoutDefault (fromIntegral . getLast)
+   maybe faktoryDefaultTimeout (secondToMicrosecond . fromIntegral . getLast)
     . joReserveFor
     . jobOptions
-
-faktoryTimeoutDefault :: Int
-faktoryTimeoutDefault = 1800
 
 instance ToJSON args => ToJSON (Job args) where
   toJSON = object . toPairs
@@ -147,3 +143,9 @@ type JobId = String
 --
 faktoryDefaultRetry :: Int
 faktoryDefaultRetry = 25
+
+faktoryDefaultTimeout :: Int
+faktoryDefaultTimeout = secondToMicrosecond 1800
+
+secondToMicrosecond :: Int -> Int
+secondToMicrosecond n = n * (10 ^ (6 :: Int))
