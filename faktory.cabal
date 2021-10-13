@@ -4,7 +4,7 @@ cabal-version: 1.18
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 164b18ff06b7a72987aaf4f1a7f4d870101c275ab001fbc7be906f69671682df
+-- hash: 48d5a03acb6447032ad3071a8873ce4f630a35844848f83852c21a2b46b688c7
 
 name:           faktory
 version:        1.1.1.0
@@ -70,6 +70,7 @@ library
       Faktory.Producer
       Faktory.Protocol
       Faktory.Settings
+      Faktory.Settings.Queue
       Faktory.Worker
   other-modules:
       Paths_faktory

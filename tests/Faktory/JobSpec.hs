@@ -10,6 +10,8 @@ import Data.Aeson
 import Data.Aeson.QQ
 import Data.Time (getCurrentTime)
 import Faktory.Job
+import Faktory.Producer
+import Faktory.Settings
 import Test.Hspec
 
 spec :: Spec
@@ -133,6 +135,28 @@ spec = do
       |]
 
       jobReserveForMicroseconds job `shouldBe` 3600000000
+
+  describe "buildJob" $ do
+    it "defaults to jobtype 'default'" $ do
+      bracket (newProducer defaultSettings) closeProducer $ \producer -> do
+        job <- buildJob @Text mempty producer "text"
+
+        jobOptions job `shouldBe` jobtype "Default"
+
+    it "adds job option defaults from settings" $ do
+      let settings = defaultSettings { settingsDefaultJobOptions = retry 5 }
+      bracket (newProducer settings) closeProducer $ \producer -> do
+        job <- buildJob @Text mempty producer "text"
+
+        jobOptions job `shouldBe` (jobtype "Default" <> retry 5)
+
+    it "doesn't prefers explicit job options over defaults in settings" $ do
+      let settings = defaultSettings { settingsDefaultJobOptions = retry 5 }
+      bracket (newProducer settings) closeProducer $ \producer -> do
+        job <- buildJob @Text (retry 88) producer "text"
+
+        jobOptions job `shouldBe` (jobtype "Default" <> retry 88)
+
 
 decodeJob :: Value -> IO (Job Text)
 decodeJob v = case fromJSON v of
