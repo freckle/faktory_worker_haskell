@@ -74,6 +74,9 @@ newtype MyJob = MyJob
   }
   deriving stock Generic
   deriving anyclass (ToJSON, FromJSON)
+
+instance HasJobType MyJob where
+  jobTypeName _ = "MyJob"
 ```
 
 ### Worker

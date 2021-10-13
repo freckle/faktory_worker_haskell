@@ -15,9 +15,9 @@ spec = do
     it "adds custom option so we can use TRACK GET later" $ do
       var <- newMVar []
       void $ workerTestCase $ \producer -> do
-        a <- perform @Text tracked producer "a"
+        a <- perform tracked producer $ J "a"
         modifyMVar_ var $ pure . (<> [a])
-        b <- perform @Text tracked producer "BOOM"
+        b <- perform tracked producer Boom
         modifyMVar_ var $ pure . (<> [b])
 
       enqueuedJobIds <- readMVar var
@@ -40,7 +40,7 @@ spec = do
     it "updates Job Details" $ do
       var <- newMVar []
       void $ workerTestCase $ \producer -> do
-        a <- perform @Text tracked producer "a"
+        a <- perform tracked producer $ J "a"
         modifyMVar_ var $ pure . (<> [a])
 
       enqueuedJobIds <- readMVar var

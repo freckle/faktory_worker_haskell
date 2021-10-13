@@ -1,6 +1,7 @@
 module Faktory.Job
   ( Job
   , JobId
+  , HasJobType(..)
   , JobOptions
   , perform
   , retry
@@ -31,6 +32,7 @@ import Faktory.Client (Client(..))
 import Faktory.Connection (ConnectionInfo(..))
 import Faktory.JobFailure
 import Faktory.JobOptions
+import Faktory.JobType (HasJobType(..))
 import Faktory.Producer (Producer(..), pushJob)
 import Faktory.Settings (Namespace, Settings(..))
 import GHC.Stack
@@ -59,7 +61,11 @@ data Job arg = Job
 -- @
 --
 perform
-  :: (HasCallStack, ToJSON arg) => JobOptions -> Producer -> arg -> IO JobId
+  :: (HasCallStack, HasJobType arg, ToJSON arg)
+  => JobOptions
+  -> Producer
+  -> arg
+  -> IO JobId
 perform options producer arg = do
   job <- buildJob options producer arg
   jobJid job <$ pushJob producer job
@@ -71,7 +77,7 @@ applyOptions namespace options job = do
   pure $ job { jobAt = scheduledAt, jobOptions = namespacedOptions }
 
 -- | Construct a 'Job' and apply options and Producer settings
-buildJob :: JobOptions -> Producer -> arg -> IO (Job arg)
+buildJob :: HasJobType arg => JobOptions -> Producer -> arg -> IO (Job arg)
 buildJob options producer arg = applyOptions namespace options =<< newJob arg
  where
   namespace =
@@ -81,7 +87,7 @@ buildJob options producer arg = applyOptions namespace options =<< newJob arg
       $ producerClient producer
 
 -- | Construct a 'Job' with default 'JobOptions'
-newJob :: arg -> IO (Job arg)
+newJob :: HasJobType arg => arg -> IO (Job arg)
 newJob arg = do
   -- Ruby uses 12 random hex
   jobId <- take 12 . randomRs ('a', 'z') <$> newStdGen
@@ -90,7 +96,7 @@ newJob arg = do
     { jobJid = jobId
     , jobAt = Nothing
     , jobArgs = pure arg
-    , jobOptions = jobtype "Default"
+    , jobOptions = jobtype (jobTypeName arg)
     , jobFailure = Nothing
     }
 

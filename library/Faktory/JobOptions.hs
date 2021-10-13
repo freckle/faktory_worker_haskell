@@ -45,7 +45,7 @@ import Numeric.Natural (Natural)
 -- already-present retries to @x@.
 --
 data JobOptions = JobOptions
-  { joJobtype :: Maybe (Last String)
+  { joJobtype :: Maybe (Last Text)
   , joRetry :: Maybe (Last Int)
   , joQueue :: Maybe (Last Queue)
   , joSchedule :: Maybe (Last (Either UTCTime NominalDiffTime))
@@ -90,7 +90,7 @@ once = retry (-1)
 queue :: Queue -> JobOptions
 queue q = mempty { joQueue = Just $ Last q }
 
-jobtype :: String -> JobOptions
+jobtype :: Text -> JobOptions
 jobtype jt = mempty { joJobtype = Just $ Last jt }
 
 at :: UTCTime -> JobOptions

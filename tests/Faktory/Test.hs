@@ -2,6 +2,7 @@ module Faktory.Test
   ( module X
   , workerTestCase
   , workerTestCaseWith
+  , TestJob(..)
 
   -- * Lower-level
   , withProducer
@@ -14,8 +15,11 @@ where
 import Faktory.Prelude as X
 
 import Control.Monad.IO.Class as X (MonadIO(..))
+import Data.Aeson (FromJSON, ToJSON)
+import Data.String (IsString(..))
 import Faktory.Job as X
 import Faktory.Producer as X
+import GHC.Generics (Generic)
 import Test.Hspec as X
 
 import Control.Concurrent (threadDelay)
@@ -24,14 +28,14 @@ import Control.Concurrent.MVar
 import Faktory.Settings
 import Faktory.Worker
 
-workerTestCase :: HasCallStack => (Producer -> IO ()) -> IO [Text]
+workerTestCase :: HasCallStack => (Producer -> IO ()) -> IO [TestJob]
 workerTestCase = workerTestCaseWith id
 
 workerTestCaseWith
   :: HasCallStack
   => (WorkerSettings -> WorkerSettings)
   -> (Producer -> IO ())
-  -> IO [Text]
+  -> IO [TestJob]
 workerTestCaseWith editSettings run = do
   a <- startWorker editSettings
   withProducer run
@@ -48,7 +52,7 @@ withWorker editSettings f = do
   result <$ haltWorker a
 
 startWorker
-  :: HasCallStack => (WorkerSettings -> WorkerSettings) -> IO (Async [Text])
+  :: HasCallStack => (WorkerSettings -> WorkerSettings) -> IO (Async [TestJob])
 startWorker editSettings = do
   withProducer $ void . flush
   settings <- envSettings
@@ -58,14 +62,24 @@ startWorker editSettings = do
 
     runWorker settings workerSettings $ \faktoryJob -> do
       let job = jobArg faktoryJob
-      when (job == "WAIT") $ threadDelay 3000000
+      when (job == Wait) $ threadDelay 3000000
       modifyMVar_ processedJobs $ pure . (job :)
-      when (job == "BOOM") $ throw $ userError "BOOM"
-      when (job == "HALT") $ throw WorkerHalt
+      when (job == Boom) $ throw $ userError "BOOM"
+      when (job == Halt) $ throw WorkerHalt
 
     readMVar processedJobs
 
 haltWorker :: Async a -> IO a
 haltWorker a = do
-  withProducer $ \producer -> void $ perform @Text mempty producer "HALT"
+  withProducer $ \producer -> void $ perform mempty producer Halt
   wait a
+
+data TestJob = Wait | Boom | Halt | J Text
+  deriving stock (Eq, Show, Generic)
+  deriving anyclass (ToJSON, FromJSON)
+
+instance IsString TestJob where
+  fromString = J . pack
+
+instance HasJobType TestJob where
+  jobTypeName _ = "TestJob"

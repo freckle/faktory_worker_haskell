@@ -4,7 +4,7 @@ import Prelude
 
 import Control.Exception.Safe
 import Data.Aeson
-import Faktory.Job (perform)
+import Faktory.Job (HasJobType(..), perform)
 import Faktory.Producer
 import GHC.Generics
 import System.Environment (getArgs)
@@ -13,6 +13,9 @@ import System.Environment (getArgs)
 newtype Job = Job { jobMessage :: String }
   deriving stock Generic
   deriving anyclass ToJSON
+
+instance HasJobType Job where
+  jobTypeName _ = "Job"
 
 main :: IO ()
 main = bracket newProducerEnv closeProducer $ \producer -> do

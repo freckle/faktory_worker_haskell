@@ -25,7 +25,7 @@ import qualified Data.ByteString.Lazy.Char8 as BSL8
 import Data.Maybe (fromMaybe)
 import Data.Time (UTCTime)
 import Faktory.Client (commandJSON, commandOK)
-import Faktory.Job (JobId, JobOptions, custom, perform)
+import Faktory.Job (HasJobType, JobId, JobOptions, custom, perform)
 import Faktory.JobState (JobState(..))
 import Faktory.Producer
 import GHC.Generics (Generic)
@@ -49,7 +49,11 @@ tracked = custom (CustomTrack 1)
 -- @
 --
 trackPerform
-  :: (HasCallStack, ToJSON arg) => JobOptions -> Producer -> arg -> IO JobId
+  :: (HasCallStack, HasJobType arg, ToJSON arg)
+  => JobOptions
+  -> Producer
+  -> arg
+  -> IO JobId
 trackPerform options = perform (options <> custom (CustomTrack 1))
 {-# DEPRECATED trackPerform "Use ‘perform (options <> tracked)’ instead" #-}
 

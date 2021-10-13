@@ -66,6 +66,7 @@ library
       Faktory.JobFailure
       Faktory.JobOptions
       Faktory.JobState
+      Faktory.JobType
       Faktory.Prelude
       Faktory.Producer
       Faktory.Protocol
