@@ -17,7 +17,7 @@ import Data.Time
 import Data.Time.Calendar (fromGregorian)
 import Faktory.Job.Custom
 import Faktory.JobOptions
-import Faktory.Settings (Namespace(..), Queue(..))
+import Faktory.Settings (Namespace(..), Queue(..), defaultSettings)
 import Test.Hspec
 
 spec :: Spec
@@ -76,6 +76,26 @@ spec = do
         let options = namespaceQueue (Namespace "namespace.") $ queue "queue"
 
         fmap getLast (joQueue options) `shouldBe` Just (Queue "namespace.queue")
+
+    describe "applyJobOptionsDefaults" $ do
+      it "applies defaults to empty settings" $ do
+        let options = applyJobOptionsDefaults defaultSettings mempty
+
+        fmap getLast (joQueue options) `shouldBe` Just "default"
+        fmap getLast (joRetry options) `shouldBe` Just 25
+
+      it "doesn't override provided queue" $ do
+        let options = applyJobOptionsDefaults defaultSettings $ queue "foo"
+
+        fmap getLast (joQueue options) `shouldBe` Just "foo"
+        fmap getLast (joRetry options) `shouldBe` Just 25
+
+      it "doesn't override provided retry" $ do
+        let options = applyJobOptionsDefaults defaultSettings $ retry 3
+
+        fmap getLast (joQueue options) `shouldBe` Just "default"
+        fmap getLast (joRetry options) `shouldBe` Just 3
+
 
 makeUTCTime :: Integer -> Int -> Int -> DiffTime -> UTCTime
 makeUTCTime y m d s =

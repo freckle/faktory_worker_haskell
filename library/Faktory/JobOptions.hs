@@ -1,4 +1,5 @@
 {-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE NamedFieldPuns #-}
 
 module Faktory.JobOptions
   ( JobOptions(..)
@@ -16,6 +17,7 @@ module Faktory.JobOptions
   -- * Enqueue-time modifiers
   , getAtFromSchedule
   , namespaceQueue
+  , applyJobOptionsDefaults
   ) where
 
 import Faktory.Prelude
@@ -25,7 +27,7 @@ import Data.Semigroup (Last(..))
 import Data.Semigroup.Generic
 import Data.Time
 import Faktory.Job.Custom
-import Faktory.Settings (Namespace, Queue)
+import Faktory.Settings (Namespace, Queue, Settings(Settings))
 import qualified Faktory.Settings as Settings
 import GHC.Generics
 import Numeric.Natural (Natural)
@@ -101,3 +103,7 @@ in_ i = mempty { joSchedule = Just $ Last $ Right i }
 
 custom :: ToJSON a => a -> JobOptions
 custom v = mempty { joCustom = Just $ toCustom v }
+
+applyJobOptionsDefaults :: Settings -> JobOptions -> JobOptions
+applyJobOptionsDefaults Settings { settingsDefaultQueue, settingsDefaultRetry }
+  = ((queue settingsDefaultQueue <> retry settingsDefaultRetry) <>)

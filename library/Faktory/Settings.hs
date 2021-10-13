@@ -32,6 +32,8 @@ data Settings = Settings
   { settingsConnection :: ConnectionInfo
   , settingsLogDebug :: String -> IO ()
   , settingsLogError :: String -> IO ()
+  , settingsDefaultQueue :: Queue
+  , settingsDefaultRetry :: Int
   }
 
 defaultSettings :: Settings
@@ -39,6 +41,8 @@ defaultSettings = Settings
   { settingsConnection = defaultConnectionInfo
   , settingsLogDebug = \_msg -> pure ()
   , settingsLogError = hPutStrLn stderr . ("[ERROR]: " <>)
+  , settingsDefaultQueue = "default"
+  , settingsDefaultRetry = 25
   }
 
 -- | Defaults, but read @'Connection'@ from the environment
