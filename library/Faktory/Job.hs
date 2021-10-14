@@ -72,14 +72,14 @@ applyOptions namespace options job = do
 
 -- | Construct a 'Job' and apply options and Producer settings
 buildJob :: JobOptions -> Producer -> arg -> IO (Job arg)
-buildJob options producer arg = applyOptions namespace (appDefs options) =<< newJob arg
+buildJob options producer arg = applyOptions namespace (applyDefaults options) =<< newJob arg
  where
   namespace =
     connectionInfoNamespace
       $ settingsConnection
       $ clientSettings
       $ producerClient producer
-  appDefs = mappend $ settingsDefaultJobOptions $ clientSettings $ producerClient producer
+  applyDefaults = mappend $ settingsDefaultJobOptions $ clientSettings $ producerClient producer
 
 -- | Construct a 'Job' with default 'JobOptions'
 newJob :: arg -> IO (Job arg)
