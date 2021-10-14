@@ -144,14 +144,14 @@ spec = do
         jobOptions job `shouldBe` jobtype "Default"
 
     it "adds job option defaults from settings" $ do
-      let settings = defaultSettings { settingsDefaultJobOptions = retry 5}
+      let settings = defaultSettings { settingsDefaultJobOptions = retry 5 }
       bracket (newProducer settings) closeProducer $ \producer -> do
         job <- buildJob @Text mempty producer "text"
 
         jobOptions job `shouldBe` (jobtype "Default" <> retry 5)
 
     it "doesn't prefers explicit job options over defaults in settings" $ do
-      let settings = defaultSettings { settingsDefaultJobOptions = retry 5}
+      let settings = defaultSettings { settingsDefaultJobOptions = retry 5 }
       bracket (newProducer settings) closeProducer $ \producer -> do
         job <- buildJob @Text (retry 88) producer "text"
 
