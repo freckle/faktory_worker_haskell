@@ -6,11 +6,11 @@ import Prelude
 
 import Control.Exception.Safe
 import Data.Aeson
+import Data.Data (Data)
 import Faktory.Job (perform)
 import Faktory.Producer
 import GHC.Generics
 import System.Environment (getArgs)
-import Data.Data (Data)
 
 -- | Must match examples/consumer
 newtype Job = Job { jobMessage :: String }

@@ -50,6 +50,7 @@ import Control.Monad.Reader
 import Data.Aeson
 import Data.Aeson.Casing
 import Data.ByteString.Lazy as BSL
+import Data.Data (Data)
 import Data.Semigroup (Last(..))
 import Data.Semigroup.Generic
 import Data.Text.Encoding (decodeUtf8, encodeUtf8)
@@ -58,7 +59,6 @@ import Faktory.Job
 import Faktory.Producer
 import GHC.Generics
 import GHC.Stack
-import Data.Data (Data)
 
 newtype Batch a = Batch (ReaderT BatchId IO a)
   deriving newtype (Functor, Applicative, Monad, MonadIO, MonadReader BatchId)

@@ -23,6 +23,7 @@ module Faktory.Job
 import Faktory.Prelude
 
 import Data.Aeson
+import Data.Data (Data, toConstr)
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NE
 import Data.Semigroup (Last(..))
@@ -35,7 +36,6 @@ import Faktory.Producer (Producer(..), pushJob)
 import Faktory.Settings (Namespace, Settings(..))
 import GHC.Stack
 import System.Random
-import Data.Data (toConstr, Data)
 
 data Job arg = Job
   { jobJid :: JobId

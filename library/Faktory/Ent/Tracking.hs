@@ -22,6 +22,7 @@ import Control.Error.Util (hush)
 import Data.Aeson
 import Data.Aeson.Casing
 import qualified Data.ByteString.Lazy.Char8 as BSL8
+import Data.Data (Data)
 import Data.Maybe (fromMaybe)
 import Data.Time (UTCTime)
 import Faktory.Client (commandJSON, commandOK)
@@ -30,7 +31,6 @@ import Faktory.JobState (JobState(..))
 import Faktory.Producer
 import GHC.Generics (Generic)
 import GHC.Stack (HasCallStack)
-import Data.Data (Data)
 
 newtype CustomTrack = CustomTrack
   { track :: Int

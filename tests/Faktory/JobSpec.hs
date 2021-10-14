@@ -1,5 +1,5 @@
-{-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE QuasiQuotes #-}
 
 module Faktory.JobSpec
   ( spec
@@ -9,13 +9,13 @@ import Faktory.Prelude
 
 import Data.Aeson
 import Data.Aeson.QQ
+import Data.Data (Data)
 import Data.Time (getCurrentTime)
 import Faktory.Job
 import Faktory.Producer
-import GHC.Generics (Generic)
 import Faktory.Settings
+import GHC.Generics (Generic)
 import Test.Hspec
-import Data.Data (Data)
 
 spec :: Spec
 spec = do
