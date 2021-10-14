@@ -149,7 +149,7 @@ spec = do
     it "adds job option defaults from settings" $ do
       let settings = defaultSettings { settingsDefaultJobOptions = retry 5 }
       bracket (newProducer settings) closeProducer $ \producer -> do
-        job <- buildJob mempty producer B
+        job <- buildJob mempty producer $ B "kind"
 
         jobOptions job `shouldBe` (jobtype "B" <> retry 5)
 
@@ -160,7 +160,7 @@ spec = do
 
         jobOptions job `shouldBe` (jobtype "A" <> retry 88)
 
-data TestJob = A | B
+data TestJob = A | B Text
   deriving stock (Generic, Data)
   deriving anyclass (ToJSON)
 
