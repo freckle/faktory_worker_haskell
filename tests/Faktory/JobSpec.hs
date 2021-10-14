@@ -11,6 +11,7 @@ import Data.Aeson.QQ
 import Data.Time (getCurrentTime)
 import Faktory.Job
 import Faktory.Producer
+import GHC.Generics (Generic)
 import Faktory.Settings
 import Test.Hspec
 
@@ -139,16 +140,16 @@ spec = do
   describe "buildJob" $ do
     it "defaults jobtype to the type constructor name" $ do
       bracket (newProducer defaultSettings) closeProducer $ \producer -> do
-        job <- buildJob @Text mempty producer "text"
+        job <- buildJob mempty producer A
 
-        jobOptions job `shouldBe` jobtype "Text"
+        jobOptions job `shouldBe` jobtype "TestJob"
 
     it "adds job option defaults from settings" $ do
       let settings = defaultSettings { settingsDefaultJobOptions = retry 5 }
       bracket (newProducer settings) closeProducer $ \producer -> do
-        job <- buildJob @Text mempty producer "text"
+        job <- buildJob mempty producer B
 
-        jobOptions job `shouldBe` (jobtype "Text" <> retry 5)
+        jobOptions job `shouldBe` (jobtype "TestJob" <> retry 5)
 
     it "doesn't prefers explicit job options over defaults in settings" $ do
       let settings = defaultSettings { settingsDefaultJobOptions = retry 5 }
@@ -157,6 +158,9 @@ spec = do
 
         jobOptions job `shouldBe` (jobtype "Text" <> retry 88)
 
+data TestJob = A | B
+  deriving stock (Generic)
+  deriving anyclass (ToJSON)
 
 decodeJob :: Value -> IO (Job Text)
 decodeJob v = case fromJSON v of
