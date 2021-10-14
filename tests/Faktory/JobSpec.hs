@@ -1,4 +1,5 @@
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE DeriveDataTypeable #-}
 
 module Faktory.JobSpec
   ( spec
@@ -14,6 +15,7 @@ import Faktory.Producer
 import GHC.Generics (Generic)
 import Faktory.Settings
 import Test.Hspec
+import Data.Data (Data)
 
 spec :: Spec
 spec = do
@@ -142,24 +144,24 @@ spec = do
       bracket (newProducer defaultSettings) closeProducer $ \producer -> do
         job <- buildJob mempty producer A
 
-        jobOptions job `shouldBe` jobtype "TestJob"
+        jobOptions job `shouldBe` jobtype "A"
 
     it "adds job option defaults from settings" $ do
       let settings = defaultSettings { settingsDefaultJobOptions = retry 5 }
       bracket (newProducer settings) closeProducer $ \producer -> do
         job <- buildJob mempty producer B
 
-        jobOptions job `shouldBe` (jobtype "TestJob" <> retry 5)
+        jobOptions job `shouldBe` (jobtype "B" <> retry 5)
 
     it "doesn't prefers explicit job options over defaults in settings" $ do
       let settings = defaultSettings { settingsDefaultJobOptions = retry 5 }
       bracket (newProducer settings) closeProducer $ \producer -> do
-        job <- buildJob @Text (retry 88) producer "text"
+        job <- buildJob (retry 88) producer A
 
-        jobOptions job `shouldBe` (jobtype "Text" <> retry 88)
+        jobOptions job `shouldBe` (jobtype "A" <> retry 88)
 
 data TestJob = A | B
-  deriving stock (Generic)
+  deriving stock (Generic, Data)
   deriving anyclass (ToJSON)
 
 decodeJob :: Value -> IO (Job Text)

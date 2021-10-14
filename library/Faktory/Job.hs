@@ -35,7 +35,7 @@ import Faktory.Producer (Producer(..), pushJob)
 import Faktory.Settings (Namespace, Settings(..))
 import GHC.Stack
 import System.Random
-import Data.Typeable (typeOf, typeRepTyCon, tyConName)
+import Data.Data (toConstr, Data)
 
 data Job arg = Job
   { jobJid :: JobId
@@ -60,7 +60,7 @@ data Job arg = Job
 -- @
 --
 perform
-  :: (HasCallStack, Typeable arg, ToJSON arg) => JobOptions -> Producer -> arg -> IO JobId
+  :: (HasCallStack, Data arg, ToJSON arg) => JobOptions -> Producer -> arg -> IO JobId
 perform options producer arg = do
   job <- buildJob options producer arg
   jobJid job <$ pushJob producer job
@@ -72,7 +72,7 @@ applyOptions namespace options job = do
   pure $ job { jobAt = scheduledAt, jobOptions = namespacedOptions }
 
 -- | Construct a 'Job' and apply options and Producer settings
-buildJob :: Typeable arg => JobOptions -> Producer -> arg -> IO (Job arg)
+buildJob :: Data arg => JobOptions -> Producer -> arg -> IO (Job arg)
 buildJob options producer arg = applyOptions namespace (applyDefaults options)
   =<< newJob arg
  where
@@ -86,7 +86,7 @@ buildJob options producer arg = applyOptions namespace (applyDefaults options)
       producer
 
 -- | Construct a 'Job' with default 'JobOptions'
-newJob :: Typeable arg => arg -> IO (Job arg)
+newJob :: Data arg => arg -> IO (Job arg)
 newJob arg = do
   -- Ruby uses 12 random hex
   jobId <- take 12 . randomRs ('a', 'z') <$> newStdGen
@@ -95,7 +95,7 @@ newJob arg = do
     { jobJid = jobId
     , jobAt = Nothing
     , jobArgs = pure arg
-    , jobOptions = jobtype $ tyConName $ typeRepTyCon $ typeOf arg
+    , jobOptions = jobtype $ show $ toConstr arg
     , jobFailure = Nothing
     }
 

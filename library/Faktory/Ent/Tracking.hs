@@ -30,6 +30,7 @@ import Faktory.JobState (JobState(..))
 import Faktory.Producer
 import GHC.Generics (Generic)
 import GHC.Stack (HasCallStack)
+import Data.Data (Data)
 
 newtype CustomTrack = CustomTrack
   { track :: Int
@@ -49,7 +50,7 @@ tracked = custom (CustomTrack 1)
 -- @
 --
 trackPerform
-  :: (HasCallStack, Typeable arg, ToJSON arg) => JobOptions -> Producer -> arg -> IO JobId
+  :: (HasCallStack, Data arg, ToJSON arg) => JobOptions -> Producer -> arg -> IO JobId
 trackPerform options = perform (options <> custom (CustomTrack 1))
 {-# DEPRECATED trackPerform "Use ‘perform (options <> tracked)’ instead" #-}
 

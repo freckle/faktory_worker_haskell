@@ -58,6 +58,7 @@ import Faktory.Job
 import Faktory.Producer
 import GHC.Generics
 import GHC.Stack
+import Data.Data (Data)
 
 newtype Batch a = Batch (ReaderT BatchId IO a)
   deriving newtype (Functor, Applicative, Monad, MonadIO, MonadReader BatchId)
@@ -99,7 +100,7 @@ newtype CustomBatchId = CustomBatchId
   deriving anyclass ToJSON
 
 batchPerform
-  :: (HasCallStack, Typeable arg, ToJSON arg) => JobOptions -> Producer -> arg -> Batch JobId
+  :: (HasCallStack, Data arg, ToJSON arg) => JobOptions -> Producer -> arg -> Batch JobId
 batchPerform options producer arg = do
   bid <- ask
   Batch $ lift $ perform (options <> custom (CustomBatchId bid)) producer arg

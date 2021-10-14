@@ -47,6 +47,8 @@ details.
 
 <!--
 ```haskell
+{-# LANGUAGE DeriveDataTypeable #-}
+
 import Data.Aeson
 import Prelude
 import Faktory.Producer
@@ -54,6 +56,7 @@ import Faktory.Job
 import Faktory.Worker
 import GHC.Generics
 import Text.Markdown.Unlit ()
+import Data.Data (Data)
 
 {- Don't actually run anything -}
 main :: IO ()
@@ -72,7 +75,7 @@ Any value can be a "Job" that is pushed and pulled to and from Faktory via its
 newtype MyJob = MyJob
   { myJobMessage :: String
   }
-  deriving stock Generic
+  deriving stock (Generic, Data)
   deriving anyclass (ToJSON, FromJSON)
 ```
 

@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveDataTypeable #-}
+
 module Main (main) where
 
 import Prelude
@@ -8,10 +10,11 @@ import Faktory.Job (perform)
 import Faktory.Producer
 import GHC.Generics
 import System.Environment (getArgs)
+import Data.Data (Data)
 
 -- | Must match examples/consumer
 newtype Job = Job { jobMessage :: String }
-  deriving stock Generic
+  deriving stock (Generic, Data)
   deriving anyclass ToJSON
 
 main :: IO ()
