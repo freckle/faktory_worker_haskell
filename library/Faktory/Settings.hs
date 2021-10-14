@@ -20,10 +20,9 @@ module Faktory.Settings
 import Faktory.Prelude
 
 import Data.Aeson
-import Data.ByteString.Lazy (ByteString, fromStrict)
-import Data.String
-import Data.Text.Encoding (encodeUtf8)
 import Faktory.Connection
+import Faktory.Settings.Queue
+import Faktory.JobOptions (JobOptions)
 import System.Environment (lookupEnv)
 import System.IO (hPutStrLn, stderr)
 import System.Random
@@ -32,8 +31,7 @@ data Settings = Settings
   { settingsConnection :: ConnectionInfo
   , settingsLogDebug :: String -> IO ()
   , settingsLogError :: String -> IO ()
-  , settingsDefaultQueue :: Queue
-  , settingsDefaultRetry :: Int
+  , settingsDefaultJobOptions :: JobOptions
   }
 
 defaultSettings :: Settings
@@ -41,8 +39,7 @@ defaultSettings = Settings
   { settingsConnection = defaultConnectionInfo
   , settingsLogDebug = \_msg -> pure ()
   , settingsLogError = hPutStrLn stderr . ("[ERROR]: " <>)
-  , settingsDefaultQueue = "default"
-  , settingsDefaultRetry = 25
+  , settingsDefaultJobOptions = mempty
   }
 
 -- | Defaults, but read @'Connection'@ from the environment
@@ -75,19 +72,6 @@ envWorkerSettings = do
     { settingsQueue = maybe defaultQueue (Queue . pack) mQueue
     , settingsId = WorkerId <$> mWorkerId
     }
-
-newtype Queue = Queue Text
-  deriving stock (Eq, Show)
-  deriving newtype (IsString, FromJSON, ToJSON)
-
-namespaceQueue :: Namespace -> Queue -> Queue
-namespaceQueue (Namespace n) (Queue q) = Queue $ mappend n q
-
-queueArg :: Queue -> ByteString
-queueArg (Queue q) = fromStrict $ encodeUtf8 q
-
-defaultQueue :: Queue
-defaultQueue = "default"
 
 newtype WorkerId = WorkerId String
   deriving newtype (FromJSON, ToJSON)
