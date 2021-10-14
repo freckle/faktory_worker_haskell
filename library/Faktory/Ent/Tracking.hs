@@ -49,7 +49,7 @@ tracked = custom (CustomTrack 1)
 -- @
 --
 trackPerform
-  :: (HasCallStack, ToJSON arg) => JobOptions -> Producer -> arg -> IO JobId
+  :: (HasCallStack, Typeable arg, ToJSON arg) => JobOptions -> Producer -> arg -> IO JobId
 trackPerform options = perform (options <> custom (CustomTrack 1))
 {-# DEPRECATED trackPerform "Use ‘perform (options <> tracked)’ instead" #-}
 
