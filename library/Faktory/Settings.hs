@@ -21,8 +21,8 @@ import Faktory.Prelude
 
 import Data.Aeson
 import Faktory.Connection
-import Faktory.Settings.Queue
 import Faktory.JobOptions (JobOptions)
+import Faktory.Settings.Queue
 import System.Environment (lookupEnv)
 import System.IO (hPutStrLn, stderr)
 import System.Random
