@@ -60,7 +60,11 @@ data Job arg = Job
 -- @
 --
 perform
-  :: (HasCallStack, Data arg, ToJSON arg) => JobOptions -> Producer -> arg -> IO JobId
+  :: (HasCallStack, Data arg, ToJSON arg)
+  => JobOptions
+  -> Producer
+  -> arg
+  -> IO JobId
 perform options producer arg = do
   job <- buildJob options producer arg
   jobJid job <$ pushJob producer job

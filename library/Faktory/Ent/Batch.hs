@@ -100,7 +100,11 @@ newtype CustomBatchId = CustomBatchId
   deriving anyclass ToJSON
 
 batchPerform
-  :: (HasCallStack, Data arg, ToJSON arg) => JobOptions -> Producer -> arg -> Batch JobId
+  :: (HasCallStack, Data arg, ToJSON arg)
+  => JobOptions
+  -> Producer
+  -> arg
+  -> Batch JobId
 batchPerform options producer arg = do
   bid <- ask
   Batch $ lift $ perform (options <> custom (CustomBatchId bid)) producer arg
