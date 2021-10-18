@@ -1,5 +1,9 @@
 ## [*Unreleased*](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.1.0...main)
 
+- TBD
+
+## [v1.1.2.0](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.1.0...v1.1.2.0)
+
 - Add `reserveFor` and `jobReserveForMicroseconds` for setting `ACK` window for
   individual jobs.
 - Timeout jobs that have exceeded their `reserve_for` setting. Jobs without an
