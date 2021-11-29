@@ -12,7 +12,6 @@ module Faktory.Job.Custom
 import Faktory.Prelude
 
 import Data.Aeson
-import qualified Data.HashMap.Strict as HashMap
 
 newtype Custom = Custom Value
   deriving stock (Eq, Show)
@@ -28,6 +27,5 @@ fromCustom (Custom v) = case fromJSON v of
   Success a -> Right a
 
 instance Semigroup Custom where
-  (Custom (Object a)) <> (Custom (Object b)) =
-    Custom $ Object $ HashMap.union b a
+  (Custom (Object a)) <> (Custom (Object b)) = Custom $ Object $ b <> a
   _ <> b = b
