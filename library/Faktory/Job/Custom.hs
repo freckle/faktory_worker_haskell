@@ -27,6 +27,5 @@ fromCustom (Custom v) = case fromJSON v of
   Success a -> Right a
 
 instance Semigroup Custom where
-  (Custom (Object a)) <> (Custom (Object b)) =
-    Custom $ Object $ b <> a
+  (Custom (Object a)) <> (Custom (Object b)) = Custom $ Object $ b <> a
   _ <> b = b
