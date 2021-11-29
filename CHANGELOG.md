@@ -1,6 +1,10 @@
-## [*Unreleased*](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.0...main)
+## [*Unreleased*](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.1...main)
 
 None
+
+## [v1.1.2.1](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.0...v1.1.2.1)
+
+- Support `aeson` 2.x
 
 ## [v1.1.2.0](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.1.0...v1.1.2.0)
 
