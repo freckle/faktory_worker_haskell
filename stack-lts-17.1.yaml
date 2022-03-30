@@ -1,3 +1,0 @@
-resolver: lts-17.1
-ghc-options:
-  "$locals": -ddump-to-file -ddump-hi
