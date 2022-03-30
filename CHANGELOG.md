@@ -1,6 +1,10 @@
-## [*Unreleased*](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.1...main)
+## [*Unreleased*](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.2...main)
 
 None
+
+## [v1.1.2.2](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.1...v1.1.2.2)
+
+- Support GHCs 9.0 and 9.2
 
 ## [v1.1.2.1](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.0...v1.1.2.1)
 
