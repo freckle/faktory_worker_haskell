@@ -54,13 +54,16 @@ ghc-options:
   -Wno-missing-import-lists
 
 when:
-  condition: impl(ghc >= 8.10)
-  ghc-options:
-    -Wno-missing-safe-haskell-mode
-    -Wno-prepositive-qualified-module
+  - condition: impl(ghc >= 8.10)
+    ghc-options:
+      -Wno-missing-safe-haskell-mode
+      -Wno-prepositive-qualified-module
+  - condition: impl(ghc >= 9.2)
+    ghc-options:
+      -Wno-missing-kind-signatures
 
 dependencies:
-  - base >= 4.13 && < 5
+  - base >= 4 && < 5
 
 default-extensions:
   - BangPatterns
@@ -102,9 +105,9 @@ library:
     - network
     - random
     - safe-exceptions
-    - semigroups
+    - semigroups >= 0.19.1
     - scanner
-    - text > 1.2
+    - text
     - time
     - unix
     - unordered-containers

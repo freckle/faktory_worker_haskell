@@ -1,6 +1,4 @@
-resolver: nightly-2021-11-28
+resolver: lts-19.1
+
 ghc-options:
   "$locals": -fwrite-ide-info
-
-extra-deps:
-  - aeson-2.0.2.0@sha256:5720fffb7289366029f2b7940e9f8b22a1b4c282f0cef4710685b1d14d76bdc7,6327

@@ -1,3 +1,1 @@
-resolver: nightly-2020-03-18
-ghc-options:
-  "$locals": -ddump-to-file -ddump-hi
+resolver: nightly-2022-03-30

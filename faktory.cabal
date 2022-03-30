@@ -4,7 +4,7 @@ cabal-version: 1.18
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1c90eb3cb55f665ff829e01574d08ece733fe5fcac86925dd2f31e323577661b
+-- hash: 39119cafc3c681da86b63ba3535ec7e86661bc5ee74b9bde653c173111231faf
 
 name:           faktory
 version:        1.1.2.1
@@ -104,7 +104,7 @@ library
   build-depends:
       aeson
     , aeson-casing
-    , base >=4.13 && <5
+    , base ==4.*
     , bytestring
     , connection
     , cryptonite
@@ -116,13 +116,15 @@ library
     , random
     , safe-exceptions
     , scanner
-    , semigroups
-    , text >1.2
+    , semigroups >=0.19.1
+    , text
     , time
     , unix
     , unordered-containers
   if impl(ghc >= 8.10)
     ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module
+  if impl(ghc >= 9.2)
+    ghc-options: -Wno-missing-kind-signatures
   default-language: Haskell2010
 
 executable faktory-example-consumer
@@ -158,11 +160,13 @@ executable faktory-example-consumer
   ghc-options: -Weverything -Wno-missing-exported-signatures -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-missing-import-lists
   build-depends:
       aeson
-    , base >=4.13 && <5
+    , base ==4.*
     , faktory
     , safe-exceptions
   if impl(ghc >= 8.10)
     ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module
+  if impl(ghc >= 9.2)
+    ghc-options: -Wno-missing-kind-signatures
   default-language: Haskell2010
 
 executable faktory-example-producer
@@ -198,11 +202,13 @@ executable faktory-example-producer
   ghc-options: -Weverything -Wno-missing-exported-signatures -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-missing-import-lists
   build-depends:
       aeson
-    , base >=4.13 && <5
+    , base ==4.*
     , faktory
     , safe-exceptions
   if impl(ghc >= 8.10)
     ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module
+  if impl(ghc >= 9.2)
+    ghc-options: -Wno-missing-kind-signatures
   default-language: Haskell2010
 
 test-suite hspec
@@ -248,13 +254,15 @@ test-suite hspec
       aeson
     , aeson-qq
     , async
-    , base >=4.13 && <5
+    , base ==4.*
     , faktory
     , hspec
     , mtl
     , time
   if impl(ghc >= 8.10)
     ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module
+  if impl(ghc >= 9.2)
+    ghc-options: -Wno-missing-kind-signatures
   default-language: Haskell2010
 
 test-suite readme
@@ -291,9 +299,11 @@ test-suite readme
   ghc-options: -Weverything -Wno-missing-exported-signatures -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-missing-import-lists -pgmL markdown-unlit
   build-depends:
       aeson
-    , base >=4.13 && <5
+    , base ==4.*
     , faktory
     , markdown-unlit
   if impl(ghc >= 8.10)
     ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module
+  if impl(ghc >= 9.2)
+    ghc-options: -Wno-missing-kind-signatures
   default-language: Haskell2010
