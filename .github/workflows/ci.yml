@@ -37,7 +37,7 @@ jobs:
         env:
           FAKTORY_URL: tcp://localhost:7419
 
-  test:
+  nightly:
     runs-on: ubuntu-latest
     services:
       faktory:
