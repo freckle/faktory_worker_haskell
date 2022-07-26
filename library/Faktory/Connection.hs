@@ -12,8 +12,8 @@ import Control.Applicative ((<|>))
 import Data.Maybe (fromMaybe)
 import Data.Void
 import Network.Connection
+import Network.Socket hiding (connect)
 import qualified Network.Socket as S
-import Network.Socket (HostName, PortNumber)
 import System.Environment (lookupEnv)
 import Text.Megaparsec
   ( Parsec
@@ -87,7 +87,7 @@ connect ConnectionInfo {..} = bracketOnError open connectionClose pure
   connectTo' cg cParams =
     bracketOnError
       (resolve' (connectionHostname cParams) (connectionPort cParams))
-      (S.close . fst)
+      (close . fst)
       ( \(h, _) ->
         connectFromSocket cg h cParams
       )
@@ -95,20 +95,20 @@ connect ConnectionInfo {..} = bracketOnError open connectionClose pure
   -- This is copy and pasted from the connectTo implement. The only change is
   -- adding a keep alive socket option.
   -- see: https://hackage.haskell.org/package/connection-0.3.1/docs/src/Network.Connection.html#connectTo
-  resolve' :: String -> PortNumber -> IO (S.Socket, S.SockAddr)
+  resolve' :: String -> PortNumber -> IO (Socket, SockAddr)
   resolve' host port = do
-      let hints = S.defaultHints { S.addrFlags = [S.AI_ADDRCONFIG], S.addrSocketType = S.Stream }
-      addrs <- S.getAddrInfo (Just hints) (Just host) (Just $ show port)
+      let hints = defaultHints { addrFlags = [AI_ADDRCONFIG], addrSocketType = Stream }
+      addrs <- getAddrInfo (Just hints) (Just host) (Just $ show port)
       firstSuccessful $ map tryToConnect addrs
     where
       tryToConnect addr =
           bracketOnError
-            (S.socket (S.addrFamily addr) (S.addrSocketType addr) (S.addrProtocol addr))
-            S.close
+            (socket (addrFamily addr) (addrSocketType addr) (addrProtocol addr))
+            close
             (\sock -> do
-              S.setSocketOption sock S.KeepAlive 1
-              S.connect sock (S.addrAddress addr)
-              return (sock, S.addrAddress addr)
+              setSocketOption sock KeepAlive 1
+              S.connect sock (addrAddress addr)
+              return (sock, addrAddress addr)
               )
       firstSuccessful = go []
         where
