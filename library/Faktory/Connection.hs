@@ -9,7 +9,6 @@ module Faktory.Connection
 import Faktory.Prelude
 
 import Control.Applicative ((<|>))
-import qualified Control.Exception as E
 import Data.Maybe (fromMaybe)
 import Data.Void
 import Network.Connection
@@ -86,7 +85,7 @@ connect ConnectionInfo {..} = bracketOnError open connectionClose pure
 
   connectTo' :: ConnectionContext -> ConnectionParams -> IO Connection
   connectTo' cg cParams =
-    E.bracketOnError
+    bracketOnError
       (resolve' (connectionHostname cParams) (connectionPort cParams))
       (S.close . fst)
       ( \(h, _) ->
@@ -103,7 +102,7 @@ connect ConnectionInfo {..} = bracketOnError open connectionClose pure
       firstSuccessful $ map tryToConnect addrs
     where
       tryToConnect addr =
-          E.bracketOnError
+          bracketOnError
             (S.socket (S.addrFamily addr) (S.addrSocketType addr) (S.addrProtocol addr))
             S.close
             (\sock -> do
@@ -113,11 +112,11 @@ connect ConnectionInfo {..} = bracketOnError open connectionClose pure
               )
       firstSuccessful = go []
         where
-          go :: [E.IOException] -> [IO a] -> IO a
-          go []      [] = E.throwIO $ HostNotResolved host
-          go l@(_:_) [] = E.throwIO $ HostCannotConnect host l
+          go :: [IOException] -> [IO a] -> IO a
+          go []      [] = throwIO $ HostNotResolved host
+          go l@(_:_) [] = throwIO $ HostCannotConnect host l
           go acc     (act:followingActs) = do
-              er <- E.try act
+              er <- try act
               case er of
                   Left err -> go (err:acc) followingActs
                   Right r  -> return r
