@@ -12,7 +12,8 @@ import Control.Applicative ((<|>))
 import Data.Maybe (fromMaybe)
 import Data.Void
 import Network.Connection
-import Network.Socket (HostName, PortNumber)
+import Network.Socket hiding (connect)
+import qualified Network.Socket as S
 import System.Environment (lookupEnv)
 import Text.Megaparsec
   ( Parsec
@@ -69,7 +70,7 @@ connect ConnectionInfo {..} = bracketOnError open connectionClose pure
  where
   open = do
     ctx <- initConnectionContext
-    connectTo ctx $ ConnectionParams
+    connectTo' ctx $ ConnectionParams
       { connectionHostname = connectionInfoHostName
       , connectionPort = connectionInfoPort
       , connectionUseSecure = if connectionInfoTls
@@ -81,6 +82,44 @@ connect ConnectionInfo {..} = bracketOnError open connectionClose pure
         else Nothing
       , connectionUseSocks = Nothing
       }
+
+  connectTo' :: ConnectionContext -> ConnectionParams -> IO Connection
+  connectTo' cg cParams =
+    bracketOnError
+      (resolve' (connectionHostname cParams) (connectionPort cParams))
+      (close . fst)
+      ( \(h, _) ->
+        connectFromSocket cg h cParams
+      )
+
+  -- This is copy and pasted from the connectTo implement. The only change is
+  -- adding a keep alive socket option.
+  -- see: https://hackage.haskell.org/package/connection-0.3.1/docs/src/Network.Connection.html#connectTo
+  resolve' :: String -> PortNumber -> IO (Socket, SockAddr)
+  resolve' host port = do
+      let hints = defaultHints { addrFlags = [AI_ADDRCONFIG], addrSocketType = Stream }
+      addrs <- getAddrInfo (Just hints) (Just host) (Just $ show port)
+      firstSuccessful $ map tryToConnect addrs
+    where
+      tryToConnect addr =
+          bracketOnError
+            (socket (addrFamily addr) (addrSocketType addr) (addrProtocol addr))
+            close
+            (\sock -> do
+              setSocketOption sock KeepAlive 1
+              S.connect sock (addrAddress addr)
+              return (sock, addrAddress addr)
+              )
+      firstSuccessful = go []
+        where
+          go :: [IOException] -> [IO a] -> IO a
+          go []      [] = throwIO $ HostNotResolved host
+          go l@(_:_) [] = throwIO $ HostCannotConnect host l
+          go acc     (act:followingActs) = do
+              er <- try act
+              case er of
+                  Left err -> go (err:acc) followingActs
+                  Right r  -> return r
 
 type Parser = Parsec Void String
 
