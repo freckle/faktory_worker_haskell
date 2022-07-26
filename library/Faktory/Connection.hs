@@ -16,15 +16,7 @@ import Network.Socket hiding (connect)
 import qualified Network.Socket as S
 import System.Environment (lookupEnv)
 import Text.Megaparsec
-  ( Parsec
-  , anySingle
-  , errorBundlePretty
-  , manyTill
-  , optional
-  , parse
-  , some
-  , (<?>)
-  )
+  (Parsec, anySingle, errorBundlePretty, manyTill, optional, parse, some, (<?>))
 import Text.Megaparsec.Char (char, digitChar, string, upperChar)
 
 newtype Namespace = Namespace Text
