@@ -114,7 +114,7 @@ newBatch producer options = do
     Left err -> batchNewError err
     Right Nothing -> batchNewError "No BatchId returned"
     Right (Just bs) -> pure $ BatchId $ decodeUtf8 $ BSL.toStrict bs
-  where batchNewError err = throwString $ "BATCH NEW error: " <> err
+  where batchNewError err = throwFaktoryException $ "BATCH NEW error: " <> err
 
 commitBatch :: Producer -> BatchId -> IO ()
 commitBatch producer (BatchId bid) = command_
