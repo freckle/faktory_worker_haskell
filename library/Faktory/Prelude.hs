@@ -15,7 +15,7 @@ import Data.Traversable as X
 import GHC.Stack.Types (HasCallStack)
 import GHC.Stack (callStack)
 
-newtype FaktoryClientException = FaktoryException StringException
+newtype FaktoryException = FaktoryException StringException
   deriving newtype (Show, Typeable, Exception)
 
 throwFaktoryException :: (MonadThrow m, HasCallStack) => String -> m a
