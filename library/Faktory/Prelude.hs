@@ -16,7 +16,8 @@ import GHC.Stack.Types (HasCallStack)
 import GHC.Stack (callStack)
 
 newtype FaktoryException = FaktoryException StringException
-  deriving newtype (Show, Exception)
+  deriving newtype (Show)
+  deriving anyclass (Exception)
 
 throwFaktoryException :: (MonadThrow m, HasCallStack) => String -> m a
 throwFaktoryException s = throwM (FaktoryException (StringException s callStack))
