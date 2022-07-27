@@ -1,4 +1,3 @@
-{-# LANGUAGE ImplicitParams #-}
 module Faktory.Prelude
   ( module X
   , module Faktory.Prelude
@@ -14,13 +13,13 @@ import Data.Foldable as X
 import Data.Text as X (Text, pack, unpack)
 import Data.Traversable as X
 import GHC.Stack.Types (HasCallStack)
+import GHC.Stack (callStack)
 
-newtype FaktoryClientException = FaktoryClientException StringException
-  deriving (Show)
-instance Exception FaktoryClientException
+newtype FaktoryClientException = FaktoryException StringException
+  deriving newtype (Show, Typeable, Exception)
 
-throwClientException :: (MonadThrow m, HasCallStack) => String -> m a
-throwClientException s = throwM (FaktoryClientException (StringException s ?callStack))
+throwFaktoryException :: (MonadThrow m, HasCallStack) => String -> m a
+throwFaktoryException s = throwM (FaktoryException (StringException s callStack))
 
 threadDelaySeconds :: Int -> IO ()
 threadDelaySeconds n = threadDelay $ n * 1000000
@@ -31,4 +30,4 @@ forkIOWithThrowToParent action = do
   forkIO $ action `X.catchAny` \err -> throwTo parent err
 
 fromRightThrows :: MonadThrow m => Either String a -> m a
-fromRightThrows = either throwClientException pure
+fromRightThrows = either throwFaktoryException pure
