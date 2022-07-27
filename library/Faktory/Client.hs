@@ -111,7 +111,7 @@ newClient settings@Settings {..} mWorkerId =
 
     commandOK client "HELLO" [encode helloPayload]
     pure client
-  where fromJustThrows message = maybe (throwString message) pure
+  where fromJustThrows message = maybe (throwClientException message) pure
 
 -- | Close a @'Client'@
 closeClient :: Client -> IO ()
@@ -130,7 +130,7 @@ commandOK :: HasCallStack => Client -> ByteString -> [ByteString] -> IO ()
 commandOK client cmd args = do
   response <- commandByteString client cmd args
   unless (response == Right (Just "OK"))
-    $ throwString
+    $ throwClientException
     $ "Server not OK. Reply was: "
     <> show response
 
