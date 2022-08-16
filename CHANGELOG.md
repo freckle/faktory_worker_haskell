@@ -1,6 +1,8 @@
-## [*Unreleased*](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.2...main)
+## [*Unreleased*](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.3...main)
 
-None
+## [v1.1.2.3](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.2...v1.1.2.3)
+
+- Set `KeepAlive` in connections to Faktory ([@jagonalez](https://github.com/freckle/faktory_worker_haskell/pull/86))
 
 ## [v1.1.2.2](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.1...v1.1.2.2)
 
