@@ -14,7 +14,7 @@ import Network.Connection hiding (connectTo)
 import Network.Socket
 import qualified Network.Socket as S
 
--- brittany --exact-print-only
+-- brittany --exactprint-only
 
 connectTo :: ConnectionContext -> ConnectionParams -> IO Connection
 connectTo cg cParams =
