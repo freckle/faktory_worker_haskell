@@ -80,6 +80,7 @@ default-extensions:
   - GeneralizedNewtypeDeriving
   - LambdaCase
   - MultiParamTypeClasses
+  - NamedFieldPuns
   - NoImplicitPrelude
   - NoMonomorphismRestriction
   - OverloadedStrings

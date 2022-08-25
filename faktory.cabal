@@ -4,7 +4,7 @@ cabal-version: 1.18
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3f510fab784e669ccb4ccbeb24aacaa7c33b3008686c4e68207214feceea5d6e
+-- hash: f567ab5ccc3a99fa5ba5081f0d12a87857fafaf84a6dc9eb84098721ae66b6ae
 
 name:           faktory
 version:        1.1.2.2
@@ -91,6 +91,7 @@ library
       GeneralizedNewtypeDeriving
       LambdaCase
       MultiParamTypeClasses
+      NamedFieldPuns
       NoImplicitPrelude
       NoMonomorphismRestriction
       OverloadedStrings
@@ -148,6 +149,7 @@ executable faktory-example-consumer
       GeneralizedNewtypeDeriving
       LambdaCase
       MultiParamTypeClasses
+      NamedFieldPuns
       NoImplicitPrelude
       NoMonomorphismRestriction
       OverloadedStrings
@@ -190,6 +192,7 @@ executable faktory-example-producer
       GeneralizedNewtypeDeriving
       LambdaCase
       MultiParamTypeClasses
+      NamedFieldPuns
       NoImplicitPrelude
       NoMonomorphismRestriction
       OverloadedStrings
@@ -240,6 +243,7 @@ test-suite hspec
       GeneralizedNewtypeDeriving
       LambdaCase
       MultiParamTypeClasses
+      NamedFieldPuns
       NoImplicitPrelude
       NoMonomorphismRestriction
       OverloadedStrings
@@ -287,6 +291,7 @@ test-suite readme
       GeneralizedNewtypeDeriving
       LambdaCase
       MultiParamTypeClasses
+      NamedFieldPuns
       NoImplicitPrelude
       NoMonomorphismRestriction
       OverloadedStrings
