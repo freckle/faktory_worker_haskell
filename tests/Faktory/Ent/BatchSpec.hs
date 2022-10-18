@@ -4,12 +4,12 @@ module Faktory.Ent.BatchSpec
 
 import Faktory.Test
 
+import Control.Arrow ((&&&))
 import Control.Concurrent (threadDelay)
 import Control.Monad.Reader
 import Faktory.Ent.Batch
 import Faktory.Ent.Batch.Status (jobBatchId)
 import qualified Faktory.Ent.Batch.Status as BatchStatus
-import Control.Arrow ((&&&))
 
 spec :: Spec
 spec = do
