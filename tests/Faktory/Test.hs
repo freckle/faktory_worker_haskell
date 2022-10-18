@@ -1,4 +1,5 @@
 {-# LANGUAGE TupleSections #-}
+
 module Faktory.Test
   ( module X
   , workerTestCase
