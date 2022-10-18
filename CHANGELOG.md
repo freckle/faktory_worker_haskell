@@ -1,4 +1,9 @@
-## [*Unreleased*](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.3...main)
+## [_Unreleased_](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.4...main)
+
+## [v1.1.2.4](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.3...v1.1.2.4)
+
+- Fix `jobBatchId` to work for all job types. Faktory seems to use both `bid` and `_bid`
+  in a jobs custom object when enqueing jobs. This allows the parser to use both
 
 ## [v1.1.2.3](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.2...v1.1.2.3)
 
