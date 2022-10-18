@@ -7,8 +7,8 @@ import Faktory.Test
 import Control.Concurrent (threadDelay)
 import Control.Monad.Reader
 import Faktory.Ent.Batch
-import qualified Faktory.Ent.Batch.Status as BatchStatus
 import Faktory.Ent.Batch.Status (jobBatchId)
+import qualified Faktory.Ent.Batch.Status as BatchStatus
 
 spec :: Spec
 spec = do

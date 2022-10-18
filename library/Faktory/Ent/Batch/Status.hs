@@ -6,6 +6,7 @@ module Faktory.Ent.Batch.Status
 
 import Faktory.Prelude
 
+import Control.Applicative ((<|>))
 import Control.Error.Util (hush)
 import Data.Aeson
 import Data.ByteString.Lazy as BSL
@@ -18,7 +19,6 @@ import Faktory.Job.Custom
 import Faktory.JobOptions (JobOptions(..))
 import Faktory.Producer
 import GHC.Generics
-import Control.Applicative ((<|>))
 
 data BatchStatus = BatchStatus
   { bid :: BatchId
@@ -37,7 +37,7 @@ newtype ReadCustomBatchId = ReadCustomBatchId
   deriving stock (Show,Eq,Generic)
 
 instance FromJSON ReadCustomBatchId where
-  -- Faktory seems to use the key '_bid' when enqueuing callback jobs and 'bid' for normal jobs... 
+  -- Faktory seems to use the key '_bid' when enqueuing callback jobs and 'bid' for normal jobs...
   parseJSON v = withParser "_bid" v <|> withParser "bid" v
    where
     withParser s =
