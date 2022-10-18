@@ -9,6 +9,7 @@ import Control.Monad.Reader
 import Faktory.Ent.Batch
 import Faktory.Ent.Batch.Status (jobBatchId)
 import qualified Faktory.Ent.Batch.Status as BatchStatus
+import Control.Arrow ((&&&))
 
 spec :: Spec
 spec = do
@@ -24,12 +25,12 @@ spec = do
           ask
         batchId <$ liftIO (threadDelay 500000)
 
-      fmap jobBatchId jobs
-        `shouldMatchList` [ Nothing
-                          , Just batchId
-                          , Just batchId
-                          , Just batchId
-                          , Just batchId
+      fmap (jobArg &&& jobBatchId) jobs
+        `shouldMatchList` [ ("HALT", Nothing)
+                          , ("a", Just batchId)
+                          , ("b", Just batchId)
+                          , ("c", Just batchId)
+                          , ("d", Just batchId)
                           ]
 
   describe "runBatch" $ do
