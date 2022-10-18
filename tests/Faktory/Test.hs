@@ -1,3 +1,4 @@
+{-# LANGUAGE TupleSections #-}
 module Faktory.Test
   ( module X
   , workerTestCase
@@ -24,14 +25,14 @@ import Control.Concurrent.MVar
 import Faktory.Settings
 import Faktory.Worker
 
-workerTestCase :: HasCallStack => (Producer -> IO ()) -> IO [Text]
+workerTestCase :: HasCallStack => (Producer -> IO ()) -> IO [Job Text]
 workerTestCase = workerTestCaseWith id
 
 workerTestCaseWith
   :: HasCallStack
   => (WorkerSettings -> WorkerSettings)
   -> (Producer -> IO ())
-  -> IO [Text]
+  -> IO [Job Text]
 workerTestCaseWith editSettings run = do
   a <- startWorker editSettings
   withProducer run
@@ -41,14 +42,17 @@ withProducer :: (Producer -> IO a) -> IO a
 withProducer f = bracket newProducerEnv closeProducer f
 
 withWorker
-  :: HasCallStack => (WorkerSettings -> WorkerSettings) -> IO a -> IO a
+  :: HasCallStack
+  => (WorkerSettings -> WorkerSettings)
+  -> IO a
+  -> IO ([Job Text], a)
 withWorker editSettings f = do
   a <- startWorker editSettings
   result <- f
-  result <$ haltWorker a
+  (, result) <$> haltWorker a
 
 startWorker
-  :: HasCallStack => (WorkerSettings -> WorkerSettings) -> IO (Async [Text])
+  :: HasCallStack => (WorkerSettings -> WorkerSettings) -> IO (Async [Job Text])
 startWorker editSettings = do
   withProducer $ void . flush
   settings <- envSettings
@@ -59,7 +63,7 @@ startWorker editSettings = do
     runWorker settings workerSettings $ \faktoryJob -> do
       let job = jobArg faktoryJob
       when (job == "WAIT") $ threadDelay 3000000
-      modifyMVar_ processedJobs $ pure . (job :)
+      modifyMVar_ processedJobs $ pure . (faktoryJob :)
       when (job == "BOOM") $ throw $ userError "BOOM"
       when (job == "HALT") $ throw WorkerHalt
 
