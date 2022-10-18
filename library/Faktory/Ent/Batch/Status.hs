@@ -6,6 +6,7 @@ module Faktory.Ent.Batch.Status
 
 import Faktory.Prelude
 
+import Control.Applicative ((<|>))
 import Control.Error.Util (hush)
 import Data.Aeson
 import Data.ByteString.Lazy as BSL
@@ -33,8 +34,14 @@ data BatchStatus = BatchStatus
 newtype ReadCustomBatchId = ReadCustomBatchId
   { _bid :: BatchId
   }
-  deriving stock Generic
-  deriving anyclass FromJSON
+  deriving stock (Show,Eq,Generic)
+
+instance FromJSON ReadCustomBatchId where
+  -- Faktory seems to use the key '_bid' when enqueuing callback jobs and 'bid' for normal jobs...
+  parseJSON v = withParser "_bid" v <|> withParser "bid" v
+   where
+    withParser s =
+      withObject "ReadCustomBatchId" $ \o -> ReadCustomBatchId <$> o .: s
 
 jobBatchId :: Job arg -> Maybe BatchId
 jobBatchId job = do

@@ -63,6 +63,7 @@ newtype Batch a = Batch (ReaderT BatchId IO a)
   deriving newtype (Functor, Applicative, Monad, MonadIO, MonadReader BatchId)
 
 newtype BatchId = BatchId Text
+  deriving stock (Show, Eq)
   deriving newtype (FromJSON, ToJSON)
 
 data BatchOptions arg = BatchOptions
