@@ -29,6 +29,7 @@ import Faktory.Settings
 import GHC.Stack
 import Network.Connection
 import Network.Socket (HostName)
+import Network.HostName (getHostName)
 import System.Posix.Process (getProcessID)
 
 data Client = Client
@@ -102,8 +103,9 @@ newClient settings@Settings {..} mWorkerId =
       mPassword = connectionInfoPassword settingsConnection
       mHashedPassword = hashPassword <$> hiNonce <*> hiIterations <*> mPassword
 
+    hostname <- getHostName
     helloPayload <-
-      HelloPayload mWorkerId (show . fst $ connectionID conn)
+      HelloPayload mWorkerId hostname
       <$> (toInteger <$> getProcessID)
       <*> pure ["haskell"]
       <*> pure expectedProtocolVersion

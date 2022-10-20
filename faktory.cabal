@@ -110,6 +110,7 @@ library
     , connection
     , cryptonite
     , errors
+    , hostname
     , megaparsec
     , memory
     , mtl
