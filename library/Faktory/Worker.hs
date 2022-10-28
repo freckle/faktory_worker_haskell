@@ -138,8 +138,9 @@ startWorker settings workerSettings handler = do
         putMVar isDone ()
       )
         `catchAny` \cleanupEx -> do
-          settingsLogError settings $ "Exception during worker cleanup: " <> displayException cleanupEx
+          -- Throw first in case the logging ever throws an error.
           throwTo parentThreadId cleanupEx
+          settingsLogError settings $ "Exception during worker cleanup: " <> displayException cleanupEx
 
 -- | Creates a new faktory worker, continuously polls the faktory server for
 --- jobs which are passed to @'handler'@.
