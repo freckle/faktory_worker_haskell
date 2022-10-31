@@ -123,17 +123,24 @@ startWorker settings workerSettings handler = do
             )
             (killThread beatThreadId)
       )
-      ( \e -> do
-          closeClient client
-          putMVar isDone ()
-          case e of
-            Left err ->
-              case fromException err of
-                Just (_ :: WorkerHalt) -> pure ()
-                Nothing -> throwTo parentThreadId err
-            Right _ -> pure ()
-      )
+      (workerCleanup client isDone parentThreadId)
   pure Worker{tid, config, isDone, isQuieted}
+  where
+    workerCleanup client isDone parentThreadId e =
+      ( do
+        closeClient client
+        case e of
+          Left err ->
+            case fromException err of
+              Just (_ :: WorkerHalt) -> pure ()
+              Nothing -> throw err
+          Right () -> pure ()
+        putMVar isDone ()
+      )
+        `catchAny` \cleanupEx -> do
+          -- Throw first in case the logging ever throws an error.
+          throwTo parentThreadId cleanupEx
+          settingsLogError settings $ "Exception during worker cleanup: " <> displayException cleanupEx
 
 -- | Creates a new faktory worker, continuously polls the faktory server for
 --- jobs which are passed to @'handler'@.
