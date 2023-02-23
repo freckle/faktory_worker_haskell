@@ -16,7 +16,7 @@ module Faktory.Worker (
 ) where
 
 import Faktory.Prelude
-import Control.Concurrent (MVar, ThreadId, forkFinally, killThread, myThreadId, newEmptyMVar, putMVar, takeMVar)
+import Control.Concurrent (MVar, ThreadId, forkFinally, killThread, newEmptyMVar, putMVar, takeMVar)
 import Control.Monad.Reader (MonadIO (liftIO), MonadReader (ask), ReaderT (runReaderT))
 import Data.Aeson
 import Data.Aeson.Casing
@@ -41,7 +41,7 @@ data WorkerConfig = WorkerConfig
 data Worker = Worker
   { config :: WorkerConfig
   , isQuieted :: TVar Bool
-  , isDone :: MVar ()
+  , isDone :: MVar (Maybe SomeException)
   , tid :: ThreadId
   }
 
@@ -110,7 +110,6 @@ startWorker settings workerSettings handler = do
   client <- newClient settings $ Just wid
   isDone <- newEmptyMVar
   let config = WorkerConfig{client, settings, wid, workerSettings}
-  parentThreadId <- myThreadId
   tid <-
     forkFinally
       ( do
@@ -123,24 +122,23 @@ startWorker settings workerSettings handler = do
             )
             (killThread beatThreadId)
       )
-      (workerCleanup client isDone parentThreadId)
+      (workerCleanup client isDone)
   pure Worker{tid, config, isDone, isQuieted}
   where
-    workerCleanup client isDone parentThreadId e =
+    workerCleanup client isDone e =
       ( do
         closeClient client
         case e of
           Left err ->
             case fromException err of
               Just (_ :: WorkerHalt) -> pure ()
-              Nothing -> throw err
+              Nothing -> putMVar isDone (Just err)
           Right () -> pure ()
-        putMVar isDone ()
+        putMVar isDone Nothing
       )
         `catchAny` \cleanupEx -> do
-          -- Throw first in case the logging ever throws an error.
-          throwTo parentThreadId cleanupEx
           settingsLogError settings $ "Exception during worker cleanup: " <> displayException cleanupEx
+          putMVar isDone (Just cleanupEx)
 
 -- | Creates a new faktory worker, continuously polls the faktory server for
 --- jobs which are passed to @'handler'@.
@@ -152,7 +150,7 @@ runWorker
   -> IO ()
 runWorker settings workerSettings handler = do
   worker <- startWorker settings workerSettings handler
-  waitUntilDone worker
+  void $ waitUntilDone worker
 
 runWorkerEnv :: FromJSON args => (Job args -> IO ()) -> IO ()
 runWorkerEnv f = do
@@ -161,7 +159,7 @@ runWorkerEnv f = do
   runWorker settings workerSettings f
 
 -- | Blocks until the worker thread has completed.
-waitUntilDone :: Worker -> IO ()
+waitUntilDone :: Worker -> IO (Maybe SomeException)
 waitUntilDone Worker{isDone} = takeMVar isDone
 
 -- | Quiet's a worker so that it no longer polls for jobs.
@@ -191,10 +189,11 @@ processorLoop f = do
     Right Nothing -> liftIO $ threadDelaySeconds $ settingsIdleDelay workerSettings
     Right (Just job) ->
       processAndAck job
-        `catches` [ Handler $ \(ex :: WorkerHalt) -> throw ex
-                  , Handler $ \(ex :: SomeException) ->
-                    failJob job $ T.pack $ show ex
-                  ]
+      `withException` (\(ex :: SomeException) ->
+        case fromException ex of
+          Just (e :: WorkerHalt) -> throw e
+          Nothing -> failJob job $ T.pack $ show ex
+      )
 
 -- | <https://github.com/contribsys/faktory/wiki/Worker-Lifecycle#heartbeat>
 heartBeat :: WorkerConfig -> IO ()
