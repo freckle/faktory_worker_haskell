@@ -1,5 +1,5 @@
 module Faktory.JobFailure
-  ( JobFailure(..)
+  ( JobFailure (..)
   ) where
 
 import Faktory.Prelude
@@ -19,10 +19,11 @@ data JobFailure = JobFailure
 -- brittany-disable-next-binding
 
 instance FromJSON JobFailure where
-  parseJSON = withObject "Failure" $ \o -> JobFailure
-    <$> o .: "retry_count"
-    <*> o .: "failed_at"
-    <*> o .:? "next_at"
-    <*> o .:? "error_message"
-    <*> o .:? "error_type"
-    <*> o .:? "backtrace"
+  parseJSON = withObject "Failure" $ \o ->
+    JobFailure
+      <$> o .: "retry_count"
+      <*> o .: "failed_at"
+      <*> o .:? "next_at"
+      <*> o .:? "error_message"
+      <*> o .:? "error_type"
+      <*> o .:? "backtrace"

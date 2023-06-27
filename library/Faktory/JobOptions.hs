@@ -1,9 +1,9 @@
 {-# LANGUAGE DerivingVia #-}
 
 module Faktory.JobOptions
-  ( JobOptions(..)
+  ( JobOptions (..)
 
-  -- * Modifiers
+    -- * Modifiers
   , retry
   , once
   , reserveFor
@@ -13,7 +13,7 @@ module Faktory.JobOptions
   , in_
   , custom
 
-  -- * Enqueue-time modifiers
+    -- * Enqueue-time modifiers
   , getAtFromSchedule
   , namespaceQueue
   ) where
@@ -21,7 +21,7 @@ module Faktory.JobOptions
 import Faktory.Prelude
 
 import Data.Aeson
-import Data.Semigroup (Last(..))
+import Data.Semigroup (Last (..))
 import Data.Semigroup.Generic
 import Data.Time
 import Faktory.Job.Custom
@@ -43,7 +43,6 @@ import Numeric.Natural (Natural)
 -- Options use 'Last' semantics, so (e.g.) @'retry' x <>@ will set retries to
 -- @x@ only if not already set, and @<> 'retry' x@ will override any
 -- already-present retries to @x@.
---
 data JobOptions = JobOptions
   { joJobtype :: Maybe (Last String)
   , joRetry :: Maybe (Last Int)
@@ -78,26 +77,26 @@ namespaceQueue namespace options = case joQueue options of
   Just (Last q) -> options <> queue (Settings.namespaceQueue namespace q)
 
 reserveFor :: Natural -> JobOptions
-reserveFor n = mempty { joReserveFor = Just $ Last n }
+reserveFor n = mempty {joReserveFor = Just $ Last n}
 
 retry :: Int -> JobOptions
-retry n = mempty { joRetry = Just $ Last n }
+retry n = mempty {joRetry = Just $ Last n}
 
 -- | Equivalent to @'retry' (-1)@: no retries, and move to Dead on failure
 once :: JobOptions
 once = retry (-1)
 
 queue :: Queue -> JobOptions
-queue q = mempty { joQueue = Just $ Last q }
+queue q = mempty {joQueue = Just $ Last q}
 
 jobtype :: String -> JobOptions
-jobtype jt = mempty { joJobtype = Just $ Last jt }
+jobtype jt = mempty {joJobtype = Just $ Last jt}
 
 at :: UTCTime -> JobOptions
-at t = mempty { joSchedule = Just $ Last $ Left t }
+at t = mempty {joSchedule = Just $ Last $ Left t}
 
 in_ :: NominalDiffTime -> JobOptions
-in_ i = mempty { joSchedule = Just $ Last $ Right i }
+in_ i = mempty {joSchedule = Just $ Last $ Right i}
 
 custom :: ToJSON a => a -> JobOptions
-custom v = mempty { joCustom = Just $ toCustom v }
+custom v = mempty {joCustom = Just $ toCustom v}

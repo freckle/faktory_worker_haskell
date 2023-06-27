@@ -2,9 +2,8 @@
 --
 -- Runs forever, @FETCH@-ing Jobs from the given Queue and handing each to your
 -- processing function.
---
 module Faktory.Worker
-  ( WorkerHalt(..)
+  ( WorkerHalt (..)
   , runWorker
   , runWorkerEnv
   , jobArg
@@ -27,12 +26,12 @@ import System.Timeout (timeout)
 -- | If processing functions @'throw'@ this, @'runWorker'@ will exit
 data WorkerHalt = WorkerHalt
   deriving stock (Eq, Show)
-  deriving anyclass Exception
+  deriving anyclass (Exception)
 
 newtype BeatPayload = BeatPayload
   { _bpWid :: WorkerId
   }
-  deriving stock Generic
+  deriving stock (Generic)
 
 instance ToJSON BeatPayload where
   toJSON = genericToJSON $ aesonPrefix snakeCase
@@ -41,7 +40,7 @@ instance ToJSON BeatPayload where
 newtype AckPayload = AckPayload
   { _apJid :: JobId
   }
-  deriving stock Generic
+  deriving stock (Generic)
 
 instance ToJSON AckPayload where
   toJSON = genericToJSON $ aesonPrefix snakeCase
@@ -53,7 +52,7 @@ data FailPayload = FailPayload
   , _fpJid :: JobId
   , _fpBacktrace :: [String]
   }
-  deriving stock Generic
+  deriving stock (Generic)
 
 instance ToJSON FailPayload where
   toJSON = genericToJSON $ aesonPrefix snakeCase
@@ -96,8 +95,11 @@ processorLoop client settings workerSettings f = do
         Nothing -> settingsLogError settings "Job reservation period expired."
         Just () -> ackJob client job
 
-  emJob <- fetchJob client $ namespaceQueue namespace $ settingsQueue
-    workerSettings
+  emJob <-
+    fetchJob client $
+      namespaceQueue namespace $
+        settingsQueue
+          workerSettings
 
   case emJob of
     Left err -> settingsLogError settings $ "Invalid Job: " <> err
@@ -106,7 +108,7 @@ processorLoop client settings workerSettings f = do
       processAndAck job
         `catches` [ Handler $ \(ex :: WorkerHalt) -> throw ex
                   , Handler $ \(ex :: SomeException) ->
-                    failJob client job $ T.pack $ show ex
+                      failJob client job $ T.pack $ show ex
                   ]
 
 -- | <https://github.com/contribsys/faktory/wiki/Worker-Lifecycle#heartbeat>

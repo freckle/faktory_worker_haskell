@@ -5,7 +5,7 @@ module Faktory.Test
   , workerTestCase
   , workerTestCaseWith
 
-  -- * Lower-level
+    -- * Lower-level
   , withProducer
   , withWorker
   , startWorker
@@ -15,7 +15,7 @@ where
 
 import Faktory.Prelude as X
 
-import Control.Monad.IO.Class as X (MonadIO(..))
+import Control.Monad.IO.Class as X (MonadIO (..))
 import Faktory.Job as X
 import Faktory.Producer as X
 import Test.Hspec as X
@@ -50,7 +50,7 @@ withWorker
 withWorker editSettings f = do
   a <- startWorker editSettings
   result <- f
-  (, result) <$> haltWorker a
+  (,result) <$> haltWorker a
 
 startWorker
   :: HasCallStack => (WorkerSettings -> WorkerSettings) -> IO (Async [Job Text])

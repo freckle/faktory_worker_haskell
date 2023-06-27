@@ -1,20 +1,20 @@
 module Faktory.Settings
-  ( Settings(..)
+  ( Settings (..)
   , defaultSettings
   , envSettings
-  , WorkerSettings(..)
+  , WorkerSettings (..)
   , defaultWorkerSettings
   , envWorkerSettings
-  , Queue(..)
+  , Queue (..)
   , namespaceQueue
   , queueArg
   , defaultQueue
   , WorkerId
   , randomWorkerId
 
-  -- * Re-exports
-  , ConnectionInfo(..)
-  , Namespace(..)
+    -- * Re-exports
+  , ConnectionInfo (..)
+  , Namespace (..)
   ) where
 
 import Faktory.Prelude
@@ -35,21 +35,21 @@ data Settings = Settings
   }
 
 defaultSettings :: Settings
-defaultSettings = Settings
-  { settingsConnection = defaultConnectionInfo
-  , settingsLogDebug = \_msg -> pure ()
-  , settingsLogError = hPutStrLn stderr . ("[ERROR]: " <>)
-  , settingsDefaultJobOptions = mempty
-  }
+defaultSettings =
+  Settings
+    { settingsConnection = defaultConnectionInfo
+    , settingsLogDebug = \_msg -> pure ()
+    , settingsLogError = hPutStrLn stderr . ("[ERROR]: " <>)
+    , settingsDefaultJobOptions = mempty
+    }
 
 -- | Defaults, but read @'Connection'@ from the environment
 --
 -- See @'envConnection'@
---
 envSettings :: IO Settings
 envSettings = do
   connection <- envConnectionInfo
-  pure defaultSettings { settingsConnection = connection }
+  pure defaultSettings {settingsConnection = connection}
 
 data WorkerSettings = WorkerSettings
   { settingsQueue :: Queue
@@ -58,20 +58,22 @@ data WorkerSettings = WorkerSettings
   }
 
 defaultWorkerSettings :: WorkerSettings
-defaultWorkerSettings = WorkerSettings
-  { settingsQueue = defaultQueue
-  , settingsId = Nothing
-  , settingsIdleDelay = 1
-  }
+defaultWorkerSettings =
+  WorkerSettings
+    { settingsQueue = defaultQueue
+    , settingsId = Nothing
+    , settingsIdleDelay = 1
+    }
 
 envWorkerSettings :: IO WorkerSettings
 envWorkerSettings = do
   mQueue <- lookupEnv "FAKTORY_QUEUE"
   mWorkerId <- lookupEnv "FAKTORY_WORKER_ID"
-  pure defaultWorkerSettings
-    { settingsQueue = maybe defaultQueue (Queue . pack) mQueue
-    , settingsId = WorkerId <$> mWorkerId
-    }
+  pure
+    defaultWorkerSettings
+      { settingsQueue = maybe defaultQueue (Queue . pack) mQueue
+      , settingsId = WorkerId <$> mWorkerId
+      }
 
 newtype WorkerId = WorkerId String
   deriving newtype (FromJSON, ToJSON)

@@ -5,10 +5,10 @@ module Faktory.JobOptionsSpec
 import Faktory.Prelude
 
 import Data.Aeson
-import Data.Semigroup (Last(..))
+import Data.Semigroup (Last (..))
 import Data.Time
   ( DiffTime
-  , UTCTime(..)
+  , UTCTime (..)
   , addUTCTime
   , diffTimeToPicoseconds
   , getCurrentTime
@@ -17,7 +17,7 @@ import Data.Time
 import Data.Time.Calendar (fromGregorian)
 import Faktory.Job.Custom
 import Faktory.JobOptions
-import Faktory.Settings (Namespace(..), Queue(..))
+import Faktory.Settings (Namespace (..), Queue (..))
 import Test.Hspec
 
 spec :: Spec
@@ -37,14 +37,14 @@ spec = do
 
         joCustom options
           `shouldBe` Just
-                       (toCustom
-                       $ object
-                           [ "a" .= False
-                           , "b" .= True
-                           , "c" .= True
-                           , "d" .= False
-                           ]
-                       )
+            ( toCustom $
+                object
+                  [ "a" .= False
+                  , "b" .= True
+                  , "c" .= True
+                  , "d" .= False
+                  ]
+            )
 
     describe "getAtFromSchedule" $ do
       it "sets at based on in" $ do
@@ -79,16 +79,17 @@ spec = do
 
 makeUTCTime :: Integer -> Int -> Int -> DiffTime -> UTCTime
 makeUTCTime y m d s =
-  UTCTime { utctDay = fromGregorian y m d, utctDayTime = s }
+  UTCTime {utctDay = fromGregorian y m d, utctDayTime = s}
 
 truncateUTCTime :: UTCTime -> UTCTime
-truncateUTCTime t = t
-  { utctDayTime =
-    secondsToDiffTime
-    $ picosecondsToSeconds
-    $ diffTimeToPicoseconds
-    $ utctDayTime t
-  }
+truncateUTCTime t =
+  t
+    { utctDayTime =
+        secondsToDiffTime $
+          picosecondsToSeconds $
+            diffTimeToPicoseconds $
+              utctDayTime t
+    }
 
 -- sameSecondAs :: UTCTime -> UTCTime -> Bool
 -- sameSecondAs a b =

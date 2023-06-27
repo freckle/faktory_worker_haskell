@@ -46,7 +46,7 @@ spec = describe "Faktory" $ do
     -- the Server and handles it correctly. Setting our own idle delay to 0
     -- ensures that we'll pick up the following HALT message immediately.
     --
-    let editSettings ws = ws { settingsIdleDelay = 0 }
+    let editSettings ws = ws {settingsIdleDelay = 0}
     jobs <- workerTestCaseWith editSettings $ \_ -> do
       threadDelay $ 2 * 1000000 + 250000
 

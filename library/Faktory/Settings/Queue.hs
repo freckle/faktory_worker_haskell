@@ -1,9 +1,9 @@
 module Faktory.Settings.Queue
-  ( Queue(..)
+  ( Queue (..)
   , namespaceQueue
   , queueArg
   , defaultQueue
-  , Namespace(..)
+  , Namespace (..)
   ) where
 
 import Faktory.Prelude
