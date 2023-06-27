@@ -49,8 +49,8 @@ spec = do
       let [aJid] = enqueuedJobIds
 
       aDetails <- bracket newProducerEnv closeProducer $ \producer -> do
-        trackSet producer
-          $ SetJobDetails
+        trackSet producer $
+          SetJobDetails
             { sjdJid = aJid
             , sjdPercent = Just 100
             , sjdDesc = Just "Updated"
