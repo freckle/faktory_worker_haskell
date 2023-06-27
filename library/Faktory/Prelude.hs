@@ -13,6 +13,8 @@ import Data.Foldable as X
 import Data.Text as X (Text, pack, unpack)
 import Data.Traversable as X
 
+{-# ANN module ("HLint: ignore Avoid restricted alias" :: String) #-}
+
 threadDelaySeconds :: Int -> IO ()
 threadDelaySeconds n = threadDelay $ n * 1000000
 

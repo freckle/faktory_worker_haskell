@@ -1,6 +1,6 @@
 module Faktory.Ent.Batch.Status
   ( jobBatchId
-  , BatchStatus(..)
+  , BatchStatus (..)
   , batchStatus
   ) where
 
@@ -16,7 +16,7 @@ import Faktory.Client
 import Faktory.Ent.Batch
 import Faktory.Job (Job, jobOptions)
 import Faktory.Job.Custom
-import Faktory.JobOptions (JobOptions(..))
+import Faktory.JobOptions (JobOptions (..))
 import Faktory.Producer
 import GHC.Generics
 
@@ -28,13 +28,13 @@ data BatchStatus = BatchStatus
   , created_at :: UTCTime
   , description :: Text
   }
-  deriving stock Generic
-  deriving anyclass FromJSON
+  deriving stock (Generic)
+  deriving anyclass (FromJSON)
 
 newtype ReadCustomBatchId = ReadCustomBatchId
   { _bid :: BatchId
   }
-  deriving stock (Show,Eq,Generic)
+  deriving stock (Show, Eq, Generic)
 
 instance FromJSON ReadCustomBatchId where
   -- Faktory seems to use the key '_bid' when enqueuing callback jobs and 'bid' for normal jobs...
@@ -49,7 +49,8 @@ jobBatchId job = do
   _bid <$> hush (fromCustom custom)
 
 batchStatus :: Producer -> BatchId -> IO (Either String (Maybe BatchStatus))
-batchStatus producer (BatchId bid) = commandJSON
-  (producerClient producer)
-  "BATCH STATUS"
-  [BSL.fromStrict $ encodeUtf8 bid]
+batchStatus producer (BatchId bid) =
+  commandJSON
+    (producerClient producer)
+    "BATCH STATUS"
+    [BSL.fromStrict $ encodeUtf8 bid]

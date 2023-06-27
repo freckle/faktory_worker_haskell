@@ -1,6 +1,6 @@
 module Faktory.Connection
-  ( ConnectionInfo(..)
-  , Namespace(..)
+  ( ConnectionInfo (..)
+  , Namespace (..)
   , defaultConnectionInfo
   , envConnectionInfo
   , connect
@@ -15,7 +15,15 @@ import Network.Connection.Compat
 import Network.Socket (HostName, PortNumber)
 import System.Environment (lookupEnv)
 import Text.Megaparsec
-  (Parsec, anySingle, errorBundlePretty, manyTill, optional, parse, some, (<?>))
+  ( Parsec
+  , anySingle
+  , errorBundlePretty
+  , manyTill
+  , optional
+  , parse
+  , some
+  , (<?>)
+  )
 import Text.Megaparsec.Char (char, digitChar, string, upperChar)
 
 newtype Namespace = Namespace Text
@@ -31,13 +39,14 @@ data ConnectionInfo = ConnectionInfo
   deriving stock (Eq, Show)
 
 defaultConnectionInfo :: ConnectionInfo
-defaultConnectionInfo = ConnectionInfo
-  { connectionInfoTls = False
-  , connectionInfoPassword = Nothing
-  , connectionInfoHostName = "localhost"
-  , connectionInfoPort = 7419
-  , connectionInfoNamespace = Namespace ""
-  }
+defaultConnectionInfo =
+  ConnectionInfo
+    { connectionInfoTls = False
+    , connectionInfoPassword = Nothing
+    , connectionInfoHostName = "localhost"
+    , connectionInfoPort = 7419
+    , connectionInfoNamespace = Namespace ""
+    }
 
 -- | Parse a @'Connection'@ from environment variables
 --
@@ -47,7 +56,6 @@ defaultConnectionInfo = ConnectionInfo
 -- Supported format is @tcp(+tls):\/\/(:password@)host:port(/namespace)@.
 --
 -- See <https://github.com/contribsys/faktory/wiki/Worker-Lifecycle#url-configuration>.
---
 envConnectionInfo :: IO ConnectionInfo
 envConnectionInfo = do
   providerString <- fromMaybe "FAKTORY_URL" <$> lookupEnv "FAKTORY_PROVIDER"
@@ -61,29 +69,35 @@ connect ConnectionInfo {..} = bracketOnError open connectionClose pure
  where
   open = do
     ctx <- initConnectionContext
-    connectTo ctx $ ConnectionParams
-      { connectionHostname = connectionInfoHostName
-      , connectionPort = connectionInfoPort
-      , connectionUseSecure = if connectionInfoTls
-        then Just TLSSettingsSimple
-          { settingDisableCertificateValidation = False
-          , settingDisableSession = False
-          , settingUseServerName = False
-          }
-        else Nothing
-      , connectionUseSocks = Nothing
-      }
+    connectTo ctx $
+      ConnectionParams
+        { connectionHostname = connectionInfoHostName
+        , connectionPort = connectionInfoPort
+        , connectionUseSecure =
+            if connectionInfoTls
+              then
+                Just
+                  TLSSettingsSimple
+                    { settingDisableCertificateValidation = False
+                    , settingDisableSession = False
+                    , settingUseServerName = False
+                    }
+              else Nothing
+        , connectionUseSocks = Nothing
+        }
 
 type Parser = Parsec Void String
 
 parseThrow :: Parser a -> String -> String -> IO a
 parseThrow parser name value = either err pure $ parse parser name value
  where
-  err ex = throwIO . userError $ unlines
-    [ ""
-    , "\"" <> value <> "\" is an invalid value for " <> name <> ":"
-    , errorBundlePretty ex
-    ]
+  err ex =
+    throwIO . userError $
+      unlines
+        [ ""
+        , "\"" <> value <> "\" is an invalid value for " <> name <> ":"
+        , errorBundlePretty ex
+        ]
 
 parseProvider :: Parser String
 parseProvider =

@@ -1,10 +1,10 @@
 cabal-version: 1.18
 
--- This file has been generated from package.yaml by hpack version 0.34.4.
+-- This file has been generated from package.yaml by hpack version 0.35.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 90987000132ede41855e5c19e984c2d6e88e9efa27154587d6a965ae91efd56a
+-- hash: ac78022c05a0f33b656fb49f3a9e04e56243e1f141f20048a93bc5445d62831d
 
 name:           faktory
 version:        1.1.2.4
@@ -122,11 +122,11 @@ library
     , time
     , unix
     , unordered-containers
+  default-language: Haskell2010
   if impl(ghc >= 8.10)
     ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module
   if impl(ghc >= 9.2)
     ghc-options: -Wno-missing-kind-signatures
-  default-language: Haskell2010
 
 executable faktory-example-consumer
   main-is: Main.hs
@@ -164,11 +164,11 @@ executable faktory-example-consumer
     , base ==4.*
     , faktory
     , safe-exceptions
+  default-language: Haskell2010
   if impl(ghc >= 8.10)
     ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module
   if impl(ghc >= 9.2)
     ghc-options: -Wno-missing-kind-signatures
-  default-language: Haskell2010
 
 executable faktory-example-producer
   main-is: Main.hs
@@ -206,11 +206,11 @@ executable faktory-example-producer
     , base ==4.*
     , faktory
     , safe-exceptions
+  default-language: Haskell2010
   if impl(ghc >= 8.10)
     ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module
   if impl(ghc >= 9.2)
     ghc-options: -Wno-missing-kind-signatures
-  default-language: Haskell2010
 
 test-suite hspec
   type: exitcode-stdio-1.0
@@ -260,11 +260,11 @@ test-suite hspec
     , hspec
     , mtl
     , time
+  default-language: Haskell2010
   if impl(ghc >= 8.10)
     ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module
   if impl(ghc >= 9.2)
     ghc-options: -Wno-missing-kind-signatures
-  default-language: Haskell2010
 
 test-suite readme
   type: exitcode-stdio-1.0
@@ -303,8 +303,8 @@ test-suite readme
     , base ==4.*
     , faktory
     , markdown-unlit
+  default-language: Haskell2010
   if impl(ghc >= 8.10)
     ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module
   if impl(ghc >= 9.2)
     ghc-options: -Wno-missing-kind-signatures
-  default-language: Haskell2010

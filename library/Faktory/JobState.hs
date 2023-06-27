@@ -1,5 +1,5 @@
 module Faktory.JobState
-  ( JobState(..)
+  ( JobState (..)
   ) where
 
 import Faktory.Prelude
@@ -39,12 +39,12 @@ jobStateToText = \case
 jobStateFromText :: Text -> Either String JobState
 jobStateFromText x =
   note
-      (unpack
-      $ "Invalid JobState: "
-      <> x
-      <> ", must be one of "
-      <> T.intercalate ", " (HashMap.keys jobStateMap)
-      )
+    ( unpack $
+        "Invalid JobState: "
+          <> x
+          <> ", must be one of "
+          <> T.intercalate ", " (HashMap.keys jobStateMap)
+    )
     $ HashMap.lookup x jobStateMap
 
 jobStateMap :: HashMap Text JobState

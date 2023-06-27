@@ -20,9 +20,8 @@ spec = do
         connection `shouldBe` defaultConnectionInfo
 
     it "parses the provided URL" $ do
-      let
-        env =
-          [("FAKTORY_PROVIDER", Nothing), ("FAKTORY_URL", Just "tcp://foo:123")]
+      let env =
+            [("FAKTORY_PROVIDER", Nothing), ("FAKTORY_URL", Just "tcp://foo:123")]
 
       withEnvironment env $ do
         ConnectionInfo {..} <- envConnectionInfo
@@ -33,11 +32,10 @@ spec = do
         connectionInfoNamespace `shouldBe` Namespace ""
 
     it "parses tls and password" $ do
-      let
-        env =
-          [ ("FAKTORY_PROVIDER", Nothing)
-          , ("FAKTORY_URL", Just "tcp+tls://:foo@bar:123")
-          ]
+      let env =
+            [ ("FAKTORY_PROVIDER", Nothing)
+            , ("FAKTORY_URL", Just "tcp+tls://:foo@bar:123")
+            ]
 
       withEnvironment env $ do
         ConnectionInfo {..} <- envConnectionInfo
@@ -47,11 +45,10 @@ spec = do
         connectionInfoPort `shouldBe` 123
 
     it "parses namespace" $ do
-      let
-        env =
-          [ ("FAKTORY_PROVIDER", Nothing)
-          , ("FAKTORY_URL", Just "tcp://localhost:7419/prefix")
-          ]
+      let env =
+            [ ("FAKTORY_PROVIDER", Nothing)
+            , ("FAKTORY_URL", Just "tcp://localhost:7419/prefix")
+            ]
 
       withEnvironment env $ do
         ConnectionInfo {..} <- envConnectionInfo
@@ -60,11 +57,10 @@ spec = do
         connectionInfoNamespace `shouldBe` Namespace "prefix"
 
     it "follows _PROVIDER to find _URL" $ do
-      let
-        env =
-          [ ("FAKTORY_PROVIDER", Just "OTHER_URL")
-          , ("OTHER_URL", Just "tcp://foo:123")
-          ]
+      let env =
+            [ ("FAKTORY_PROVIDER", Just "OTHER_URL")
+            , ("OTHER_URL", Just "tcp://foo:123")
+            ]
 
       withEnvironment env $ do
         ConnectionInfo {..} <- envConnectionInfo
@@ -72,21 +68,19 @@ spec = do
         connectionInfoPort `shouldBe` 123
 
     it "throws nice errors for invalid PROVIDER" $ do
-      let
-        env =
-          [ ("FAKTORY_PROVIDER", Just "flippity-$flop")
-          , ("FAKTORY_URL", Nothing)
-          ]
+      let env =
+            [ ("FAKTORY_PROVIDER", Just "flippity-$flop")
+            , ("FAKTORY_URL", Nothing)
+            ]
 
       withEnvironment env envConnectionInfo
         `shouldThrowMessage` "expecting an environment variable name"
 
     it "throws nice errors for invalid _URL" $ do
-      let
-        env =
-          [ ("FAKTORY_PROVIDER", Nothing)
-          , ("FAKTORY_URL", Just "http://foo:123")
-          ]
+      let env =
+            [ ("FAKTORY_PROVIDER", Nothing)
+            , ("FAKTORY_URL", Just "http://foo:123")
+            ]
 
       withEnvironment env envConnectionInfo
         `shouldThrowMessage` "expecting tcp(+tls)://(:<password>@)<host>:<port>"
@@ -94,9 +88,8 @@ spec = do
     it "throws nice errors for missing _PROVIDER" $ do
       pendingWith "This makes implementation more complicated"
 
-      let
-        env =
-          [("FAKTORY_PROVIDER", Just "MISSING_URL"), ("MISSING_URL", Nothing)]
+      let env =
+            [("FAKTORY_PROVIDER", Just "MISSING_URL"), ("MISSING_URL", Nothing)]
 
       withEnvironment env envConnectionInfo `shouldThrowMessage` "..."
 
@@ -104,12 +97,12 @@ spec = do
 --
 -- Values are @'Maybe'@ so that @'Nothing'@ can be used to unset values during
 -- override and/or restoration. Note: this is probably not thread-safe.
---
 withEnvironment :: [(String, Maybe String)] -> IO a -> IO a
-withEnvironment env act = bracket
-  (traverse readAndReset env)
-  (traverse_ readAndReset)
-  (const act)
+withEnvironment env act =
+  bracket
+    (traverse readAndReset env)
+    (traverse_ readAndReset)
+    (const act)
  where
   readAndReset :: (String, Maybe String) -> IO (String, Maybe String)
   readAndReset (variable, mNewValue) = do

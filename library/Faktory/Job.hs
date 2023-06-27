@@ -25,14 +25,14 @@ import Faktory.Prelude
 import Data.Aeson
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NE
-import Data.Semigroup (Last(..))
+import Data.Semigroup (Last (..))
 import Data.Time (UTCTime)
-import Faktory.Client (Client(..))
-import Faktory.Connection (ConnectionInfo(..))
+import Faktory.Client (Client (..))
+import Faktory.Connection (ConnectionInfo (..))
 import Faktory.JobFailure
 import Faktory.JobOptions
-import Faktory.Producer (Producer(..), pushJob)
-import Faktory.Settings (Namespace, Settings(..))
+import Faktory.Producer (Producer (..), pushJob)
+import Faktory.Settings (Namespace, Settings (..))
 import GHC.Stack
 import System.Random
 
@@ -57,7 +57,6 @@ data Job arg = Job
 -- 'perform' ('in_' 10 <> 'once') SomeJob
 -- 'perform' ('in_' 10 <> 'retry' 3) SomeJob
 -- @
---
 perform
   :: (HasCallStack, ToJSON arg) => JobOptions -> Producer -> arg -> IO JobId
 perform options producer arg = do
@@ -68,21 +67,25 @@ applyOptions :: Namespace -> JobOptions -> Job arg -> IO (Job arg)
 applyOptions namespace options job = do
   scheduledAt <- getAtFromSchedule options
   let namespacedOptions = namespaceQueue namespace $ jobOptions job <> options
-  pure $ job { jobAt = scheduledAt, jobOptions = namespacedOptions }
+  pure $ job {jobAt = scheduledAt, jobOptions = namespacedOptions}
 
 -- | Construct a 'Job' and apply options and Producer settings
 buildJob :: JobOptions -> Producer -> arg -> IO (Job arg)
-buildJob options producer arg = applyOptions namespace (applyDefaults options)
-  =<< newJob arg
+buildJob options producer arg =
+  applyOptions namespace (applyDefaults options)
+    =<< newJob arg
  where
   namespace =
-    connectionInfoNamespace
-      $ settingsConnection
-      $ clientSettings
-      $ producerClient producer
+    connectionInfoNamespace $
+      settingsConnection $
+        clientSettings $
+          producerClient producer
   applyDefaults =
-    mappend $ settingsDefaultJobOptions $ clientSettings $ producerClient
-      producer
+    mappend $
+      settingsDefaultJobOptions $
+        clientSettings $
+          producerClient
+            producer
 
 -- | Construct a 'Job' with default 'JobOptions'
 newJob :: arg -> IO (Job arg)
@@ -90,13 +93,14 @@ newJob arg = do
   -- Ruby uses 12 random hex
   jobId <- take 12 . randomRs ('a', 'z') <$> newStdGen
 
-  pure Job
-    { jobJid = jobId
-    , jobAt = Nothing
-    , jobArgs = pure arg
-    , jobOptions = jobtype "Default"
-    , jobFailure = Nothing
-    }
+  pure
+    Job
+      { jobJid = jobId
+      , jobAt = Nothing
+      , jobArgs = pure arg
+      , jobOptions = jobtype "Default"
+      , jobFailure = Nothing
+      }
 
 jobArg :: Job arg -> arg
 jobArg Job {..} = NE.head jobArgs
@@ -132,19 +136,19 @@ toPairs Job {..} =
 -- brittany-disable-next-binding
 
 instance FromJSON args => FromJSON (Job args) where
-  parseJSON = withObject "Job" $ \o -> Job
-    <$> o .: "jid"
-    <*> o .:? "at"
-    <*> o .: "args"
-    <*> parseJSON (Object o)
-    <*> o .:? "failure"
+  parseJSON = withObject "Job" $ \o ->
+    Job
+      <$> o .: "jid"
+      <*> o .:? "at"
+      <*> o .: "args"
+      <*> parseJSON (Object o)
+      <*> o .:? "failure"
 
 type JobId = String
 
 -- | https://github.com/contribsys/faktory/wiki/Job-Errors#the-process
 --
 -- > By default Faktory will retry a job 25 times
---
 faktoryDefaultRetry :: Int
 faktoryDefaultRetry = 25
 

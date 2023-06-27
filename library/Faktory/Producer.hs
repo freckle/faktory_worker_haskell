@@ -1,5 +1,5 @@
 module Faktory.Producer
-  ( Producer(..)
+  ( Producer (..)
   , newProducer
   , newProducerEnv
   , closeProducer
@@ -35,6 +35,5 @@ pushJob producer job = commandOK (producerClient producer) "PUSH" [encode job]
 -- | Clear all job data in the Faktory server
 --
 -- Use with caution!
---
 flush :: HasCallStack => Producer -> IO ()
 flush producer = commandOK (producerClient producer) "FLUSH" []

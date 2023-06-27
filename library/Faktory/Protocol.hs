@@ -4,10 +4,9 @@
 --
 -- Faktory takes a lot of inspiration from Redis, so the connection and
 -- protocol-related code translated well with minor simplifications.
---
 module Faktory.Protocol
   ( readReply
-  , Reply(..)
+  , Reply (..)
   , reply
   ) where
 
@@ -55,9 +54,10 @@ error = Error <$> line
 
 {-# INLINE bulk #-}
 bulk :: Scanner Reply
-bulk = Bulk <$> do
-  len <- integral
-  if len < 0 then return Nothing else Just <$> Scanner.take len <* eol
+bulk =
+  Bulk <$> do
+    len <- integral
+    if len < 0 then return Nothing else Just <$> Scanner.take len <* eol
 
 {-# INLINE integral #-}
 integral :: Integral i => Scanner i
