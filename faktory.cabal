@@ -4,7 +4,7 @@ cabal-version: 1.18
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ac78022c05a0f33b656fb49f3a9e04e56243e1f141f20048a93bc5445d62831d
+-- hash: 397b6e0dde7a6daecf0f58a760a3cfac064246e16c90b862f333981ab114f124
 
 name:           faktory
 version:        1.1.2.4
@@ -107,7 +107,7 @@ library
     , aeson-casing
     , base ==4.*
     , bytestring
-    , connection
+    , crypton-connection
     , cryptonite
     , errors
     , megaparsec

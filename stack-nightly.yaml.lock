@@ -3,24 +3,10 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/lock_files
 
-packages:
-- completed:
-    hackage: connection-0.3.1@sha256:3dcbf2f10d1677d339267d6dacb38a24913622edf42b05f75a73f381610ddbfc,1563
-    pantry-tree:
-      sha256: ddf462f50f0fc53404c6dead419c7241faf26da0e67c32accd0d9dc0d6e4da87
-      size: 386
-  original:
-    hackage: connection-0.3.1
-- completed:
-    hackage: tls-1.6.0@sha256:7ae39373fd2de27fb80e90f76d22aeeb9a074a0ddd120cbd02c9c52f516a9e55,6987
-    pantry-tree:
-      sha256: a64b0c6cdfc37b48ebb7c0e30fe23a0e1a172baf3819ff6d0ca281ae4a56041a
-      size: 4897
-  original:
-    hackage: tls-1.6.0
+packages: []
 snapshots:
 - completed:
-    sha256: d4639f3981024cf7621b8e0480365ec7b6d8c963c5f26a320af027e0b37d1bf2
-    size: 531725
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/nightly/2023/6/26.yaml
-  original: nightly-2023-06-26
+    sha256: e4162106c3c7d9a71f1034ab31582fbeee1cc5b3266a49c0d52f577a6002df8e
+    size: 559903
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/nightly/2023/7/25.yaml
+  original: nightly-2023-07-25
