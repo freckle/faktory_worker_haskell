@@ -1,1 +1,10 @@
 resolver: lts-21.0
+extra-deps:
+  - crypton-connection-0.3.1
+
+  # For crypton-connection
+  - crypton-x509-1.7.6
+  - crypton-x509-store-1.6.9
+  - crypton-x509-system-1.6.7
+  - crypton-x509-validation-1.6.12
+  - tls-1.7.0

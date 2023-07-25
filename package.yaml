@@ -96,7 +96,7 @@ library:
     - aeson
     - aeson-casing
     - bytestring
-    - connection
+    - crypton-connection
     - cryptonite
     - errors
     - megaparsec
