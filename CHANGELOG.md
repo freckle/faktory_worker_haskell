@@ -1,4 +1,9 @@
-## [_Unreleased_](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.4...main)
+## [_Unreleased_](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.5...main)
+
+## [v1.1.2.5](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.4...v1.1.2.5)
+
+- Migrate to `crypton-connection`
+- Remove CI for GHC 8.6
 
 ## [v1.1.2.4](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.3...v1.1.2.4)
 
