@@ -43,24 +43,24 @@ extra-doc-files:
   - README.lhs
 
 ghc-options:
-  -Weverything
-  -Wno-missing-exported-signatures
-  -Wno-missed-specialisations
-  -Wno-all-missed-specialisations
-  -Wno-unsafe
-  -Wno-safe
-  -Wno-missing-local-signatures
-  -Wno-monomorphism-restriction
-  -Wno-missing-import-lists
+  - -Weverything
+  - -Wno-missing-exported-signatures
+  - -Wno-missed-specialisations
+  - -Wno-all-missed-specialisations
+  - -Wno-unsafe
+  - -Wno-safe
+  - -Wno-missing-local-signatures
+  - -Wno-monomorphism-restriction
+  - -Wno-missing-import-lists
 
 when:
   - condition: impl(ghc >= 8.10)
     ghc-options:
-      -Wno-missing-safe-haskell-mode
-      -Wno-prepositive-qualified-module
+      - -Wno-missing-safe-haskell-mode
+      - -Wno-prepositive-qualified-module
   - condition: impl(ghc >= 9.2)
     ghc-options:
-      -Wno-missing-kind-signatures
+      - -Wno-missing-kind-signatures
 
 dependencies:
   - base >= 4 && < 5
