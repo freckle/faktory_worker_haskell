@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP #-}
+
 module Faktory.Job
   ( Job
   , JobId
@@ -121,7 +123,11 @@ instance ToJSON args => ToJSON (Job args) where
   toJSON = object . toPairs
   toEncoding = pairs . mconcat . toPairs
 
+#if MIN_VERSION_aeson(2,2,0)
+toPairs :: (KeyValue e a, ToJSON arg) => Job arg -> [a]
+#else
 toPairs :: (KeyValue a, ToJSON arg) => Job arg -> [a]
+#endif
 toPairs Job {..} =
   [ "jid" .= jobJid
   , "at" .= jobAt
