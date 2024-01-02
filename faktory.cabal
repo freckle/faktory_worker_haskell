@@ -1,10 +1,10 @@
 cabal-version: 1.18
 
--- This file has been generated from package.yaml by hpack version 0.35.2.
+-- This file has been generated from package.yaml by hpack version 0.36.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: f338840edaad43c60718b8e34d909b59d73059f77abc2619c14a57e4bcc1e061
+-- hash: 8990de091d6b2d167e0e4f0e84b21606c882980649d5edcbed0afa9a7202fd74
 
 name:           faktory
 version:        1.1.2.5
@@ -127,6 +127,8 @@ library
     ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module
   if impl(ghc >= 9.2)
     ghc-options: -Wno-missing-kind-signatures
+  if impl(ghc >= 9.8)
+    ghc-options: -Wno-missing-role-annotations
 
 executable faktory-example-consumer
   main-is: Main.hs
@@ -169,6 +171,8 @@ executable faktory-example-consumer
     ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module
   if impl(ghc >= 9.2)
     ghc-options: -Wno-missing-kind-signatures
+  if impl(ghc >= 9.8)
+    ghc-options: -Wno-missing-role-annotations
 
 executable faktory-example-producer
   main-is: Main.hs
@@ -211,6 +215,8 @@ executable faktory-example-producer
     ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module
   if impl(ghc >= 9.2)
     ghc-options: -Wno-missing-kind-signatures
+  if impl(ghc >= 9.8)
+    ghc-options: -Wno-missing-role-annotations
 
 test-suite hspec
   type: exitcode-stdio-1.0
@@ -265,6 +271,8 @@ test-suite hspec
     ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module
   if impl(ghc >= 9.2)
     ghc-options: -Wno-missing-kind-signatures
+  if impl(ghc >= 9.8)
+    ghc-options: -Wno-missing-role-annotations
 
 test-suite readme
   type: exitcode-stdio-1.0
@@ -308,3 +316,5 @@ test-suite readme
     ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module
   if impl(ghc >= 9.2)
     ghc-options: -Wno-missing-kind-signatures
+  if impl(ghc >= 9.8)
+    ghc-options: -Wno-missing-role-annotations
