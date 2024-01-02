@@ -1,4 +1,8 @@
-## [_Unreleased_](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.5...main)
+## [_Unreleased_](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.6...main)
+
+## [v1.1.2.6](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.5...v1.1.2.6)
+
+- Support ghc-9.8 and aeson-2.2
 
 ## [v1.1.2.5](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.4...v1.1.2.5)
 
