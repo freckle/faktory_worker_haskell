@@ -69,3 +69,9 @@ spec = describe "Faktory" $ do
       void $ perform @Text mempty producer "BOOM"
 
     failed `shouldSatisfy` (== 1) . length
+
+  it "fails jobs that didn't parse" $ do
+    (_, failed, _) <- withWorker id $ withProducer $ \producer -> do
+      void $ perform @Int mempty producer 42
+
+    failed `shouldSatisfy` (== 1) . length
