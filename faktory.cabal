@@ -4,10 +4,10 @@ cabal-version: 1.18
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3745aedbf1b91d2c710a7d56cf5802cd63e7e0279f80be134fc79f850ed6cfe6
+-- hash: 4e8530827601475a141f2b1524153409a869122bcd0dafe12b70368e0aefcf07
 
 name:           faktory
-version:        1.1.2.6
+version:        1.1.2.7
 synopsis:       Faktory Worker for Haskell
 description:    Haskell client and worker process for the Faktory background job server.
                 .
