@@ -55,6 +55,7 @@ data WorkerSettings = WorkerSettings
   { settingsQueue :: Queue
   , settingsId :: Maybe WorkerId
   , settingsIdleDelay :: Int
+  , settingsOnFailed :: SomeException -> IO ()
   }
 
 defaultWorkerSettings :: WorkerSettings
@@ -63,6 +64,7 @@ defaultWorkerSettings =
     { settingsQueue = defaultQueue
     , settingsId = Nothing
     , settingsIdleDelay = 1
+    , settingsOnFailed = \_ -> pure ()
     }
 
 envWorkerSettings :: IO WorkerSettings

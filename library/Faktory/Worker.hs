@@ -107,7 +107,8 @@ processorLoop client settings workerSettings f = do
     Right (Just job) ->
       processAndAck job
         `catches` [ Handler $ \(ex :: WorkerHalt) -> throw ex
-                  , Handler $ \(ex :: SomeException) ->
+                  , Handler $ \(ex :: SomeException) -> do
+                      settingsOnFailed workerSettings ex
                       failJob client job $ T.pack $ show ex
                   ]
 
