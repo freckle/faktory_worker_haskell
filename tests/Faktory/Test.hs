@@ -34,10 +34,8 @@ workerTestCaseWith
   => (WorkerSettings -> WorkerSettings)
   -> (Producer -> IO ())
   -> IO [Job Text]
-workerTestCaseWith editSettings run = do
-  a <- startWorker editSettings
-  withProducer run
-  haltWorker a
+workerTestCaseWith editSettings =
+  fmap fst . withWorker editSettings . withProducer
 
 withProducer :: (Producer -> IO a) -> IO a
 withProducer f = bracket newProducerEnv closeProducer f
