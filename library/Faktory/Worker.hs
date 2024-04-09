@@ -15,6 +15,7 @@ import Faktory.Prelude
 import Control.Concurrent (killThread)
 import Data.Aeson
 import Data.Aeson.Casing
+import Data.Aeson.Types (parseEither)
 import qualified Data.Text as T
 import Faktory.Client
 import Faktory.Job (Job, JobId, jobArg, jobJid, jobReserveForMicroseconds)
@@ -89,7 +90,8 @@ processorLoop
 processorLoop client settings workerSettings f = do
   let
     namespace = connectionInfoNamespace $ settingsConnection settings
-    processAndAck job = do
+    processAndAck job' = do
+      job <- decodeJob job'
       mResult <- timeout (jobReserveForMicroseconds job) $ f job
       case mResult of
         Nothing -> settingsLogError settings "Job reservation period expired."
@@ -112,14 +114,16 @@ processorLoop client settings workerSettings f = do
                       failJob client job $ T.pack $ show ex
                   ]
 
+decodeJob :: (HasCallStack, FromJSON arg) => Job Value -> IO (Job arg)
+decodeJob = either throwString pure . traverse (parseEither parseJSON)
+
 -- | <https://github.com/contribsys/faktory/wiki/Worker-Lifecycle#heartbeat>
 heartBeat :: Client -> WorkerId -> IO ()
 heartBeat client workerId = do
   threadDelaySeconds 25
   command_ client "BEAT" [encode $ BeatPayload workerId]
 
-fetchJob
-  :: FromJSON args => Client -> Queue -> IO (Either String (Maybe (Job args)))
+fetchJob :: Client -> Queue -> IO (Either String (Maybe (Job Value)))
 fetchJob client queue = commandJSON client "FETCH" [queueArg queue]
 
 ackJob :: HasCallStack => Client -> Job args -> IO ()
