@@ -1,4 +1,9 @@
-## [_Unreleased_](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.6...main)
+## [_Unreleased_](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.7...main)
+
+## [v1.1.2.7](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.6...v1.1.2.7)
+
+- Fix handling decoding errors of the Job payload. Previously, it would log an
+  error and neither `ACK` nor `FAIL` the Job. Now it `FAIL`s the Job.
 
 ## [v1.1.2.6](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.5...v1.1.2.6)
 
