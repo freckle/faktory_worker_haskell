@@ -15,7 +15,7 @@ spec :: Spec
 spec = do
   describe "jobBatchId" $ do
     it "parses the batchId out of batch jobs" $ do
-      (jobs, batchId) <- withWorker id $ withProducer $ \producer -> do
+      (jobs, _, batchId) <- withWorker id $ withProducer $ \producer -> do
         c <- buildJob @Text mempty producer "c"
         d <- buildJob @Text mempty producer "d"
         let options = description "foo" <> complete c <> success d
@@ -100,7 +100,7 @@ spec = do
       fmap jobArg jobs `shouldMatchList` ["a", "b", "c", "d", "HALT"]
 
     it "supports BATCH STATUS" $ do
-      (_, batchId) <- withWorker id $ withProducer $ \producer -> do
+      (_, _, batchId) <- withWorker id $ withProducer $ \producer -> do
         c <- buildJob @Text mempty producer "c"
         d <- buildJob @Text mempty producer "d"
         let options = description "foo" <> complete c <> success d

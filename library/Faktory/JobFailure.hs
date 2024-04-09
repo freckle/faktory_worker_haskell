@@ -15,6 +15,7 @@ data JobFailure = JobFailure
   , jfErrorType :: Maybe Text
   , jfBacktrace :: Maybe [Text]
   }
+  deriving stock (Show)
 
 -- brittany-disable-next-binding
 

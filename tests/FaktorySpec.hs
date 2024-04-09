@@ -63,3 +63,9 @@ spec = describe "Faktory" $ do
       void $ perform @Text (reserveFor 4) producer "WAIT"
 
     fmap jobArg jobs `shouldMatchList` ["WAIT", "HALT"]
+
+  it "fails jobs that raise exceptions" $ do
+    (_, failed, _) <- withWorker id $ withProducer $ \producer -> do
+      void $ perform @Text mempty producer "BOOM"
+
+    failed `shouldSatisfy` (== 1) . length
