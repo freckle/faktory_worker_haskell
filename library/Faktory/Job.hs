@@ -48,7 +48,7 @@ data Job arg = Job
   , jobOptions :: JobOptions
   , jobFailure :: Maybe JobFailure
   }
-  deriving stock (Show, Functor)
+  deriving stock (Show, Functor, Foldable, Traversable)
 
 -- | Perform a Job with the given options
 --
