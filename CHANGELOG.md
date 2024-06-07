@@ -1,4 +1,11 @@
-## [_Unreleased_](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.7...main)
+## [_Unreleased_](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.3.0...main)
+
+## [v1.1.3.0](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.7...v1.1.3.0)
+
+- Add `Faktory.Pool`
+
+  This incurs the new dependencies, `unliftio`, `resource-pool`, and
+  `microlens`.
 
 ## [v1.1.2.7](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.6...v1.1.2.7)
 
