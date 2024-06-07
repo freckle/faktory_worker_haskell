@@ -24,8 +24,8 @@ import Faktory.Prelude
 import Control.Monad.IO.Class (MonadIO (..))
 import Control.Monad.Reader (MonadReader, asks)
 import Data.Aeson (ToJSON)
-import Data.Pool (Pool)
-import qualified Data.Pool as Pool
+import Data.Pool.Compat (Pool)
+import qualified Data.Pool.Compat as Pool
 import Faktory.Job hiding (buildJob, perform)
 import qualified Faktory.Job as Job
 import Faktory.Producer
@@ -59,14 +59,13 @@ newFaktoryPool
   -> PoolSettings
   -> m FaktoryPool
 newFaktoryPool settings PoolSettings {..} = do
-  liftIO
-    . fmap FaktoryPool
-    . Pool.newPool
-    $ Pool.defaultPoolConfig
-      (newProducer settings)
-      closeProducer
-      (fromIntegral settingsTimeout)
-      (fromIntegral settingsSize)
+  liftIO $
+    FaktoryPool
+      <$> Pool.createPool
+        (newProducer settings)
+        closeProducer
+        (fromIntegral settingsTimeout)
+        (fromIntegral settingsSize)
 
 -- | 'Faktory.Job.perform' but using a 'Producer' from the pool
 --
