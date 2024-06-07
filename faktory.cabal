@@ -4,7 +4,7 @@ cabal-version: 1.18
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4e8530827601475a141f2b1524153409a869122bcd0dafe12b70368e0aefcf07
+-- hash: 690e0deaa46069fadbd59ee63f2da1a97d4fb5bcadabf75910d088636b34bbf9
 
 name:           faktory
 version:        1.1.2.7
@@ -66,6 +66,7 @@ library
       Faktory.JobFailure
       Faktory.JobOptions
       Faktory.JobState
+      Faktory.Pool
       Faktory.Prelude
       Faktory.Producer
       Faktory.Protocol
@@ -112,15 +113,18 @@ library
     , errors
     , megaparsec
     , memory
+    , microlens
     , mtl
     , network
     , random
+    , resource-pool
     , safe-exceptions
     , scanner
     , semigroups >=0.19.1
     , text
     , time
     , unix
+    , unliftio
     , unordered-containers
   default-language: Haskell2010
   if impl(ghc >= 8.10)
