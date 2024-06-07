@@ -37,7 +37,7 @@ import UnliftIO (MonadUnliftIO, withRunInIO)
 -- |
 --
 -- @since 1.1.3.0
-type FaktoryPool = Pool Producer
+newtype FaktoryPool = FaktoryPool (Pool Producer)
 
 -- |
 --
@@ -60,6 +60,7 @@ newFaktoryPool
   -> m FaktoryPool
 newFaktoryPool settings PoolSettings {..} = do
   liftIO
+    . fmap FaktoryPool
     . Pool.newPool
     $ Pool.defaultPoolConfig
       (newProducer settings)
@@ -104,7 +105,7 @@ withProducer
   => (Producer -> m a)
   -> m a
 withProducer f = do
-  p <- asks (^. faktoryPoolL)
+  FaktoryPool p <- asks (^. faktoryPoolL)
   withRunInIO $ \runInIO -> do
     Pool.withResource p $ runInIO . f
 
@@ -121,6 +122,6 @@ withProducer f = do
 takeProducer
   :: (MonadIO m, MonadReader env m, HasFaktoryPool env) => m (Producer, m ())
 takeProducer = do
-  p <- asks (^. faktoryPoolL)
+  FaktoryPool p <- asks (^. faktoryPoolL)
   (producer, lp) <- liftIO $ Pool.takeResource p
   pure (producer, liftIO $ Pool.putResource lp producer)
