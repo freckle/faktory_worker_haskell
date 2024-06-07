@@ -104,15 +104,18 @@ library:
     - errors
     - megaparsec
     - memory
+    - microlens
     - mtl
     - network
     - random
+    - resource-pool
     - safe-exceptions
     - semigroups >= 0.19.1
     - scanner
     - text
     - time
     - unix
+    - unliftio
     - unordered-containers
 
 executables:

@@ -2,6 +2,8 @@ module Faktory.Settings
   ( Settings (..)
   , defaultSettings
   , envSettings
+
+    -- * Worker
   , WorkerSettings (..)
   , defaultWorkerSettings
   , envWorkerSettings
@@ -11,6 +13,10 @@ module Faktory.Settings
   , defaultQueue
   , WorkerId
   , randomWorkerId
+
+    -- * Pool
+  , PoolSettings (..)
+  , envPoolSettings
 
     -- * Re-exports
   , ConnectionInfo (..)
@@ -23,6 +29,7 @@ import Data.Aeson
 import Faktory.Connection
 import Faktory.JobOptions (JobOptions)
 import Faktory.Settings.Queue
+import Numeric.Natural
 import System.Environment (lookupEnv)
 import System.IO (hPutStrLn, stderr)
 import System.Random
@@ -82,3 +89,43 @@ newtype WorkerId = WorkerId String
 
 randomWorkerId :: IO WorkerId
 randomWorkerId = WorkerId . take 8 . randomRs ('a', 'z') <$> newStdGen
+
+-- |
+--
+-- @since 1.1.3.0
+data PoolSettings = PoolSettings
+  { settingsSize :: Natural
+  -- ^ Maximum pool size
+  --
+  -- Default is @10@. Smallest acceptable value is @1@. Note that, due to the
+  -- striping behavior of @resource-pool@, a configured size @N@ may result in
+  -- @N - 1@ resources.
+  , settingsTimeout :: Natural
+  -- ^ How long before destroying a resource, in seconds
+  --
+  -- Default is @600@.
+  }
+
+-- |
+--
+-- @since 1.1.3.0
+defaultPoolSettings :: PoolSettings
+defaultPoolSettings =
+  PoolSettings
+    { settingsSize = 10
+    , settingsTimeout = 600
+    }
+
+-- | Read 'PoolSettings' from the environment
+--
+-- - @FAKTORY_POOL_SIZE@
+-- - @FAKTORY_POOL_TIMEOUT@
+--
+-- @since 1.1.3.0
+envPoolSettings :: IO PoolSettings
+envPoolSettings =
+  PoolSettings
+    <$> (maybe settingsSize read <$> lookupEnv "FAKTORY_POOL_SIZE")
+    <*> (maybe settingsTimeout read <$> lookupEnv "FAKTORY_POOL_TIMEOUT")
+ where
+  PoolSettings {..} = defaultPoolSettings
