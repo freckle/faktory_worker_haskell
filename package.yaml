@@ -6,7 +6,7 @@ author: Freckle Engineering
 maintainer: engineering@freckle.com
 copyright: 2018 Freckle Education
 license: MIT
-github: frontrowed/faktory_worker_haskell
+github: freckle/faktory_worker_haskell
 synopsis: Faktory Worker for Haskell
 description: |
   Haskell client and worker process for the Faktory background job server.
