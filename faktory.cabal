@@ -4,7 +4,7 @@ cabal-version: 1.18
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 89f1872b73104a5e3c9199c20692c3b0da3ba450a23bdfd7aad3d2bacc7bcb6c
+-- hash: 93c05d233611150574822d2e7e5b79a7f5016dbfb15705ce42d76a2cab18ec5a
 
 name:           faktory
 version:        1.1.3.0
@@ -38,8 +38,8 @@ description:    Haskell client and worker process for the Faktory background job
                 .
                 This package contains only the `Client` and `Worker`.
 category:       Network
-homepage:       https://github.com/frontrowed/faktory_worker_haskell#readme
-bug-reports:    https://github.com/frontrowed/faktory_worker_haskell/issues
+homepage:       https://github.com/freckle/faktory_worker_haskell#readme
+bug-reports:    https://github.com/freckle/faktory_worker_haskell/issues
 author:         Freckle Engineering
 maintainer:     engineering@freckle.com
 copyright:      2018 Freckle Education
@@ -52,7 +52,7 @@ extra-doc-files:
 
 source-repository head
   type: git
-  location: https://github.com/frontrowed/faktory_worker_haskell
+  location: https://github.com/freckle/faktory_worker_haskell
 
 library
   exposed-modules:
