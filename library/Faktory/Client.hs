@@ -1,11 +1,10 @@
 module Faktory.Client
-  (
-  -- * Client operations
-    Client(..)
+  ( -- * Client operations
+    Client (..)
   , newClient
   , closeClient
 
-  -- * High-level Client API
+    -- * High-level Client API
   , command_
   , commandOK
   , commandJSON
@@ -15,7 +14,7 @@ module Faktory.Client
 import Faktory.Prelude
 
 import Control.Concurrent.MVar
-import Crypto.Hash (Digest, SHA256(..), hashWith)
+import Crypto.Hash (Digest, SHA256 (..), hashWith)
 import Data.Aeson
 import Data.Bitraversable (bimapM)
 import Data.ByteArray (ByteArrayAccess)
@@ -45,8 +44,8 @@ data HiPayload = HiPayload
   }
 
 instance FromJSON HiPayload where
-  parseJSON = withObject "HiPayload"
-    $ \o -> HiPayload <$> o .: "v" <*> o .:? "s" <*> o .:? "i"
+  parseJSON = withObject "HiPayload" $
+    \o -> HiPayload <$> o .: "v" <*> o .:? "s" <*> o .:? "i"
 
 data HelloPayload = HelloPayload
   { helloWorkerId :: Maybe WorkerId
@@ -58,22 +57,25 @@ data HelloPayload = HelloPayload
   }
 
 instance ToJSON HelloPayload where
-  toJSON HelloPayload {..} = object
-    [ "wid" .= helloWorkerId
-    , "hostname" .= helloHostname
-    , "pid" .= helloProcessId
-    , "labels" .= helloLabels
-    , "v" .= helloVersion
-    , "pwdhash" .= helloPasswordHash
-    ]
-  toEncoding HelloPayload {..} = pairs $ mconcat
-    [ "wid" .= helloWorkerId
-    , "hostname" .= helloHostname
-    , "pid" .= helloProcessId
-    , "labels" .= helloLabels
-    , "v" .= helloVersion
-    , "pwdhash" .= helloPasswordHash
-    ]
+  toJSON HelloPayload {..} =
+    object
+      [ "wid" .= helloWorkerId
+      , "hostname" .= helloHostname
+      , "pid" .= helloProcessId
+      , "labels" .= helloLabels
+      , "v" .= helloVersion
+      , "pwdhash" .= helloPasswordHash
+      ]
+  toEncoding HelloPayload {..} =
+    pairs $
+      mconcat
+        [ "wid" .= helloWorkerId
+        , "hostname" .= helloHostname
+        , "pid" .= helloProcessId
+        , "labels" .= helloLabels
+        , "v" .= helloVersion
+        , "pwdhash" .= helloPasswordHash
+        ]
 
 -- | Open a new @'Client'@ connection with the given @'Settings'@
 newClient :: HasCallStack => Settings -> Maybe WorkerId -> IO Client
@@ -83,21 +85,23 @@ newClient settings@Settings {..} mWorkerId =
 
     greeting <-
       fromJustThrows "Unexpected end of HI message"
-      =<< fromRightThrows
-      =<< recvUnsafe settings conn
+        =<< fromRightThrows
+        =<< recvUnsafe settings conn
     stripped <-
-      fromJustThrows ("Missing HI prefix: " <> show greeting)
-        $ BSL8.stripPrefix "HI" greeting
+      fromJustThrows ("Missing HI prefix: " <> show greeting) $
+        BSL8.stripPrefix "HI" greeting
     HiPayload {..} <-
-      fromJustThrows ("Failed to parse HI payload: " <> show stripped)
-        $ decode stripped
+      fromJustThrows ("Failed to parse HI payload: " <> show stripped) $
+        decode stripped
 
-    when (hiVersion > expectedProtocolVersion) $ settingsLogError $ concat
-      [ "Server's protocol version "
-      , show hiVersion
-      , " higher than client's expected protocol version "
-      , show expectedProtocolVersion
-      ]
+    when (hiVersion > expectedProtocolVersion) $
+      settingsLogError $
+        concat
+          [ "Server's protocol version "
+          , show hiVersion
+          , " higher than client's expected protocol version "
+          , show expectedProtocolVersion
+          ]
 
     let
       mPassword = connectionInfoPassword settingsConnection
@@ -160,7 +164,6 @@ commandByteString Client {..} cmd args = withMVar clientConnection $ \conn ->
 -- | Send a command to the Server socket
 --
 -- Do not use outside of @'withMVar'@, this is not threadsafe.
---
 sendUnsafe :: Settings -> Connection -> ByteString -> [ByteString] -> IO ()
 sendUnsafe Settings {..} conn cmd args = do
   let bs = BSL8.unwords (cmd : args)
@@ -170,7 +173,6 @@ sendUnsafe Settings {..} conn cmd args = do
 -- | Receive data from the Server socket
 --
 -- Do not use outside of @'withMVar'@, this is not threadsafe.
---
 recvUnsafe :: Settings -> Connection -> IO (Either String (Maybe ByteString))
 recvUnsafe Settings {..} conn = do
   emByteString <- readReply $ connectionGet conn 4096
@@ -180,7 +182,6 @@ recvUnsafe Settings {..} conn = do
 -- | Iteratively apply a function @n@ times
 --
 -- This is like @iterate f s !! n@ but strict in @s@
---
 times :: Int -> (s -> s) -> s -> s
 times n f !s
   | n <= 0 = s
@@ -195,13 +196,13 @@ hashPassword nonce n password =
     . hash
     . T.encodeUtf8
     $ T.pack password
-    <> nonce
+      <> nonce
  where
   -- Note that we use hash at two different types above.
   --
   -- 1. hash :: ByteString    -> Digest SHA256
   -- 2. hash :: Digest SHA256 -> Digest SHA256
-  hash :: (ByteArrayAccess b) => b -> Digest SHA256
+  hash :: ByteArrayAccess b => b -> Digest SHA256
   hash = hashWith SHA256
 
 -- | Protocol version the client expects

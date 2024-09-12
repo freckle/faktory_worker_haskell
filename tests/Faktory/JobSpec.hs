@@ -19,7 +19,9 @@ spec = do
   -- https://github.com/contribsys/faktory/issues/374#issuecomment-902075572
   describe "jobRetriesRemaining" $ do
     it "handles first consumed" $ do
-      job <- decodeJob [aesonQQ|
+      job <-
+        decodeJob
+          [aesonQQ|
         { "jid": "abc"
         , "args": [""]
         , "retry": 2
@@ -30,7 +32,9 @@ spec = do
 
     it "handles a first retry" $ do
       now <- getCurrentTime
-      job <- decodeJob [aesonQQ|
+      job <-
+        decodeJob
+          [aesonQQ|
         { "jid": "abc"
         , "args": [""]
         , "retry": 2
@@ -45,7 +49,9 @@ spec = do
 
     it "handles a final retry" $ do
       now <- getCurrentTime
-      job <- decodeJob [aesonQQ|
+      job <-
+        decodeJob
+          [aesonQQ|
         { "jid": "abc"
         , "args": [""]
         , "retry": 2
@@ -59,7 +65,9 @@ spec = do
       jobRetriesRemaining job `shouldBe` 0
 
     it "uses Faktory's default" $ do
-      job <- decodeJob [aesonQQ|
+      job <-
+        decodeJob
+          [aesonQQ|
         { "jid": "abc"
         , "args": [""]
         }
@@ -69,13 +77,17 @@ spec = do
 
     it "handles retry -1" $ do
       now <- getCurrentTime
-      job1 <- decodeJob [aesonQQ|
+      job1 <-
+        decodeJob
+          [aesonQQ|
         { "jid": "abc"
         , "args": [""]
         , "retry": -1
         }
       |]
-      job2 <- decodeJob [aesonQQ|
+      job2 <-
+        decodeJob
+          [aesonQQ|
         { "jid": "abc"
         , "args": [""]
         , "retry": -1
@@ -91,13 +103,17 @@ spec = do
 
     it "handles retry 0" $ do
       now <- getCurrentTime
-      job1 <- decodeJob [aesonQQ|
+      job1 <-
+        decodeJob
+          [aesonQQ|
         { "jid": "abc"
         , "args": [""]
         , "retry": 0
         }
       |]
-      job2 <- decodeJob [aesonQQ|
+      job2 <-
+        decodeJob
+          [aesonQQ|
         { "jid": "abc"
         , "args": [""]
         , "retry": 0
@@ -113,7 +129,9 @@ spec = do
 
     it "handles nonsense" $ do
       now <- getCurrentTime
-      job <- decodeJob [aesonQQ|
+      job <-
+        decodeJob
+          [aesonQQ|
         { "jid": "abc"
         , "args": [""]
         , "retry": 20
@@ -127,7 +145,9 @@ spec = do
       jobRetriesRemaining job `shouldBe` 0
 
     it "handles reserve_for" $ do
-      job <- decodeJob [aesonQQ|
+      job <-
+        decodeJob
+          [aesonQQ|
         { "jid": "abc"
         , "args": [""]
         , "reserve_for": 3600
@@ -144,19 +164,18 @@ spec = do
         jobOptions job `shouldBe` jobtype "Default"
 
     it "adds job option defaults from settings" $ do
-      let settings = defaultSettings { settingsDefaultJobOptions = retry 5 }
+      let settings = defaultSettings {settingsDefaultJobOptions = retry 5}
       bracket (newProducer settings) closeProducer $ \producer -> do
         job <- buildJob @Text mempty producer "text"
 
         jobOptions job `shouldBe` (jobtype "Default" <> retry 5)
 
     it "doesn't prefers explicit job options over defaults in settings" $ do
-      let settings = defaultSettings { settingsDefaultJobOptions = retry 5 }
+      let settings = defaultSettings {settingsDefaultJobOptions = retry 5}
       bracket (newProducer settings) closeProducer $ \producer -> do
         job <- buildJob @Text (retry 88) producer "text"
 
         jobOptions job `shouldBe` (jobtype "Default" <> retry 88)
-
 
 decodeJob :: Value -> IO (Job Text)
 decodeJob v = case fromJSON v of

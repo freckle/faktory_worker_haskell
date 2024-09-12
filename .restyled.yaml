@@ -1,2 +1,6 @@
-- brittany
-- stylish-haskell
+restylers_version: dev
+restylers:
+  - fourmolu
+  - stylish-haskell:
+      enabled: false
+  - "*"

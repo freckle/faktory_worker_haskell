@@ -23,23 +23,21 @@
 --
 -- __/NOTE__: This module does not support batched Jobs dynamically adding more
 -- Jobs to the Batch. PRs welcome.
---
 module Faktory.Ent.Batch
-  (
-  -- * Options
+  ( -- * Options
     BatchOptions
   , description
   , complete
   , success
 
-  -- * Running
+    -- * Running
   , runBatch
   , Batch
   , batchPerform
 
-  -- * Low-level
-  , BatchId(..)
-  , CustomBatchId(..)
+    -- * Low-level
+  , BatchId (..)
+  , CustomBatchId (..)
   , newBatch
   , commitBatch
   ) where
@@ -50,7 +48,7 @@ import Control.Monad.Reader
 import Data.Aeson
 import Data.Aeson.Casing
 import Data.ByteString.Lazy as BSL
-import Data.Semigroup (Last(..))
+import Data.Semigroup (Last (..))
 import Data.Semigroup.Generic
 import Data.Text.Encoding (decodeUtf8, encodeUtf8)
 import Faktory.Client
@@ -63,6 +61,7 @@ newtype Batch a = Batch (ReaderT BatchId IO a)
   deriving newtype (Functor, Applicative, Monad, MonadIO, MonadReader BatchId)
 
 newtype BatchId = BatchId Text
+  deriving stock (Show, Eq)
   deriving newtype (FromJSON, ToJSON)
 
 data BatchOptions arg = BatchOptions
@@ -70,7 +69,7 @@ data BatchOptions arg = BatchOptions
   , boSuccess :: Maybe (Last (Job arg))
   , boComplete :: Maybe (Last (Job arg))
   }
-  deriving stock Generic
+  deriving stock (Generic)
   deriving (Semigroup, Monoid) via GenericSemigroupMonoid (BatchOptions arg)
 
 instance ToJSON arg => ToJSON (BatchOptions arg) where
@@ -78,13 +77,13 @@ instance ToJSON arg => ToJSON (BatchOptions arg) where
   toEncoding = genericToEncoding $ aesonPrefix snakeCase
 
 description :: Text -> BatchOptions arg
-description d = mempty { boDescription = Just $ Last d }
+description d = mempty {boDescription = Just $ Last d}
 
 complete :: Job arg -> BatchOptions arg
-complete job = mempty { boComplete = Just $ Last job }
+complete job = mempty {boComplete = Just $ Last job}
 
 success :: Job arg -> BatchOptions arg
-success job = mempty { boSuccess = Just $ Last job }
+success job = mempty {boSuccess = Just $ Last job}
 
 runBatch :: ToJSON arg => BatchOptions arg -> Producer -> Batch a -> IO a
 runBatch options producer (Batch f) = do
@@ -95,8 +94,8 @@ runBatch options producer (Batch f) = do
 newtype CustomBatchId = CustomBatchId
   { bid :: BatchId
   }
-  deriving stock Generic
-  deriving anyclass ToJSON
+  deriving stock (Generic)
+  deriving anyclass (ToJSON)
 
 batchPerform
   :: (HasCallStack, ToJSON arg) => JobOptions -> Producer -> arg -> Batch JobId
@@ -106,10 +105,11 @@ batchPerform options producer arg = do
 
 newBatch :: ToJSON arg => Producer -> BatchOptions arg -> IO BatchId
 newBatch producer options = do
-  result <- commandByteString
-    (producerClient producer)
-    "BATCH NEW"
-    [encode options]
+  result <-
+    commandByteString
+      (producerClient producer)
+      "BATCH NEW"
+      [encode options]
   case result of
     Left err -> batchNewError err
     Right Nothing -> batchNewError "No BatchId returned"
@@ -117,7 +117,8 @@ newBatch producer options = do
   where batchNewError err = throwFaktoryException $ "BATCH NEW error: " <> err
 
 commitBatch :: Producer -> BatchId -> IO ()
-commitBatch producer (BatchId bid) = command_
-  (producerClient producer)
-  "BATCH COMMIT"
-  [BSL.fromStrict $ encodeUtf8 bid]
+commitBatch producer (BatchId bid) =
+  command_
+    (producerClient producer)
+    "BATCH COMMIT"
+    [BSL.fromStrict $ encodeUtf8 bid]

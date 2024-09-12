@@ -1,5 +1,8 @@
 # faktory\_worker\_haskell
 
+[![Hackage](https://img.shields.io/hackage/v/faktory.svg?style=flat)](https://hackage.haskell.org/package/faktory)
+[![Stackage Nightly](http://stackage.org/package/faktory/badge/nightly)](http://stackage.org/nightly/package/faktory)
+[![Stackage LTS](http://stackage.org/package/faktory/badge/lts)](http://stackage.org/lts/package/faktory)
 [![CI](https://github.com/freckle/faktory_worker_haskell/actions/workflows/ci.yml/badge.svg)](https://github.com/freckle/faktory_worker_haskell/actions/workflows/ci.yml)
 
 Haskell client and worker process for the Faktory background job server.

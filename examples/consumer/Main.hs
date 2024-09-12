@@ -8,9 +8,9 @@ import Faktory.Worker
 import GHC.Generics
 
 -- | Must match examples/producer
-newtype Job = Job { jobMessage :: String }
-  deriving stock Generic
-  deriving anyclass FromJSON
+newtype Job = Job {jobMessage :: String}
+  deriving stock (Generic)
+  deriving anyclass (FromJSON)
 
 main :: IO ()
 main = do

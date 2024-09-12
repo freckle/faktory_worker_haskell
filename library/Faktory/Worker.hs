@@ -20,6 +20,7 @@ import Control.Concurrent (MVar, ThreadId, forkFinally, killThread, newEmptyMVar
 import Control.Monad.Reader (MonadIO (liftIO), MonadReader (ask), ReaderT (runReaderT))
 import Data.Aeson
 import Data.Aeson.Casing
+import Data.Aeson.Types (parseEither)
 import qualified Data.Text as T
 import Faktory.Client
 import Faktory.Job (Job, JobId, jobArg, jobJid, jobReserveForMicroseconds)
@@ -48,12 +49,12 @@ data Worker = Worker
 -- | If processing functions @'throw'@ this, @'runWorker'@ will exit
 data WorkerHalt = WorkerHalt
   deriving stock (Eq, Show)
-  deriving anyclass Exception
+  deriving anyclass (Exception)
 
 newtype BeatPayload = BeatPayload
   { _bpWid :: WorkerId
   }
-  deriving stock Generic
+  deriving stock (Generic)
 
 instance ToJSON BeatPayload where
   toJSON = genericToJSON $ aesonPrefix snakeCase
@@ -62,7 +63,7 @@ instance ToJSON BeatPayload where
 newtype AckPayload = AckPayload
   { _apJid :: JobId
   }
-  deriving stock Generic
+  deriving stock (Generic)
 
 instance ToJSON AckPayload where
   toJSON = genericToJSON $ aesonPrefix snakeCase
@@ -79,7 +80,7 @@ data FailPayload = FailPayload
   , _fpJid :: JobId
   , _fpBacktrace :: [String]
   }
-  deriving stock Generic
+  deriving stock (Generic)
 
 instance ToJSON FailPayload where
   toJSON = genericToJSON $ aesonPrefix snakeCase
@@ -172,28 +173,39 @@ processorLoop
   => (Job arg -> IO ())
   -> WorkerM ()
 processorLoop f = do
-  WorkerConfig{settings, workerSettings} <- ask
+  WorkerConfig{client, settings, workerSettings} <- ask
   let
     namespace = connectionInfoNamespace $ settingsConnection settings
-    processAndAck job = do
-      mResult <- liftIO $ timeout (jobReserveForMicroseconds job) $ f job
+    processAndAck job' = liftIO $ do
+      job <- decodeJob job'
+      mResult <- timeout (jobReserveForMicroseconds job) $ f job
       case mResult of
-        Nothing -> liftIO $ settingsLogError settings "Job reservation period expired."
-        Just () -> ackJob job
+                 Nothing -> settingsLogError settings "Job reservation period expired."
+                 Just () -> ackJob client job
 
-  emJob <- fetchJob $ namespaceQueue namespace $ settingsQueue
-    workerSettings
+  -- client is inside WorkerConfig I think
+  emJob <-
+    liftIO $
+      fetchJob client $
+        namespaceQueue namespace $
+          settingsQueue
+            workerSettings
 
-  case emJob of
-    Left err -> liftIO $ settingsLogError settings $ "Invalid Job: " <> err
+  liftIO $ case emJob of
+    Left err -> settingsLogError settings $ "Invalid Job: " <> err
     Right Nothing -> liftIO $ threadDelaySeconds $ settingsIdleDelay workerSettings
-    Right (Just job) ->
+    Right (Just job) -> liftIO $
       processAndAck job
       `withException` (\(ex :: SomeException) ->
         case fromException ex of
           Just (e :: WorkerHalt) -> throw e
-          Nothing -> failJob job $ T.pack $ show ex
+          Nothing -> do
+            settingsOnFailed workerSettings ex
+            failJob client job $ T.pack $ show ex
       )
+
+decodeJob :: (HasCallStack, FromJSON arg) => Job Value -> IO (Job arg)
+decodeJob = either throwString pure . traverse (parseEither parseJSON)
 
 -- | <https://github.com/contribsys/faktory/wiki/Worker-Lifecycle#heartbeat>
 heartBeat :: WorkerConfig -> IO ()
@@ -201,21 +213,14 @@ heartBeat WorkerConfig{client, wid} = do
   threadDelaySeconds 25
   command_ client "BEAT" [encode $ BeatPayload wid]
 
-fetchJob
-  :: FromJSON args => Queue -> WorkerM (Either String (Maybe (Job args)))
-fetchJob queue = do
-  WorkerConfig{client} <- ask
-  liftIO $ commandJSON client "FETCH" [queueArg queue]
+fetchJob :: Client -> Queue -> IO (Either String (Maybe (Job Value)))
+fetchJob client queue = commandJSON client "FETCH" [queueArg queue]
 
-ackJob :: HasCallStack => Job args -> WorkerM ()
-ackJob job = do
-  WorkerConfig{client} <- ask
-  liftIO $ commandOK client "ACK" [encode $ AckPayload $ jobJid job]
+ackJob :: HasCallStack => Client -> Job args -> IO ()
+ackJob client job = commandOK client "ACK" [encode $ AckPayload $ jobJid job]
 
-failJob :: HasCallStack => Job args -> Text -> WorkerM ()
-failJob job message = do
-  WorkerConfig{client} <- ask
-  liftIO $ commandOK client "FAIL" [encode $ FailPayload message "" (jobJid job) []]
+failJob :: HasCallStack => Client -> Job args -> Text -> IO ()
+failJob client job message = commandOK client "FAIL" [encode $ FailPayload message "" (jobJid job) []]
 
 workerId :: Worker -> WorkerId
 workerId Worker{config = WorkerConfig{wid}} = wid

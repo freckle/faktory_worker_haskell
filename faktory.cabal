@@ -1,13 +1,11 @@
 cabal-version: 1.18
 
--- This file has been generated from package.yaml by hpack version 0.34.4.
+-- This file has been generated from package.yaml by hpack version 0.37.0.
 --
 -- see: https://github.com/sol/hpack
---
--- hash: f567ab5ccc3a99fa5ba5081f0d12a87857fafaf84a6dc9eb84098721ae66b6ae
 
 name:           faktory
-version:        1.1.2.2
+version:        1.1.3.0
 synopsis:       Faktory Worker for Haskell
 description:    Haskell client and worker process for the Faktory background job server.
                 .
@@ -38,8 +36,8 @@ description:    Haskell client and worker process for the Faktory background job
                 .
                 This package contains only the `Client` and `Worker`.
 category:       Network
-homepage:       https://github.com/frontrowed/faktory_worker_haskell#readme
-bug-reports:    https://github.com/frontrowed/faktory_worker_haskell/issues
+homepage:       https://github.com/freckle/faktory_worker_haskell#readme
+bug-reports:    https://github.com/freckle/faktory_worker_haskell/issues
 author:         Freckle Engineering
 maintainer:     engineering@freckle.com
 copyright:      2018 Freckle Education
@@ -52,10 +50,11 @@ extra-doc-files:
 
 source-repository head
   type: git
-  location: https://github.com/frontrowed/faktory_worker_haskell
+  location: https://github.com/freckle/faktory_worker_haskell
 
 library
   exposed-modules:
+      Data.Pool.Compat
       Faktory.Client
       Faktory.Connection
       Faktory.Ent.Batch
@@ -66,12 +65,14 @@ library
       Faktory.JobFailure
       Faktory.JobOptions
       Faktory.JobState
+      Faktory.Pool
       Faktory.Prelude
       Faktory.Producer
       Faktory.Protocol
       Faktory.Settings
       Faktory.Settings.Queue
       Faktory.Worker
+      Network.Connection.Compat
   other-modules:
       Paths_faktory
   hs-source-dirs:
@@ -107,27 +108,32 @@ library
     , aeson-casing
     , base ==4.*
     , bytestring
-    , connection
+    , crypton-connection
     , cryptonite
     , errors
     , hostname
     , megaparsec
     , memory
+    , microlens
     , mtl
     , network
     , random
+    , resource-pool
     , safe-exceptions
     , scanner
     , semigroups >=0.19.1
     , text
     , time
     , unix
+    , unliftio
     , unordered-containers
+  default-language: Haskell2010
   if impl(ghc >= 8.10)
     ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module
   if impl(ghc >= 9.2)
     ghc-options: -Wno-missing-kind-signatures
-  default-language: Haskell2010
+  if impl(ghc >= 9.8)
+    ghc-options: -Wno-missing-role-annotations
 
 executable faktory-example-consumer
   main-is: Main.hs
@@ -166,11 +172,13 @@ executable faktory-example-consumer
     , base ==4.*
     , faktory
     , safe-exceptions
+  default-language: Haskell2010
   if impl(ghc >= 8.10)
     ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module
   if impl(ghc >= 9.2)
     ghc-options: -Wno-missing-kind-signatures
-  default-language: Haskell2010
+  if impl(ghc >= 9.8)
+    ghc-options: -Wno-missing-role-annotations
 
 executable faktory-example-producer
   main-is: Main.hs
@@ -209,11 +217,13 @@ executable faktory-example-producer
     , base ==4.*
     , faktory
     , safe-exceptions
+  default-language: Haskell2010
   if impl(ghc >= 8.10)
     ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module
   if impl(ghc >= 9.2)
     ghc-options: -Wno-missing-kind-signatures
-  default-language: Haskell2010
+  if impl(ghc >= 9.8)
+    ghc-options: -Wno-missing-role-annotations
 
 test-suite hspec
   type: exitcode-stdio-1.0
@@ -264,11 +274,13 @@ test-suite hspec
     , hspec
     , mtl
     , time
+  default-language: Haskell2010
   if impl(ghc >= 8.10)
     ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module
   if impl(ghc >= 9.2)
     ghc-options: -Wno-missing-kind-signatures
-  default-language: Haskell2010
+  if impl(ghc >= 9.8)
+    ghc-options: -Wno-missing-role-annotations
 
 test-suite readme
   type: exitcode-stdio-1.0
@@ -308,8 +320,10 @@ test-suite readme
     , base ==4.*
     , faktory
     , markdown-unlit
+  default-language: Haskell2010
   if impl(ghc >= 8.10)
     ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module
   if impl(ghc >= 9.2)
     ghc-options: -Wno-missing-kind-signatures
-  default-language: Haskell2010
+  if impl(ghc >= 9.8)
+    ghc-options: -Wno-missing-role-annotations

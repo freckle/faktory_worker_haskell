@@ -1,12 +1,12 @@
 ---
 name: faktory
-version: 1.1.2.2
+version: 1.1.3.0
 category: Network
 author: Freckle Engineering
 maintainer: engineering@freckle.com
 copyright: 2018 Freckle Education
 license: MIT
-github: frontrowed/faktory_worker_haskell
+github: freckle/faktory_worker_haskell
 synopsis: Faktory Worker for Haskell
 description: |
   Haskell client and worker process for the Faktory background job server.
@@ -43,24 +43,27 @@ extra-doc-files:
   - README.lhs
 
 ghc-options:
-  -Weverything
-  -Wno-missing-exported-signatures
-  -Wno-missed-specialisations
-  -Wno-all-missed-specialisations
-  -Wno-unsafe
-  -Wno-safe
-  -Wno-missing-local-signatures
-  -Wno-monomorphism-restriction
-  -Wno-missing-import-lists
+  - -Weverything
+  - -Wno-missing-exported-signatures
+  - -Wno-missed-specialisations
+  - -Wno-all-missed-specialisations
+  - -Wno-unsafe
+  - -Wno-safe
+  - -Wno-missing-local-signatures
+  - -Wno-monomorphism-restriction
+  - -Wno-missing-import-lists
 
 when:
   - condition: impl(ghc >= 8.10)
     ghc-options:
-      -Wno-missing-safe-haskell-mode
-      -Wno-prepositive-qualified-module
+      - -Wno-missing-safe-haskell-mode
+      - -Wno-prepositive-qualified-module
   - condition: impl(ghc >= 9.2)
     ghc-options:
-      -Wno-missing-kind-signatures
+      - -Wno-missing-kind-signatures
+  - condition: impl(ghc >= 9.8)
+    ghc-options:
+      - -Wno-missing-role-annotations
 
 dependencies:
   - base >= 4 && < 5
@@ -97,20 +100,24 @@ library:
     - aeson
     - aeson-casing
     - bytestring
-    - connection
+    - crypton-connection
     - cryptonite
     - errors
+    - hostname
     - megaparsec
     - memory
+    - microlens
     - mtl
     - network
     - random
+    - resource-pool
     - safe-exceptions
     - semigroups >= 0.19.1
     - scanner
     - text
     - time
     - unix
+    - unliftio
     - unordered-containers
 
 executables:

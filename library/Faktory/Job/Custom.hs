@@ -2,12 +2,11 @@
 --
 -- This type's 'Semigroup' will merge two Objects. It is right-biased, as we are
 -- generally throughout this library, so called /last-wins/ semantics.
---
 module Faktory.Job.Custom
-    ( Custom
-    , toCustom
-    , fromCustom
-    ) where
+  ( Custom
+  , toCustom
+  , fromCustom
+  ) where
 
 import Faktory.Prelude
 

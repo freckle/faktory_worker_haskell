@@ -22,6 +22,8 @@ newtype FaktoryException = FaktoryException StringException
 throwFaktoryException :: (MonadThrow m, HasCallStack) => String -> m a
 throwFaktoryException s = throwM (FaktoryException (StringException s callStack))
 
+{-# ANN module ("HLint: ignore Avoid restricted alias" :: String) #-}
+
 threadDelaySeconds :: Int -> IO ()
 threadDelaySeconds n = threadDelay $ n * 1000000
 

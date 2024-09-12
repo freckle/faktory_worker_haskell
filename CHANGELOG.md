@@ -1,6 +1,34 @@
-## [*Unreleased*](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.2...main)
+## [_Unreleased_](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.3.0...main)
 
-None
+## [v1.1.3.0](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.7...v1.1.3.0)
+
+- Add `Faktory.Pool`
+
+  This incurs the new dependencies, `unliftio`, `resource-pool`, and
+  `microlens`.
+
+## [v1.1.2.7](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.6...v1.1.2.7)
+
+- Fix handling decoding errors of the Job payload. Previously, it would log an
+  error and neither `ACK` nor `FAIL` the Job. Now it `FAIL`s the Job.
+
+## [v1.1.2.6](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.5...v1.1.2.6)
+
+- Support ghc-9.8 and aeson-2.2
+
+## [v1.1.2.5](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.4...v1.1.2.5)
+
+- Migrate to `crypton-connection`
+- Remove CI for GHC 8.6
+
+## [v1.1.2.4](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.3...v1.1.2.4)
+
+- Fix `jobBatchId` to work for all job types. Faktory seems to use both `bid` and `_bid`
+  in a jobs custom object when enqueing jobs. This allows the parser to use both
+
+## [v1.1.2.3](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.2...v1.1.2.3)
+
+- Set `KeepAlive` in connections to Faktory ([@jagonalez](https://github.com/freckle/faktory_worker_haskell/pull/86))
 
 ## [v1.1.2.2](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.1...v1.1.2.2)
 

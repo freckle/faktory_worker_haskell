@@ -20,43 +20,20 @@ jobs:
     strategy:
       matrix:
         stack-yaml:
-          - stack.yaml           # ghc-9.0
+          - stack-nightly.yaml   # ghc-9.8
+          - stack.yaml           # ghc-9.6
+          - stack-lts-21.25.yaml # ghc-9.4
+          - stack-lts-20.26.yaml # ghc-9.2
+          - stack-lts-19.33.yaml # ghc-9.0
           - stack-lts-18.28.yaml # ghc-8.10
           - stack-lts-16.31.yaml # ghc-8.8
-          - stack-lts-14.27.yaml # ghc-8.6
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v2
-      - uses: freckle/stack-cache-action@v2
+      - uses: actions/checkout@v3
+      - uses: freckle/stack-action@v4
         with:
           stack-yaml: ${{ matrix.stack-yaml }}
-      - uses: freckle/stack-action@v3
-        with:
-          stack-yaml: ${{ matrix.stack-yaml }}
-        env:
-          FAKTORY_URL: tcp://localhost:7419
-
-  nightly:
-    runs-on: ubuntu-latest
-    services:
-      faktory:
-        image: docker.contribsys.com/contribsys/faktory-ent:1.4.0
-        credentials:
-          username: ${{ secrets.FAKTORY_REGISTRY_USERNAME }}
-          password: ${{ secrets.FAKTORY_REGISTRY_PASSWORD }}
-        ports:
-          - 7419:7419
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: freckle/stack-cache-action@v2
-        with:
-          stack-yaml: stack-nightly.yaml
-      - uses: freckle/stack-action@v3
-        with:
-          stack-yaml: stack-nightly.yaml
-          stack-arguments: --resolver nightly
         env:
           FAKTORY_URL: tcp://localhost:7419
 
@@ -64,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: rwe/actions-hlint-setup@v1
-      - uses: rwe/actions-hlint-run@v2
+      - uses: haskell/actions/hlint-setup@v2
+      - uses: haskell/actions/hlint-run@v2
         with:
           fail-on: warning
