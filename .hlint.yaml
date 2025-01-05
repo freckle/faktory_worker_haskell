@@ -4,6 +4,7 @@
 - ignore: {name: "Use list comprehension"}
 - ignore: {name: "Reduce duplication"}
 - ignore: {name: "Avoid restricted qualification", within: Faktory.Prelude}
+- ignore: {name: "Fuctor law"}
 
 # Custom Warnings
 - warn: {lhs: fromJust, rhs: fromJustNote}
