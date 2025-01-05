@@ -99,8 +99,8 @@ library:
     - aeson
     - aeson-casing
     - bytestring
+    - crypton
     - crypton-connection
-    - cryptonite
     - data-default
     - errors
     - megaparsec
