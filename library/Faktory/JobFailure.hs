@@ -17,8 +17,6 @@ data JobFailure = JobFailure
   }
   deriving stock (Show)
 
--- brittany-disable-next-binding
-
 instance FromJSON JobFailure where
   parseJSON = withObject "Failure" $ \o ->
     JobFailure
