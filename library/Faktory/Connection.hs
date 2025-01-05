@@ -9,6 +9,7 @@ module Faktory.Connection
 import Faktory.Prelude
 
 import Control.Applicative ((<|>))
+import Data.Default (def)
 import Data.Maybe (fromMaybe)
 import Data.Void
 import Network.Connection.Compat
@@ -75,13 +76,7 @@ connect ConnectionInfo {..} = bracketOnError open connectionClose pure
         , connectionPort = connectionInfoPort
         , connectionUseSecure =
             if connectionInfoTls
-              then
-                Just
-                  TLSSettingsSimple
-                    { settingDisableCertificateValidation = False
-                    , settingDisableSession = False
-                    , settingUseServerName = False
-                    }
+              then Just def
               else Nothing
         , connectionUseSocks = Nothing
         }
