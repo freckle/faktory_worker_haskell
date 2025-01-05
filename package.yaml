@@ -101,6 +101,7 @@ library:
     - bytestring
     - crypton-connection
     - cryptonite
+    - data-default
     - errors
     - megaparsec
     - memory
@@ -110,8 +111,8 @@ library:
     - random
     - resource-pool
     - safe-exceptions
-    - semigroups >= 0.19.1
     - scanner
+    - semigroups >= 0.19.1
     - text
     - time
     - unix
