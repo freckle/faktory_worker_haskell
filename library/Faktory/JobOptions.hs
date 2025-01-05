@@ -54,8 +54,6 @@ data JobOptions = JobOptions
   deriving stock (Eq, Show, Generic)
   deriving (Semigroup, Monoid) via GenericSemigroupMonoid JobOptions
 
--- brittany-disable-next-binding
-
 instance FromJSON JobOptions where
   parseJSON = withObject "JobOptions" $ \o ->
     JobOptions

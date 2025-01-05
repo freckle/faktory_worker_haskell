@@ -140,8 +140,6 @@ toPairs Job {..} =
   , "reserve_for" .= joReserveFor jobOptions
   ]
 
--- brittany-disable-next-binding
-
 instance FromJSON args => FromJSON (Job args) where
   parseJSON = withObject "Job" $ \o ->
     Job
