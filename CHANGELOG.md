@@ -1,4 +1,8 @@
-## [_Unreleased_](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.3.0...main)
+## [_Unreleased_](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.3.1...main)
+
+## [v1.1.3.1](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.3.0...v1.1.3.1)
+
+- Replace `cryptonite` with `crypton`
 
 ## [v1.1.3.0](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.2.7...v1.1.3.0)
 
