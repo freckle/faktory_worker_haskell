@@ -1,4 +1,8 @@
-## [_Unreleased_](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.3.1...main)
+## [_Unreleased_](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.3.2...main)
+
+## [v1.1.3.2](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.3.1...v1.1.3.2)
+
+- Release to fix lower bounds
 
 ## [v1.1.3.1](https://github.com/frontrowed/faktory_worker_haskell/compare/v1.1.3.0...v1.1.3.1)
 
