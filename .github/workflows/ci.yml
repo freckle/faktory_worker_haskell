@@ -37,7 +37,7 @@ jobs:
           FAKTORY_REGISTRY_PASSWORD: ${{ secrets.FAKTORY_REGISTRY_PASSWORD }}
 
     outputs:
-      test-image: ${{ steps.prep.outputs.has-credentials }}
+      test-image: ${{ steps.prep.outputs.test-image }}
       test-arguments: ${{ steps.prep.outputs.test-arguments }}
 
   test:
