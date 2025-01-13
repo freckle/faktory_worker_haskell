@@ -21,17 +21,11 @@ jobs:
       - id: prep
         run: |
           if [[ -n "$FAKTORY_REGISTRY_USERNAME" && -n "$FAKTORY_REGISTRY_PASSWORD" ]]; then
-            echo "Credentials found, using non-free faktory and running all tests"
-            image=docker.contribsys.com/contribsys/faktory-ent:1.4.0
-            arguments=''
+            echo 'test-image=docker.contribsys.com/contribsys/faktory-ent:1.4.0'
           else
-            echo "Credentials not found, using free faktory and skipping Faktory.Ent tests"
-            image=contribsys/faktory:1.4.0
-            arguments='--test-arguments="--skip Faktory.Ent"'
-          fi
-
-          echo "test-image=$image" >>"$GITHUB_OUTPUT"
-          echo "test-arguments=$arguments" >>"$GITHUB_OUTPUT"
+            echo 'test-image=contribsys/faktory:1.4.0'
+            echo 'test-arguments=--test-arguments="--skip Faktory.Ent"'
+          fi >>"$GITHUB_OUTPUT"
         env:
           FAKTORY_REGISTRY_USERNAME: ${{ secrets.FAKTORY_REGISTRY_USERNAME }}
           FAKTORY_REGISTRY_PASSWORD: ${{ secrets.FAKTORY_REGISTRY_PASSWORD }}
