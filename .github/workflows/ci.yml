@@ -15,33 +15,39 @@ jobs:
     outputs:
       stack-yamls: ${{ steps.generate.outputs.stack-yamls }}
 
-  prep:
-    runs-on: ubuntu-latest
-    steps:
-      - id: prep
-        run: |
-          if [[ -n "$FAKTORY_REGISTRY_USERNAME" && -n "$FAKTORY_REGISTRY_PASSWORD" ]]; then
-            echo 'test-image=docker.contribsys.com/contribsys/faktory-ent:1.4.0'
-          else
-            echo 'test-image=contribsys/faktory:1.4.0'
-            echo 'test-arguments=--test-arguments="--skip Faktory.Ent"'
-          fi >>"$GITHUB_OUTPUT"
-        env:
-          FAKTORY_REGISTRY_USERNAME: ${{ secrets.FAKTORY_REGISTRY_USERNAME }}
-          FAKTORY_REGISTRY_PASSWORD: ${{ secrets.FAKTORY_REGISTRY_PASSWORD }}
-
-    outputs:
-      test-image: ${{ steps.prep.outputs.test-image }}
-      test-arguments: ${{ steps.prep.outputs.test-arguments }}
-
   test:
-    needs:
-      - prep
-      - generate
+    needs: [generate]
     runs-on: ubuntu-latest
     services:
       faktory:
-        image: ${{ needs.prep.outputs.test-image }}
+        image: contribsys/faktory:1.4.0
+        ports:
+          - 7419:7419
+
+    strategy:
+      matrix:
+        stack-yaml: ${{ fromJSON(needs.generate.outputs.stack-yamls) }}
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: freckle/stack-action@v5
+        with:
+          stack-build-arguments-test: |
+            --test-arguments="--skip Faktory.Ent"
+        env:
+          STACK_YAML: ${{ matrix.stack-yaml }}
+          FAKTORY_URL: tcp://localhost:7419
+
+  test-ent:
+    if: |
+      github.actor != 'dependabot[bot]' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    needs: [generate]
+    runs-on: ubuntu-latest
+    services:
+      faktory:
+        image: docker.contribsys.com/contribsys/faktory-ent:1.4.0
         credentials:
           username: ${{ secrets.FAKTORY_REGISTRY_USERNAME }}
           password: ${{ secrets.FAKTORY_REGISTRY_PASSWORD }}
@@ -57,7 +63,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: freckle/stack-action@v5
         with:
-          stack-build-arguments-test: ${{ needs.prep.outputs.test-arguments }}
+          stack-build-arguments-test: |
+            --test-arguments="--match Faktory.Ent"
         env:
           STACK_YAML: ${{ matrix.stack-yaml }}
           FAKTORY_URL: tcp://localhost:7419
