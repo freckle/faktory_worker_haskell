@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: generate
-        uses: freckle/stack-action/generate-matrix@v4
+        uses: freckle/stack-action/generate-matrix@v5
     outputs:
       stack-yamls: ${{ steps.generate.outputs.stack-yamls }}
 
