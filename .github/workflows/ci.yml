@@ -40,6 +40,8 @@ jobs:
           FAKTORY_URL: tcp://localhost:7419
 
   test-ent:
+    # It must not be a Dependabot PR or fork to have access to secrets, which
+    # are needed to run the enterprise image so we can test that.
     if: |
       github.actor != 'dependabot[bot]' &&
       github.event.pull_request.head.repo.full_name == github.repository
