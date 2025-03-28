@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       faktory:
-        image: contribsys/faktory:1.4.0
+        image: contribsys/faktory:1.4.2
         ports:
           - 7419:7419
 
