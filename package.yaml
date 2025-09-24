@@ -157,4 +157,5 @@ tests:
     dependencies:
       - aeson
       - faktory
+    build-tools:
       - markdown-unlit
