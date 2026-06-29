@@ -1,1 +1,18 @@
 resolver: lts-23.3
+extra-deps:
+  - crypton-1.1.4
+  - crypton-asn1-encoding-0.10.0
+  - crypton-asn1-parse-0.10.0
+  - crypton-asn1-types-0.4.1
+  - crypton-connection-0.4.6
+  - crypton-pem-0.3.0
+  - crypton-x509-1.9.1
+  - crypton-x509-store-1.9.0
+  - crypton-x509-system-1.9.0
+  - crypton-x509-validation-1.9.1
+  - ech-config-0.0.1
+  - hpke-0.1.0
+  - mlkem-0.2.2.0
+  - ram-0.22.0
+  - time-hourglass-0.3.0
+  - tls-2.4.3
