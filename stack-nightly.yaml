@@ -1,1 +1,12 @@
-resolver: nightly-2024-01-02
+resolver: nightly-2026-06-28
+
+extra-deps:
+  - crypton-1.1.4
+  - crypton-connection-0.4.6
+  - crypton-x509-1.9.1
+  - crypton-x509-store-1.9.0
+  - crypton-x509-system-1.9.0
+  - crypton-x509-validation-1.9.1
+  - hpke-0.1.0
+  - mlkem-0.2.2.0
+  - tls-2.4.3

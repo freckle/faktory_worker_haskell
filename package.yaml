@@ -99,12 +99,12 @@ library:
     - aeson
     - aeson-casing
     - bytestring
-    - crypton
+    - crypton >= 1.1
     - crypton-connection
     - data-default
     - errors
     - megaparsec
-    - memory
+    - ram
     - microlens
     - mtl
     - network
