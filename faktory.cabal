@@ -56,7 +56,6 @@ source-repository head
 
 library
   exposed-modules:
-      Data.Pool.Compat
       Faktory.Client
       Faktory.Connection
       Faktory.Ent.Batch
@@ -119,7 +118,7 @@ library
     , mtl
     , network
     , random
-    , resource-pool
+    , resource-pool >=0.3.0
     , safe-exceptions
     , scanner
     , semigroups >=0.19.1
