@@ -6,6 +6,7 @@ extra-deps:
   - crypton-asn1-types-0.4.1
   - crypton-connection-0.4.6
   - crypton-pem-0.3.0
+  - crypton-socks-0.6.2
   - crypton-x509-1.9.1
   - crypton-x509-store-1.9.0
   - crypton-x509-system-1.9.0
