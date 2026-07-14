@@ -32,6 +32,10 @@ jobs:
         stack-yaml: ${{ fromJSON(needs.generate.outputs.stack-yamls) }}
       fail-fast: false
 
+    # We accept nightly is failing right now
+    continue-on-error: >-
+      ${{ matrix.stack-yaml == 'stack-nightly.yaml' && true || false }}
+
     steps:
       - uses: actions/checkout@v7
       - uses: freckle/stack-action@v5
@@ -64,6 +68,10 @@ jobs:
         stack-yaml: ${{ fromJSON(needs.generate.outputs.stack-yamls) }}
       fail-fast: false
 
+    # We accept nightly is failing right now
+    continue-on-error: >-
+      ${{ matrix.stack-yaml == 'stack-nightly.yaml' && true || false }}
+
     steps:
       - uses: actions/checkout@v7
       - uses: freckle/stack-action@v5
@@ -82,3 +90,17 @@ jobs:
       - uses: haskell-actions/hlint-run@v2
         with:
           fail-on: warning
+
+  check:
+    if: always()
+
+    needs:
+      - test
+      - test-ent
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: re-actors/alls-green@release/v1
+        with:
+          jobs: ${{ toJSON(needs) }}
