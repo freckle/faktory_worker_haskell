@@ -97,6 +97,7 @@ jobs:
     needs:
       - test
       - test-ent
+      - hlint
 
     runs-on: ubuntu-latest
 
